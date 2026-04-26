@@ -18,10 +18,14 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'rentcar_super_secret_key_2024';
 
+const CLIENT_ORIGIN = process.env.CLIENT_URL
+  ? [process.env.CLIENT_URL]
+  : ['http://localhost:5173', 'http://localhost:3000'];
+
 // Socket.io
 const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    origin: CLIENT_ORIGIN,
     credentials: true,
   },
 });
@@ -70,7 +74,7 @@ io.on('connection', (socket) => {
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  origin: CLIENT_ORIGIN,
   credentials: true
 }));
 app.use(express.json());
@@ -91,6 +95,15 @@ app.use('/api/messages', messagesRoutes);
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'RentCar API is running', timestamp: new Date().toISOString() });
 });
+
+// Serve React frontend in production
+if (process.env.NODE_ENV === 'production') {
+  const clientBuild = path.join(__dirname, '../client/dist');
+  app.use(express.static(clientBuild));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientBuild, 'index.html'));
+  });
+}
 
 // Error handler
 app.use((err, req, res, next) => {
