@@ -141,8 +141,8 @@ export default function SearchBar({ compact = false, initialValues = {} }) {
       </div>
 
       {/* Search Fields */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-3">
-        <div className="col-span-2 lg:col-span-1">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
+        <div>
           <label className="form-label text-white/90">{t('home.search_city')}</label>
           <input
             type="text"
@@ -175,7 +175,7 @@ export default function SearchBar({ compact = false, initialValues = {} }) {
             className="input-field"
           />
         </div>
-        <div className="col-span-2 lg:col-span-1 flex items-end">
+        <div className="flex items-end">
           <button
             type="submit"
             className="btn-primary w-full flex items-center justify-center gap-2 py-3 text-base"
