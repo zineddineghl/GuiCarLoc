@@ -161,7 +161,7 @@ export default function SearchBar({ compact = false, initialValues = {} }) {
             value={form.start_date}
             min={today}
             onChange={handleChange}
-            className="input-field"
+            className="input-field py-2 text-sm"
           />
         </div>
         <div>
@@ -172,7 +172,7 @@ export default function SearchBar({ compact = false, initialValues = {} }) {
             value={form.end_date}
             min={form.start_date}
             onChange={handleChange}
-            className="input-field"
+            className="input-field py-2 text-sm"
           />
         </div>
         <div className="flex items-end">
