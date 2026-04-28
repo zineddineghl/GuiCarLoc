@@ -141,7 +141,7 @@ export default function SearchBar({ compact = false, initialValues = {} }) {
       </div>
 
       {/* Search Fields */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-3">
         <div className="col-span-2 lg:col-span-1">
           <label className="form-label text-white/90">{t('home.search_city')}</label>
           <input
