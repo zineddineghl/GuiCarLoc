@@ -7,7 +7,7 @@ import CarCard from '../components/CarCard';
 import { ShieldCheckIcon, BanknotesIcon, ClockIcon } from '@heroicons/react/24/outline';
 
 export default function Home() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [featuredCars, setFeaturedCars] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -183,13 +183,13 @@ export default function Home() {
       <section className="bg-gradient-to-r from-primary-700 to-primary-900 text-white py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            {t('i18n.language') === 'fr'
+            {i18n.language === 'fr'
               ? 'Vous avez une voiture à louer ?'
               : 'Have a car to rent out?'}
           </h2>
           <p className="text-primary-200 text-lg mb-8">
-            {t('i18n.language') === 'fr'
-              ? 'Publiez votre annonce gratuitement et commencez à gagner de l\'argent.'
+            {i18n.language === 'fr'
+              ? "Publiez votre annonce gratuitement et commencez à gagner de l'argent."
               : 'Post your listing for free and start earning money.'}
           </p>
           <Link to="/post-listing" className="inline-flex items-center gap-2 px-8 py-3 bg-white text-primary-700 font-bold rounded-xl hover:bg-primary-50 transition-colors text-lg shadow-lg">

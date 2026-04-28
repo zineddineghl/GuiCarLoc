@@ -14,7 +14,7 @@ export default function Footer() {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 text-white font-bold text-xl mb-4">
               <span className="text-2xl">🚗</span>
-              <span>RentCar</span>
+              <span>GuiCarLoc</span>
             </div>
             <p className="text-gray-400 text-sm leading-relaxed max-w-sm">
               {t('footer.description')}
@@ -73,7 +73,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-800 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-gray-500 text-sm">
-            &copy; {currentYear} RentCar. All rights reserved.
+            &copy; {currentYear} GuiCarLoc. All rights reserved.
           </p>
         </div>
       </div>
