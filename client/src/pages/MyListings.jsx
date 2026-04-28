@@ -158,7 +158,7 @@ export default function MyListings() {
                   </p>
 
                   <div className="flex flex-wrap gap-4 text-sm">
-                    <span className="font-bold text-primary-700">{car.price_per_day}€{t('car.per_day')}</span>
+                    <span className="font-bold text-primary-700">{car.price_per_day} GNF{t('car.per_day')}</span>
                     <span className="text-gray-500">
                       {car.total_bookings || 0} {t('listing.bookings_count')}
                       {car.pending_bookings > 0 && (

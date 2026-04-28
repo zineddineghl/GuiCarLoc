@@ -8,7 +8,9 @@
     "login": "Connexion",
     "register": "Inscription",
     "logout": "Déconnexion",
-    "messages": "Messages"
+    "messages": "Messages",
+    "favorites": "Favoris",
+    "dashboard": "Tableau de bord"
   },
   "home": {
     "hero_title": "Trouvez votre voiture de location idéale",
@@ -96,7 +98,8 @@
     "dates": "Dates",
     "price": "Prix total",
     "booked_on": "Réservé le",
-    "login_to_book": "Veuillez vous connecter pour réserver cette voiture"
+    "login_to_book": "Veuillez vous connecter pour réserver cette voiture",
+    "history": "Historique"
   },
   "listing": {
     "title": "Publier une annonce",
@@ -114,7 +117,7 @@
     "seats": "Nombre de places",
     "transmission": "Transmission",
     "fuel": "Type de carburant",
-    "price": "Prix par jour (€)",
+    "price": "Prix par jour (GNF)",
     "city": "Ville",
     "city_placeholder": "ex. Paris",
     "address": "Adresse (optionnel)",
@@ -161,7 +164,10 @@
     "login_required": "Veuillez vous connecter pour continuer",
     "two_fa_title": "Vérification en deux étapes",
     "two_fa_hint": "Un code à 6 chiffres a été envoyé à votre adresse email.",
-    "verify_code": "Vérifier le code"
+    "verify_code": "Vérifier le code",
+    "verify_email_title": "Vérifiez votre email",
+    "verify_email_hint": "Un code à 6 chiffres a été envoyé à votre adresse. Vérifiez votre boîte de réception.",
+    "resend_code": "Renvoyer le code"
   },
   "filters": {
     "title": "Filtres",
@@ -220,6 +226,40 @@
     "contact_owner": "Contacter le propriétaire",
     "contact": "Contacter"
   },
+  "favorites": {
+    "title": "Mes favoris",
+    "empty": "Vous n'avez pas encore de favoris. Parcourez les annonces et sauvegardez celles qui vous plaisent !"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "welcome": "Bienvenue",
+    "total_revenue": "Revenus totaux",
+    "month_revenue": "Ce mois-ci",
+    "this_month": "Mois en cours",
+    "pending": "En attente",
+    "action_needed": "Action requise",
+    "all_clear": "Tout est à jour",
+    "occupancy": "Taux d'occupation",
+    "cars_active": "voitures actives",
+    "your_stats": "Vos statistiques",
+    "avg_rating": "Note moyenne",
+    "not_rated": "Pas encore noté",
+    "total_bookings": "Réservations totales",
+    "confirmed": "Confirmées",
+    "cancelled": "Annulées / Refusées",
+    "performance": "Performance des voitures",
+    "car": "Voiture",
+    "revenue": "Revenus",
+    "bookings_count": "Réservations",
+    "rating": "Note",
+    "recent": "Activité récente",
+    "see_all": "Voir tout",
+    "no_cars": "Aucune voiture publiée pour le moment.",
+    "revenue_chart": "Revenus — 6 derniers mois",
+    "confirmed_bookings_short": "réservations confirmées",
+    "load_error": "Impossible de charger les données du tableau de bord.",
+    "retry": "Réessayer"
+  },
   "footer": {
     "description": "La plateforme de location de voitures entre particuliers. Trouvez ou proposez des véhicules facilement."
   },
@@ -231,8 +271,8 @@
     "delete": "Supprimer",
     "edit": "Modifier",
     "back": "Retour",
-    "per_day": "€/jour",
-    "eur": "€",
+    "per_day": "GNF/jour",
+    "eur": "GNF",
     "required": "Obligatoire",
     "optional": "Optionnel",
     "see_details": "Voir les détails",

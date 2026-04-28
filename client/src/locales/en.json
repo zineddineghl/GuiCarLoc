@@ -8,7 +8,9 @@
     "login": "Login",
     "register": "Register",
     "logout": "Logout",
-    "messages": "Messages"
+    "messages": "Messages",
+    "favorites": "Favorites",
+    "dashboard": "Dashboard"
   },
   "home": {
     "hero_title": "Find Your Perfect Rental Car",
@@ -96,7 +98,8 @@
     "dates": "Dates",
     "price": "Total Price",
     "booked_on": "Booked on",
-    "login_to_book": "Please log in to book this car"
+    "login_to_book": "Please log in to book this car",
+    "history": "History"
   },
   "listing": {
     "title": "List Your Car",
@@ -114,7 +117,7 @@
     "seats": "Number of Seats",
     "transmission": "Transmission",
     "fuel": "Fuel Type",
-    "price": "Price per Day (€)",
+    "price": "Price per Day (GNF)",
     "city": "City",
     "city_placeholder": "e.g. Paris",
     "address": "Address (optional)",
@@ -161,7 +164,10 @@
     "login_required": "Please login to continue",
     "two_fa_title": "Two-step verification",
     "two_fa_hint": "A 6-digit code has been sent to your email address.",
-    "verify_code": "Verify code"
+    "verify_code": "Verify code",
+    "verify_email_title": "Verify your email",
+    "verify_email_hint": "A 6-digit code was sent to your address. Check your inbox.",
+    "resend_code": "Resend code"
   },
   "filters": {
     "title": "Filters",
@@ -220,6 +226,40 @@
     "contact_owner": "Contact owner",
     "contact": "Contact"
   },
+  "favorites": {
+    "title": "My Favorites",
+    "empty": "You have no favorites yet. Browse listings and save the ones you like!"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome",
+    "total_revenue": "Total Revenue",
+    "month_revenue": "This Month",
+    "this_month": "Current month",
+    "pending": "Pending",
+    "action_needed": "Action needed",
+    "all_clear": "All clear",
+    "occupancy": "Occupancy",
+    "cars_active": "cars active",
+    "your_stats": "Your Stats",
+    "avg_rating": "Avg. Rating",
+    "not_rated": "Not rated yet",
+    "total_bookings": "Total Bookings",
+    "confirmed": "Confirmed",
+    "cancelled": "Cancelled / Rejected",
+    "performance": "Cars Performance",
+    "car": "Car",
+    "revenue": "Revenue",
+    "bookings_count": "Bookings",
+    "rating": "Rating",
+    "recent": "Recent Activity",
+    "see_all": "See all",
+    "no_cars": "No cars listed yet.",
+    "revenue_chart": "Revenue — last 6 months",
+    "confirmed_bookings_short": "confirmed bookings",
+    "load_error": "Unable to load dashboard data.",
+    "retry": "Retry"
+  },
   "footer": {
     "description": "The peer-to-peer car rental platform. Find or list vehicles easily."
   },
@@ -231,8 +271,8 @@
     "delete": "Delete",
     "edit": "Edit",
     "back": "Back",
-    "per_day": "€/day",
-    "eur": "€",
+    "per_day": "GNF/day",
+    "eur": "GNF",
     "required": "Required",
     "optional": "Optional",
     "see_details": "See Details",

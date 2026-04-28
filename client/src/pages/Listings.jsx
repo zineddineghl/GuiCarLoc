@@ -172,7 +172,7 @@ export default function Listings() {
 
             {/* Min Price */}
             <div>
-              <label className="form-label">{t('filters.min_price')} (€)</label>
+              <label className="form-label">{t('filters.min_price')} (GNF)</label>
               <input
                 type="number"
                 value={filters.min_price}
@@ -185,7 +185,7 @@ export default function Listings() {
 
             {/* Max Price */}
             <div>
-              <label className="form-label">{t('filters.max_price')} (€)</label>
+              <label className="form-label">{t('filters.max_price')} (GNF)</label>
               <input
                 type="number"
                 value={filters.max_price}

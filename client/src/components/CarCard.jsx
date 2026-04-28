@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { MapPinIcon, UserGroupIcon, CogIcon, BoltIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, UserGroupIcon, CogIcon, BoltIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+import { useAuth } from '../App';
 
 const CAR_TYPE_ICONS = {
   sedan: '🚗',
@@ -21,6 +23,8 @@ const FUEL_ICONS = {
 
 export default function CarCard({ car }) {
   const { t } = useTranslation();
+  const { user, favIds, toggleFavorite } = useAuth();
+  const isFav = favIds.has(car.id);
 
   const firstImage = car.images && car.images.length > 0
     ? `/uploads/${car.images[0]}`
@@ -65,6 +69,19 @@ export default function CarCard({ car }) {
             </span>
           )}
         </div>
+
+        {/* Favorite Button */}
+        {user && (
+          <button
+            onClick={e => { e.preventDefault(); e.stopPropagation(); toggleFavorite(car.id); }}
+            className="absolute bottom-3 right-3 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-colors"
+          >
+            {isFav
+              ? <HeartSolidIcon className="h-5 w-5 text-red-500" />
+              : <HeartIcon className="h-5 w-5 text-gray-400" />
+            }
+          </button>
+        )}
       </div>
 
       {/* Content */}
@@ -113,7 +130,7 @@ export default function CarCard({ car }) {
         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
           <div className="flex items-baseline gap-1">
             <span className="text-2xl font-bold text-primary-700">
-              {car.price_per_day}€
+              {car.price_per_day} GNF
             </span>
             <span className="text-sm text-gray-500">{t('car.per_day')}</span>
           </div>

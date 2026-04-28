@@ -395,7 +395,7 @@ export default function UserProfile() {
                     <p className="font-semibold text-sm text-gray-900 truncate">{car.title}</p>
                     <div className="flex items-center justify-between mt-1">
                       <span className="text-primary-700 font-bold text-sm">
-                        {car.price_per_day}€<span className="text-gray-400 font-normal">/j</span>
+                        {car.price_per_day} GNF<span className="text-gray-400 font-normal">/j</span>
                       </span>
                       {car.avg_car_rating && (
                         <span className="text-xs text-gray-500">★ {car.avg_car_rating}</span>

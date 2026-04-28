@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../App';
 import DateRangePicker from '../components/DateRangePicker';
+import AvailabilityCalendar from '../components/AvailabilityCalendar';
 import {
   MapPinIcon,
   UserGroupIcon,
@@ -13,8 +14,10 @@ import {
   EnvelopeIcon,
   ArrowLeftIcon,
   CheckCircleIcon,
-  XCircleIcon
+  XCircleIcon,
+  HeartIcon
 } from '@heroicons/react/24/outline';
+import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 
 const CAR_TYPE_ICONS = {
   sedan: '🚗', suv: '🚙', van: '🚐', sports: '🏎️', luxury: '🚘', economy: '🚕'
@@ -42,7 +45,7 @@ function StatusBadge({ available }) {
 export default function CarDetail() {
   const { id } = useParams();
   const { t, i18n } = useTranslation();
-  const { user } = useAuth();
+  const { user, favIds, toggleFavorite } = useAuth();
   const navigate = useNavigate();
 
   const [car, setCar] = useState(null);
@@ -168,6 +171,7 @@ export default function CarDetail() {
   const typeIcon = CAR_TYPE_ICONS[car.type] || '🚗';
   const fuelIcon = FUEL_ICONS[car.fuel] || '⛽';
   const isOwner = user && user.id === car.owner_id;
+  const isFav = favIds.has(car.id);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -232,7 +236,20 @@ export default function CarDetail() {
                   <span className="text-xl">{typeIcon}</span>
                   <span className="text-sm text-gray-500 font-medium">{t(`car.type_${car.type}`)}</span>
                 </div>
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{car.title}</h1>
+                <div className="flex items-start gap-3">
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex-1">{car.title}</h1>
+                  {user && (
+                    <button
+                      onClick={() => toggleFavorite(car.id)}
+                      className="mt-1 p-2 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0"
+                    >
+                      {isFav
+                        ? <HeartSolidIcon className="h-6 w-6 text-red-500" />
+                        : <HeartIcon className="h-6 w-6 text-gray-400" />
+                      }
+                    </button>
+                  )}
+                </div>
                 {car.avg_car_rating && (
                   <div className="flex items-center gap-1.5 mt-1">
                     <span className="text-yellow-400">★</span>
@@ -283,6 +300,12 @@ export default function CarDetail() {
               </p>
             </div>
           </div>
+
+          {/* Availability Calendar */}
+          <AvailabilityCalendar
+            bookedRanges={bookedRanges}
+            lang={i18n.language.startsWith('fr') ? 'fr' : 'en'}
+          />
 
           {/* Owner Info */}
           <div className="card p-6">
@@ -383,7 +406,7 @@ export default function CarDetail() {
           <div className="card p-6 sticky top-24">
             {/* Price */}
             <div className="flex items-baseline gap-2 mb-6">
-              <span className="text-3xl font-extrabold text-primary-700">{car.price_per_day}€</span>
+              <span className="text-3xl font-extrabold text-primary-700">{car.price_per_day} GNF</span>
               <span className="text-gray-500">{t('car.per_day')}</span>
             </div>
 
@@ -417,13 +440,13 @@ export default function CarDetail() {
                   <div className="bg-primary-50 rounded-xl p-4 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">
-                        {car.price_per_day}€ × {days} {days === 1 ? t('booking.day') : t('booking.days')}
+                        {car.price_per_day} GNF × {days} {days === 1 ? t('booking.day') : t('booking.days')}
                       </span>
-                      <span className="font-semibold">{total}€</span>
+                      <span className="font-semibold">{total} GNF</span>
                     </div>
                     <div className="border-t border-primary-200 pt-2 flex justify-between font-bold">
                       <span>{t('booking.total')}</span>
-                      <span className="text-primary-700">{total}€</span>
+                      <span className="text-primary-700">{total} GNF</span>
                     </div>
                   </div>
                 )}

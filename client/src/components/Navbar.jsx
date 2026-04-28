@@ -8,6 +8,9 @@ import {
   XMarkIcon,
   ArrowRightOnRectangleIcon,
   ChatBubbleLeftRightIcon,
+  HeartIcon,
+  ChartBarIcon,
+  ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 
 function CarSvgIcon({ className }) {
@@ -93,6 +96,22 @@ export default function Navbar() {
                     )}
                   </span>
                 </NavLink>
+                <NavLink to="/favorites" className={navLinkClass}>
+                  <HeartIcon className="h-4 w-4" />
+                  {t('nav.favorites')}
+                </NavLink>
+                {(user.role === 'owner' || user.role === 'both') && (
+                  <NavLink to="/dashboard" className={navLinkClass}>
+                    <ChartBarIcon className="h-4 w-4" />
+                    {t('nav.dashboard')}
+                  </NavLink>
+                )}
+                {user.is_admin === 1 && (
+                  <NavLink to="/admin" className={navLinkClass}>
+                    <ShieldCheckIcon className="h-4 w-4" />
+                    Admin
+                  </NavLink>
+                )}
               </>
             )}
           </div>
@@ -185,6 +204,22 @@ export default function Navbar() {
                     )}
                   </span>
                 </NavLink>
+                <NavLink to="/favorites" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>
+                  <HeartIcon className="h-5 w-5" />
+                  {t('nav.favorites')}
+                </NavLink>
+                {(user.role === 'owner' || user.role === 'both') && (
+                  <NavLink to="/dashboard" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>
+                    <ChartBarIcon className="h-5 w-5" />
+                    {t('nav.dashboard')}
+                  </NavLink>
+                )}
+                {user.is_admin === 1 && (
+                  <NavLink to="/admin" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>
+                    <ShieldCheckIcon className="h-5 w-5" />
+                    Admin
+                  </NavLink>
+                )}
                 <div className="px-4 py-2 border-t border-gray-100 mt-2 pt-3">
                   <p className="text-sm text-gray-500 mb-2">{user.name}</p>
                   <button

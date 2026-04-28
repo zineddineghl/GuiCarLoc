@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import SearchBar from '../components/SearchBar';
 import CarCard from '../components/CarCard';
-import { ShieldCheckIcon, CurrencyEuroIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { ShieldCheckIcon, BanknotesIcon, ClockIcon } from '@heroicons/react/24/outline';
 
 export default function Home() {
   const { t } = useTranslation();
@@ -33,7 +33,6 @@ export default function Home() {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
           <div className="text-center mb-10">
-            <div className="text-6xl mb-4">🚗</div>
             <h1 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">
               {t('home.hero_title')}
             </h1>
@@ -165,7 +164,7 @@ export default function Home() {
           </div>
           <div className="flex flex-col items-center text-center p-6 rounded-2xl hover:bg-primary-50 transition-colors">
             <div className="w-14 h-14 bg-primary-100 rounded-2xl flex items-center justify-center mb-4">
-              <CurrencyEuroIcon className="h-8 w-8 text-primary-600" />
+              <BanknotesIcon className="h-8 w-8 text-primary-600" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">{t('home.benefit2_title')}</h3>
             <p className="text-gray-600">{t('home.benefit2_desc')}</p>

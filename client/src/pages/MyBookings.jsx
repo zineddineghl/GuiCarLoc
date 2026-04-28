@@ -6,6 +6,15 @@ import { useAuth } from '../App';
 import { CalendarIcon, MapPinIcon, CheckIcon, XMarkIcon, StarIcon } from '@heroicons/react/24/outline';
 import ReviewModal from '../components/ReviewModal';
 
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+function isBookingPast(booking) {
+  if (booking.status === 'pending') return false;
+  if (booking.status === 'confirmed') return new Date(booking.end_date) < today;
+  return true; // rejected, cancelled
+}
+
 const STATUS_BADGE = {
   pending: 'badge-pending',
   confirmed: 'badge-confirmed',
@@ -85,7 +94,7 @@ function BookingCard({ booking, onStatusChange, isOwnerView, onReviewSuccess }) 
               {formatDate(booking.start_date)} → {formatDate(booking.end_date)}
             </span>
             <span className="font-semibold text-primary-700">
-              {t('booking.total')}: {booking.total_price}€
+              {t('booking.total')}: {booking.total_price} GNF
             </span>
           </div>
 
@@ -278,50 +287,105 @@ export default function MyBookings() {
       )}
 
       {/* My Bookings */}
-      {(!isOwner || activeTab === 'my') && (
-        <div className="space-y-4">
-          {myBookings.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="text-5xl mb-3">📋</div>
-              <p className="text-gray-500">{t('booking.no_bookings')}</p>
-              <Link to="/listings" className="btn-primary mt-4 inline-block">
-                {t('nav.listings')}
-              </Link>
-            </div>
-          ) : (
-            myBookings.map(booking => (
-              <BookingCard
-                key={booking.id}
-                booking={booking}
-                onStatusChange={handleStatusChange}
-                isOwnerView={false}
-                onReviewSuccess={() => {}}
-              />
-            ))
-          )}
-        </div>
-      )}
+      {(!isOwner || activeTab === 'my') && (() => {
+        const active = myBookings.filter(b => !isBookingPast(b));
+        const past = myBookings.filter(b => isBookingPast(b));
+        return (
+          <div className="space-y-4">
+            {active.length === 0 && past.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="text-5xl mb-3">📋</div>
+                <p className="text-gray-500">{t('booking.no_bookings')}</p>
+                <Link to="/listings" className="btn-primary mt-4 inline-block">
+                  {t('nav.listings')}
+                </Link>
+              </div>
+            ) : (
+              <>
+                {active.map(booking => (
+                  <BookingCard
+                    key={booking.id}
+                    booking={booking}
+                    onStatusChange={handleStatusChange}
+                    isOwnerView={false}
+                    onReviewSuccess={() => {}}
+                  />
+                ))}
+                {past.length > 0 && (
+                  <div className="mt-8">
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="flex-1 border-t border-gray-200" />
+                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        {t('booking.history')}
+                      </span>
+                      <span className="flex-1 border-t border-gray-200" />
+                    </div>
+                    <div className="space-y-4 opacity-80">
+                      {past.map(booking => (
+                        <BookingCard
+                          key={booking.id}
+                          booking={booking}
+                          onStatusChange={handleStatusChange}
+                          isOwnerView={false}
+                          onReviewSuccess={() => {}}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Received Bookings */}
-      {isOwner && activeTab === 'received' && (
-        <div className="space-y-4">
-          {receivedBookings.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="text-5xl mb-3">📬</div>
-              <p className="text-gray-500">{t('booking.no_received')}</p>
-            </div>
-          ) : (
-            receivedBookings.map(booking => (
-              <BookingCard
-                key={booking.id}
-                booking={booking}
-                onStatusChange={handleStatusChange}
-                isOwnerView={true}
-              />
-            ))
-          )}
-        </div>
-      )}
+      {isOwner && activeTab === 'received' && (() => {
+        const active = receivedBookings.filter(b => !isBookingPast(b));
+        const past = receivedBookings.filter(b => isBookingPast(b));
+        return (
+          <div className="space-y-4">
+            {active.length === 0 && past.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="text-5xl mb-3">📬</div>
+                <p className="text-gray-500">{t('booking.no_received')}</p>
+              </div>
+            ) : (
+              <>
+                {active.map(booking => (
+                  <BookingCard
+                    key={booking.id}
+                    booking={booking}
+                    onStatusChange={handleStatusChange}
+                    isOwnerView={true}
+                  />
+                ))}
+                {past.length > 0 && (
+                  <div className="mt-8">
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="flex-1 border-t border-gray-200" />
+                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        {t('booking.history')}
+                      </span>
+                      <span className="flex-1 border-t border-gray-200" />
+                    </div>
+                    <div className="space-y-4 opacity-80">
+                      {past.map(booking => (
+                        <BookingCard
+                          key={booking.id}
+                          booking={booking}
+                          onStatusChange={handleStatusChange}
+                          isOwnerView={true}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }

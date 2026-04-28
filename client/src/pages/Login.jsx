@@ -174,6 +174,12 @@ export default function Login() {
                 </div>
               </div>
 
+              <div className="flex justify-end">
+                <Link to="/forgot-password" className="text-sm text-primary-600 hover:underline">
+                  Mot de passe oublié ?
+                </Link>
+              </div>
+
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">
                   {error}
@@ -207,13 +213,6 @@ export default function Login() {
           )}
         </div>
 
-        {!twoFaStep && (
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-700">
-            <p className="font-semibold mb-1">Demo / Test accounts:</p>
-            <p>owner@test.com / password123</p>
-            <p>renter@test.com / password123</p>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -1,11 +1,11 @@
 const express = require('express');
-const db = require('../db');
+const pool = require('../db');
 const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
-// POST /api/reviews - create a review (auth required, renter only)
-router.post('/', authenticateToken, (req, res) => {
+// POST /api/reviews
+router.post('/', authenticateToken, async (req, res) => {
   try {
     const { booking_id, car_rating, owner_rating, comment } = req.body;
 
@@ -20,60 +20,48 @@ router.post('/', authenticateToken, (req, res) => {
       return res.status(400).json({ error: 'Ratings must be between 1 and 5' });
     }
 
-    const booking = db.prepare(`
+    const { rows: bookingRows } = await pool.query(`
       SELECT b.*, c.owner_id as car_owner_id
       FROM bookings b
       JOIN cars c ON b.car_id = c.id
-      WHERE b.id = ?
-    `).get(booking_id);
+      WHERE b.id = $1
+    `, [booking_id]);
 
-    if (!booking) {
-      return res.status(404).json({ error: 'Booking not found' });
-    }
+    const booking = bookingRows[0];
+    if (!booking) return res.status(404).json({ error: 'Booking not found' });
+    if (booking.renter_id !== req.user.id) return res.status(403).json({ error: 'Only the renter can leave a review' });
+    if (booking.status !== 'confirmed') return res.status(400).json({ error: 'Can only review confirmed bookings' });
+    if (new Date(booking.end_date) >= new Date()) return res.status(400).json({ error: 'Booking must be completed before reviewing' });
 
-    if (booking.renter_id !== req.user.id) {
-      return res.status(403).json({ error: 'Only the renter can leave a review' });
-    }
+    const { rows: existing } = await pool.query('SELECT id FROM reviews WHERE booking_id = $1', [booking_id]);
+    if (existing[0]) return res.status(409).json({ error: 'You have already reviewed this booking' });
 
-    if (booking.status !== 'confirmed') {
-      return res.status(400).json({ error: 'Can only review confirmed bookings' });
-    }
-
-    if (new Date(booking.end_date) >= new Date()) {
-      return res.status(400).json({ error: 'Booking must be completed before reviewing' });
-    }
-
-    const existing = db.prepare('SELECT id FROM reviews WHERE booking_id = ?').get(booking_id);
-    if (existing) {
-      return res.status(409).json({ error: 'You have already reviewed this booking' });
-    }
-
-    const result = db.prepare(`
+    const { rows } = await pool.query(`
       INSERT INTO reviews (booking_id, reviewer_id, car_id, owner_id, car_rating, owner_rating, comment)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(booking_id, req.user.id, booking.car_id, booking.car_owner_id, carR, ownerR, comment || null);
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING *
+    `, [booking_id, req.user.id, booking.car_id, booking.car_owner_id, carR, ownerR, comment || null]);
 
-    const review = db.prepare('SELECT * FROM reviews WHERE id = ?').get(Number(result.lastInsertRowid));
-    res.status(201).json({ review });
+    res.status(201).json({ review: rows[0] });
   } catch (err) {
     console.error('Create review error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// GET /api/reviews/car/:car_id - get all reviews for a car
-router.get('/car/:car_id', (req, res) => {
+// GET /api/reviews/car/:car_id
+router.get('/car/:car_id', async (req, res) => {
   try {
-    const reviews = db.prepare(`
+    const { rows } = await pool.query(`
       SELECT r.id, r.car_rating, r.owner_rating, r.comment, r.created_at,
              u.name as reviewer_name
       FROM reviews r
       JOIN users u ON r.reviewer_id = u.id
-      WHERE r.car_id = ?
+      WHERE r.car_id = $1
       ORDER BY r.created_at DESC
-    `).all(req.params.car_id);
+    `, [req.params.car_id]);
 
-    res.json({ reviews });
+    res.json({ reviews: rows });
   } catch (err) {
     console.error('Get reviews error:', err);
     res.status(500).json({ error: 'Internal server error' });

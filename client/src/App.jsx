@@ -13,6 +13,11 @@ import MyListings from './pages/MyListings';
 import MyBookings from './pages/MyBookings';
 import UserProfile from './pages/UserProfile';
 import Messages from './pages/Messages';
+import Favorites from './pages/Favorites';
+import Dashboard from './pages/Dashboard';
+import Admin from './pages/Admin';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 // Auth Context
 const AuthContext = createContext(null);
@@ -42,6 +47,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [notifCount, setNotifCount] = useState(0);
   const [msgCount, setMsgCount] = useState(0);
+  const [favIds, setFavIds] = useState(new Set());
 
   useEffect(() => {
     const storedToken = localStorage.getItem('rentcar_token');
@@ -61,7 +67,8 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!user) { setNotifCount(0); setMsgCount(0); return; }
+    if (!user) { setNotifCount(0); setMsgCount(0); setFavIds(new Set()); return; }
+    axios.get('/api/favorites/ids').then(res => setFavIds(new Set(res.data.ids))).catch(() => {});
     const fetchNotifs = () => {
       axios.get('/api/bookings/notifications').then(res => setNotifCount(res.data.total || 0)).catch(() => {});
       axios.get('/api/messages/unread-count').then(res => setMsgCount(res.data.count || 0)).catch(() => {});
@@ -78,6 +85,26 @@ function App() {
     setUser(userData);
   };
 
+  const toggleFavorite = async (carId) => {
+    const isFav = favIds.has(carId);
+    setFavIds(prev => {
+      const next = new Set(prev);
+      isFav ? next.delete(carId) : next.add(carId);
+      return next;
+    });
+    try {
+      if (isFav) await axios.delete(`/api/favorites/${carId}`);
+      else await axios.post(`/api/favorites/${carId}`);
+    } catch {
+      // revert on error
+      setFavIds(prev => {
+        const next = new Set(prev);
+        isFav ? next.add(carId) : next.delete(carId);
+        return next;
+      });
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('rentcar_token');
     delete axios.defaults.headers.common['Authorization'];
@@ -85,10 +112,11 @@ function App() {
     setUser(null);
     setNotifCount(0);
     setMsgCount(0);
+    setFavIds(new Set());
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading, notifCount, setNotifCount, msgCount, setMsgCount }}>
+    <AuthContext.Provider value={{ user, token, login, logout, loading, notifCount, setNotifCount, msgCount, setMsgCount, favIds, toggleFavorite }}>
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Navbar />
         <main className="flex-1">
@@ -98,6 +126,8 @@ function App() {
             <Route path="/cars/:id" element={<CarDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route
               path="/post-listing"
               element={
@@ -143,6 +173,30 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Messages />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/favorites"
+              element={
+                <ProtectedRoute>
+                  <Favorites />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <Admin />
                 </ProtectedRoute>
               }
             />
