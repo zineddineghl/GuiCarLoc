@@ -19,7 +19,8 @@ router.get('/', authenticateToken, async (req, res) => {
       ORDER BY f.created_at DESC
     `, [req.user.id]);
 
-    res.json({ cars: rows.map(car => ({ ...car, images: car.images ? JSON.parse(car.images) : [] })) });
+    const safeParseJSON = (str) => { try { return JSON.parse(str); } catch { return []; } };
+    res.json({ cars: rows.map(car => ({ ...car, images: safeParseJSON(car.images) })) });
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' });
   }
