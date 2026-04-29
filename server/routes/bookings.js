@@ -122,6 +122,7 @@ router.get('/my', authenticateToken, async (req, res) => {
     const { rows } = await pool.query(`
       SELECT b.*,
              c.title as car_title, c.brand, c.model, c.year, c.city, c.images, c.price_per_day,
+             c.owner_id,
              u.name as owner_name, u.email as owner_email, u.phone as owner_phone,
              EXISTS(SELECT 1 FROM reviews rv WHERE rv.booking_id = b.id) as has_review
       FROM bookings b

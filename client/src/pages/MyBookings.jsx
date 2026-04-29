@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../App';
-import { CalendarIcon, MapPinIcon, CheckIcon, XMarkIcon, StarIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, MapPinIcon, CheckIcon, XMarkIcon, StarIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 import ReviewModal from '../components/ReviewModal';
 
 const today = new Date();
@@ -29,7 +29,9 @@ function formatDate(dateStr) {
 
 function BookingCard({ booking, onStatusChange, isOwnerView, onReviewSuccess }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const otherUserId = isOwnerView ? booking.renter_id : booking.owner_id;
   const [showReview, setShowReview] = useState(false);
   const [hasReview, setHasReview] = useState(Boolean(booking.has_review));
 
@@ -117,6 +119,13 @@ function BookingCard({ booking, onStatusChange, isOwnerView, onReviewSuccess }) 
 
         {/* Actions */}
         <div className="flex sm:flex-col gap-2 sm:items-end justify-end">
+          <button
+            onClick={() => navigate(`/messages/${otherUserId}`)}
+            className="flex items-center gap-1 px-3 py-1.5 bg-primary-50 border border-primary-200 text-primary-700 rounded-lg text-xs font-semibold hover:bg-primary-100 transition-colors"
+          >
+            <ChatBubbleLeftIcon className="h-3.5 w-3.5" />
+            {t('booking.send_message') || 'Message'}
+          </button>
           {canReview && (
             <button
               onClick={() => setShowReview(true)}
