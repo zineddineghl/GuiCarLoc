@@ -58,7 +58,8 @@ export default function Messages() {
   // Connect socket
   useEffect(() => {
     if (!token) return;
-    const socket = io('http://localhost:5000', { auth: { token } });
+    const SOCKET_URL = import.meta.env.PROD ? '' : 'http://localhost:5000';
+    const socket = io(SOCKET_URL, { auth: { token } });
     socketRef.current = socket;
 
     socket.on('new_message', (msg) => {

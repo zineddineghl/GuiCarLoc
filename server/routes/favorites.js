@@ -15,7 +15,7 @@ router.get('/', authenticateToken, async (req, res) => {
       JOIN users u ON c.owner_id = u.id
       LEFT JOIN reviews r ON r.car_id = c.id
       WHERE f.user_id = $1
-      GROUP BY c.id, u.name
+      GROUP BY c.id, u.name, f.created_at
       ORDER BY f.created_at DESC
     `, [req.user.id]);
 
