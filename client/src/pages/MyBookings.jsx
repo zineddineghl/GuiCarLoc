@@ -163,7 +163,7 @@ function BookingCard({ booking, onStatusChange, isOwnerView, onReviewSuccess }) 
             className="flex items-center gap-1 px-3 py-1.5 bg-primary-50 border border-primary-200 text-primary-700 rounded-lg text-xs font-semibold hover:bg-primary-100 transition-colors"
           >
             <ChatBubbleLeftIcon className="h-3.5 w-3.5" />
-            {t('booking.send_message') || 'Message'}
+            {t('booking.send_message')}
           </button>
           {canReview && (
             <button
