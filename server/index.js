@@ -5,6 +5,7 @@ const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
+const { sendNewMessageEmail } = require('./mailer');
 
 const pool = require('./db');
 const migrate = require('./migrate');
@@ -59,14 +60,37 @@ io.on('connection', (socket) => {
         [socket.userId, receiverId, content.trim()]
       );
       const msgId = result.rows[0].id;
-      const msgResult = await pool.query(
-        `SELECT m.*, u.name as sender_name, u.avatar as sender_avatar
-         FROM messages m JOIN users u ON m.sender_id = u.id
-         WHERE m.id = $1`,
-        [msgId]
-      );
+      const [msgResult, usersResult] = await Promise.all([
+        pool.query(
+          `SELECT m.*, u.name as sender_name, u.avatar as sender_avatar
+           FROM messages m JOIN users u ON m.sender_id = u.id
+           WHERE m.id = $1`,
+          [msgId]
+        ),
+        pool.query(
+          'SELECT id, name, email FROM users WHERE id = ANY($1)',
+          [[socket.userId, receiverId]]
+        ),
+      ]);
       const message = msgResult.rows[0];
       io.to(`user_${socket.userId}`).to(`user_${receiverId}`).emit('new_message', message);
+
+      // Send email notification only if receiver is not connected
+      const receiverSockets = await io.in(`user_${receiverId}`).fetchSockets();
+      if (receiverSockets.length === 0) {
+        const sender = usersResult.rows.find(u => u.id === socket.userId);
+        const receiver = usersResult.rows.find(u => u.id === parseInt(receiverId));
+        if (sender && receiver) {
+          const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+          sendNewMessageEmail({
+            to: receiver.email,
+            receiverName: receiver.name,
+            senderName: sender.name,
+            content: content.trim(),
+            messagesUrl: `${clientUrl}/messages/${socket.userId}`,
+          }).catch(err => console.error('[Socket] Email notification error:', err.message));
+        }
+      }
     } catch (err) {
       console.error('[Socket] send_message error:', err.message);
     }

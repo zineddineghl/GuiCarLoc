@@ -160,4 +160,21 @@ async function sendBookingRejectedEmail({ to, renterName, carTitle, startDate, e
   await sendEmail({ to, subject, html });
 }
 
-module.exports = { sendOTPEmail, sendVerificationEmail, sendNewBookingEmail, sendBookingConfirmedEmail, sendBookingRejectedEmail, sendPasswordResetEmail };
+async function sendNewMessageEmail({ to, receiverName, senderName, content, messagesUrl }) {
+  const subject = `Nouveau message de ${senderName} — GuiCarLoc`;
+  const html = baseTemplate(`
+    <p style="color:#374151;">Bonjour <strong>${receiverName}</strong>,</p>
+    <p style="color:#374151;"><strong>${senderName}</strong> vous a envoyé un message :</p>
+    <div style="background:#f3f4f6;border-left:4px solid #1e40af;border-radius:4px;padding:14px 18px;margin:16px 0;">
+      <p style="margin:0;color:#1f2937;font-style:italic;">"${content}"</p>
+    </div>
+    <div style="text-align:center;margin:24px 0;">
+      <a href="${messagesUrl}" style="background:#1e40af;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:bold;font-size:15px;display:inline-block;">
+        Répondre dans la messagerie
+      </a>
+    </div>
+  `);
+  await sendEmail({ to, subject, html });
+}
+
+module.exports = { sendOTPEmail, sendVerificationEmail, sendNewBookingEmail, sendBookingConfirmedEmail, sendBookingRejectedEmail, sendPasswordResetEmail, sendNewMessageEmail };
