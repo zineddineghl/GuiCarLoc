@@ -187,11 +187,17 @@ export default function Messages() {
                           <span className="ml-1 bg-primary-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0">
                             {conv.unread_count}
                           </span>
-                        ) : conv.last_sender_id === user.id && (
-                          <span className={`ml-1 text-xs flex-shrink-0 ${conv.last_message_read ? 'text-primary-600' : 'text-gray-400'}`}>
-                            {conv.last_message_read
-                              ? (i18n.language === 'fr' ? 'Lu' : 'Seen')
-                              : (i18n.language === 'fr' ? 'Remis' : 'Delivered')}
+                        ) : (
+                          <span className={`ml-1 text-xs flex-shrink-0 ${
+                            conv.last_sender_id === user.id && !conv.last_message_read
+                              ? 'text-gray-400'
+                              : 'text-primary-600'
+                          }`}>
+                            {conv.last_sender_id === user.id
+                              ? (conv.last_message_read
+                                  ? (i18n.language === 'fr' ? 'Lu' : 'Seen')
+                                  : (i18n.language === 'fr' ? 'Remis' : 'Delivered'))
+                              : (i18n.language === 'fr' ? 'Lu' : 'Seen')}
                           </span>
                         )}
                       </div>
