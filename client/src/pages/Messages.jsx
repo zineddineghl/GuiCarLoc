@@ -62,6 +62,12 @@ export default function Messages() {
     const socket = io(SOCKET_URL, { auth: { token } });
     socketRef.current = socket;
 
+    socket.on('messages_read', ({ by }) => {
+      setMessages(prev => prev.map(m =>
+        m.sender_id === user.id && m.receiver_id === by ? { ...m, read: 1 } : m
+      ));
+    });
+
     socket.on('new_message', (msg) => {
       // Update conversation list
       setConversations(prev => {
@@ -166,11 +172,11 @@ export default function Messages() {
                     <Avatar name={conv.name} avatarFile={conv.avatar} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-gray-900 text-sm truncate">{conv.name}</span>
-                        <span className="text-xs text-gray-400 flex-shrink-0 ml-1">{timeAgo(conv.last_message_at, i18n.language)}</span>
+                        <span className={`text-sm truncate ${conv.unread_count > 0 ? 'font-bold text-gray-900' : 'font-medium text-gray-900'}`}>{conv.name}</span>
+                        <span className={`text-xs flex-shrink-0 ml-1 ${conv.unread_count > 0 ? 'text-primary-600 font-semibold' : 'text-gray-400'}`}>{timeAgo(conv.last_message_at, i18n.language)}</span>
                       </div>
                       <div className="flex items-center justify-between mt-0.5">
-                        <p className="text-xs text-gray-500 truncate">
+                        <p className={`text-xs truncate ${conv.unread_count > 0 ? 'text-gray-900 font-semibold' : 'text-gray-500'}`}>
                           {conv.last_sender_id === user.id ? (i18n.language === 'fr' ? 'Vous : ' : 'You: ') : ''}{conv.last_message}
                         </p>
                         {conv.unread_count > 0 && (
@@ -213,24 +219,36 @@ export default function Messages() {
                 ) : messages.length === 0 ? (
                   <div className="text-center text-gray-400 text-sm py-8">{t('messages.start_conversation')}</div>
                 ) : (
-                  messages.map(msg => {
-                    const isMe = msg.sender_id === user.id;
-                    return (
-                      <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} gap-2`}>
-                        {!isMe && <Avatar name={msg.sender_name} avatarFile={msg.sender_avatar} size="sm" />}
-                        <div className={`max-w-[70%] px-4 py-2 rounded-2xl text-sm ${
-                          isMe
-                            ? 'bg-primary-600 text-white rounded-br-sm'
-                            : 'bg-gray-100 text-gray-900 rounded-bl-sm'
-                        }`}>
-                          <p className="whitespace-pre-wrap break-words">{msg.content}</p>
-                          <p className={`text-xs mt-1 ${isMe ? 'text-primary-200' : 'text-gray-400'}`}>
-                            {timeAgo(msg.created_at, i18n.language)}
-                          </p>
+                  (() => {
+                    const myMsgs = messages.filter(m => m.sender_id === user.id);
+                    const lastMyMsgId = myMsgs.length > 0 ? myMsgs[myMsgs.length - 1].id : null;
+                    return messages.map(msg => {
+                      const isMe = msg.sender_id === user.id;
+                      const showRead = isMe && msg.id === lastMyMsgId && msg.read === 1;
+                      return (
+                        <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                          <div className={`flex ${isMe ? 'justify-end' : 'justify-start'} gap-2 w-full`}>
+                            {!isMe && <Avatar name={msg.sender_name} avatarFile={msg.sender_avatar} size="sm" />}
+                            <div className={`max-w-[70%] px-4 py-2 rounded-2xl text-sm ${
+                              isMe
+                                ? 'bg-primary-600 text-white rounded-br-sm'
+                                : 'bg-gray-100 text-gray-900 rounded-bl-sm'
+                            }`}>
+                              <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                              <p className={`text-xs mt-1 ${isMe ? 'text-primary-200' : 'text-gray-400'}`}>
+                                {timeAgo(msg.created_at, i18n.language)}
+                              </p>
+                            </div>
+                          </div>
+                          {showRead && (
+                            <p className="text-xs text-gray-400 mt-0.5 mr-1">
+                              {i18n.language === 'fr' ? 'Vu' : 'Seen'} ✓
+                            </p>
+                          )}
                         </div>
-                      </div>
-                    );
-                  })
+                      );
+                    });
+                  })()
                 )}
                 <div ref={messagesEndRef} />
               </div>

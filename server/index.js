@@ -102,6 +102,8 @@ io.on('connection', (socket) => {
         'UPDATE messages SET read = 1 WHERE sender_id = $1 AND receiver_id = $2',
         [senderId, socket.userId]
       );
+      // Notify the original sender that their messages have been read
+      io.to(`user_${senderId}`).emit('messages_read', { by: socket.userId });
     } catch (err) {
       console.error('[Socket] mark_read error:', err.message);
     }
