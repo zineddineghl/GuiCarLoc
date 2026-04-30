@@ -99,6 +99,16 @@ async function migrate() {
       )
     `);
 
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS blocked_dates (
+        id SERIAL PRIMARY KEY,
+        car_id INTEGER NOT NULL REFERENCES cars(id) ON DELETE CASCADE,
+        start_date TEXT NOT NULL,
+        end_date TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     console.log('[DB] Migrations completed successfully');
   } catch (err) {
     console.error('[DB] Migration error:', err.message);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -15,7 +15,11 @@ import {
   ArrowLeftIcon,
   CheckCircleIcon,
   XCircleIcon,
-  HeartIcon
+  HeartIcon,
+  NoSymbolIcon,
+  TrashIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 
@@ -67,6 +71,12 @@ export default function CarDetail() {
   const [bookingError, setBookingError] = useState('');
   const [bookingSuccess, setBookingSuccess] = useState('');
 
+  const [showBlocker, setShowBlocker] = useState(false);
+  const [blockedDates, setBlockedDates] = useState([]);
+  const [blockForm, setBlockForm] = useState({ start_date: today, end_date: tomorrow });
+  const [blockLoading, setBlockLoading] = useState(false);
+  const [blockError, setBlockError] = useState('');
+
   useEffect(() => {
     axios.get(`/api/cars/${id}`)
       .then(res => setCar(res.data.car))
@@ -84,6 +94,15 @@ export default function CarDetail() {
       .then(res => setBookedRanges(res.data.ranges || []))
       .catch(() => {});
   }, [id, t]);
+
+  const isOwner = user && car && user.id === car.owner_id;
+
+  useEffect(() => {
+    if (!isOwner) return;
+    axios.get(`/api/cars/${id}/blocked-dates`)
+      .then(res => setBlockedDates(res.data.blocked || []))
+      .catch(() => {});
+  }, [isOwner, id]);
 
   const handleDateChange = ({ start_date, end_date }) => {
     setBooking(prev => ({ ...prev, start_date, end_date }));
@@ -170,8 +189,37 @@ export default function CarDetail() {
   const total = calculateTotal();
   const typeIcon = CAR_TYPE_ICONS[car.type] || '🚗';
   const fuelIcon = FUEL_ICONS[car.fuel] || '⛽';
-  const isOwner = user && user.id === car.owner_id;
   const isFav = favIds.has(car.id);
+
+  const handleAddBlock = async (e) => {
+    e.preventDefault();
+    if (!blockForm.start_date || !blockForm.end_date || blockForm.start_date > blockForm.end_date) {
+      setBlockError(i18n.language.startsWith('fr') ? 'Dates invalides' : 'Invalid dates');
+      return;
+    }
+    setBlockLoading(true);
+    setBlockError('');
+    try {
+      const res = await axios.post(`/api/cars/${id}/blocked-dates`, blockForm);
+      const newBlock = res.data.block;
+      setBlockedDates(prev => [...prev, newBlock]);
+      setBookedRanges(prev => [...prev, { ...newBlock, type: 'blocked' }]);
+    } catch (err) {
+      setBlockError(err.response?.data?.error || 'Erreur');
+    } finally {
+      setBlockLoading(false);
+    }
+  };
+
+  const handleRemoveBlock = async (blockId) => {
+    try {
+      await axios.delete(`/api/cars/${id}/blocked-dates/${blockId}`);
+      setBlockedDates(prev => prev.filter(b => b.id !== blockId));
+      setBookedRanges(prev => prev.filter(r => !(r.type === 'blocked' && r.id === blockId)));
+    } catch {
+      // ignore
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -411,11 +459,93 @@ export default function CarDetail() {
             </div>
 
             {isOwner ? (
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
-                <p className="text-blue-700 font-medium text-sm mb-3">This is your listing</p>
-                <Link to={`/edit-listing/${car.id}`} className="btn-secondary btn-sm w-full">
-                  {t('common.edit')}
-                </Link>
+              <div className="space-y-3">
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <p className="text-blue-700 font-medium text-sm mb-3 text-center">This is your listing</p>
+                  <div className="flex flex-col gap-2">
+                    <Link to={`/edit-listing/${car.id}`} className="btn-secondary btn-sm w-full text-center">
+                      {t('common.edit')}
+                    </Link>
+                    <button
+                      onClick={() => setShowBlocker(v => !v)}
+                      className="flex items-center justify-center gap-2 px-3 py-2 bg-orange-50 border border-orange-200 text-orange-700 rounded-lg text-sm font-semibold hover:bg-orange-100 transition-colors"
+                    >
+                      <NoSymbolIcon className="h-4 w-4" />
+                      {i18n.language.startsWith('fr') ? 'Bloquer des dates' : 'Block dates'}
+                      {showBlocker ? <ChevronUpIcon className="h-3.5 w-3.5 ml-auto" /> : <ChevronDownIcon className="h-3.5 w-3.5 ml-auto" />}
+                    </button>
+                  </div>
+                </div>
+
+                {showBlocker && (
+                  <div className="border border-orange-200 rounded-xl p-4 bg-orange-50/50 space-y-3">
+                    <p className="text-xs font-semibold text-orange-700">
+                      {i18n.language.startsWith('fr') ? 'Bloquer une période' : 'Block a period'}
+                    </p>
+                    <form onSubmit={handleAddBlock} className="space-y-2">
+                      <div>
+                        <label className="text-xs text-gray-500 block mb-0.5">
+                          {i18n.language.startsWith('fr') ? 'Du' : 'From'}
+                        </label>
+                        <input
+                          type="date"
+                          value={blockForm.start_date}
+                          min={today}
+                          onChange={e => setBlockForm(p => ({ ...p, start_date: e.target.value }))}
+                          className="input-field text-sm py-1.5"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 block mb-0.5">
+                          {i18n.language.startsWith('fr') ? 'Au' : 'To'}
+                        </label>
+                        <input
+                          type="date"
+                          value={blockForm.end_date}
+                          min={blockForm.start_date || today}
+                          onChange={e => setBlockForm(p => ({ ...p, end_date: e.target.value }))}
+                          className="input-field text-sm py-1.5"
+                          required
+                        />
+                      </div>
+                      {blockError && (
+                        <p className="text-xs text-red-600">{blockError}</p>
+                      )}
+                      <button
+                        type="submit"
+                        disabled={blockLoading}
+                        className="w-full py-2 px-3 bg-orange-600 text-white text-sm font-semibold rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50"
+                      >
+                        {blockLoading
+                          ? (i18n.language.startsWith('fr') ? 'En cours...' : 'Loading...')
+                          : (i18n.language.startsWith('fr') ? 'Bloquer ces dates' : 'Block these dates')}
+                      </button>
+                    </form>
+
+                    {blockedDates.length > 0 && (
+                      <div className="space-y-1.5 pt-1 border-t border-orange-200">
+                        <p className="text-xs font-semibold text-orange-700">
+                          {i18n.language.startsWith('fr') ? 'Périodes bloquées' : 'Blocked periods'}
+                        </p>
+                        {blockedDates.map(b => (
+                          <div key={b.id} className="flex items-center justify-between bg-white rounded-lg px-2.5 py-1.5 border border-orange-100">
+                            <span className="text-xs text-gray-700">
+                              {b.start_date} → {b.end_date}
+                            </span>
+                            <button
+                              onClick={() => handleRemoveBlock(b.id)}
+                              className="text-red-400 hover:text-red-600 transition-colors ml-2"
+                              title={i18n.language.startsWith('fr') ? 'Supprimer' : 'Remove'}
+                            >
+                              <TrashIcon className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
               <form onSubmit={handleBookingSubmit} className="space-y-4">

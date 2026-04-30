@@ -79,6 +79,15 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(409).json({ error: 'Car is already booked for the selected dates' });
     }
 
+    const { rows: blockedRows } = await pool.query(`
+      SELECT id FROM blocked_dates
+      WHERE car_id = $1 AND NOT (end_date < $2 OR start_date > $3)
+    `, [car_id, start_date, end_date]);
+
+    if (blockedRows[0]) {
+      return res.status(409).json({ error: 'Ces dates sont bloquées par le propriétaire' });
+    }
+
     const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
     const total_price = days * car.price_per_day;
 
@@ -163,11 +172,17 @@ router.get('/received', authenticateToken, async (req, res) => {
 // GET /api/bookings/car/:car_id/booked-dates
 router.get('/car/:car_id/booked-dates', async (req, res) => {
   try {
-    const { rows } = await pool.query(`
-      SELECT start_date, end_date FROM bookings
-      WHERE car_id = $1 AND status IN ('pending', 'confirmed')
-    `, [req.params.car_id]);
-    res.json({ ranges: rows });
+    const [bookingRes, blockedRes] = await Promise.all([
+      pool.query(`
+        SELECT start_date, end_date, 'booked' as type FROM bookings
+        WHERE car_id = $1 AND status IN ('pending', 'confirmed')
+      `, [req.params.car_id]),
+      pool.query(`
+        SELECT start_date, end_date, 'blocked' as type FROM blocked_dates
+        WHERE car_id = $1
+      `, [req.params.car_id]),
+    ]);
+    res.json({ ranges: [...bookingRes.rows, ...blockedRes.rows] });
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' });
   }

@@ -21,12 +21,16 @@ function MonthGrid({ viewDate, bookedRanges, lang }) {
   const calEnd = endOfWeek(endOfMonth(viewDate), { weekStartsOn: 1 });
   const days = eachDayOfInterval({ start: calStart, end: calEnd });
 
-  const isBooked = (date) =>
-    bookedRanges.some(range => {
+  const getStatus = (date) => {
+    for (const range of bookedRanges) {
       const s = new Date(range.start_date + 'T00:00:00');
       const e = new Date(range.end_date + 'T00:00:00');
-      return !isBefore(date, s) && !isAfter(date, e);
-    });
+      if (!isBefore(date, s) && !isAfter(date, e)) {
+        return range.type === 'blocked' ? 'blocked' : 'booked';
+      }
+    }
+    return 'available';
+  };
 
   const monthLabel = format(viewDate, 'MMMM yyyy', { locale });
   const monthLabelCap = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
@@ -45,7 +49,7 @@ function MonthGrid({ viewDate, bookedRanges, lang }) {
         {days.map(day => {
           const otherMonth = !isSameMonth(day, viewDate);
           const past = isBefore(day, today);
-          const booked = !otherMonth && !past && isBooked(day);
+          const status = (!otherMonth && !past) ? getStatus(day) : null;
           const todayDay = !otherMonth && isSameDay(day, today);
 
           let cls = 'h-7 flex items-center justify-center text-xs rounded ';
@@ -54,8 +58,10 @@ function MonthGrid({ viewDate, bookedRanges, lang }) {
             cls += 'invisible ';
           } else if (past) {
             cls += 'text-gray-300 ';
-          } else if (booked) {
+          } else if (status === 'booked') {
             cls += 'bg-red-100 text-red-400 line-through ';
+          } else if (status === 'blocked') {
+            cls += 'bg-orange-100 text-orange-400 line-through ';
           } else {
             cls += `bg-green-50 text-green-700 font-medium ${todayDay ? 'ring-1 ring-primary-400' : ''} `;
           }
@@ -114,7 +120,7 @@ export default function AvailabilityCalendar({ bookedRanges = [], lang = 'fr' })
         <MonthGrid viewDate={nextMonth} bookedRanges={bookedRanges} lang={lang} />
       </div>
 
-      <div className="flex items-center gap-4 mt-4 text-xs text-gray-500">
+      <div className="flex items-center gap-4 mt-4 text-xs text-gray-500 flex-wrap">
         <span className="flex items-center gap-1.5">
           <span className="w-3 h-3 bg-green-50 border border-green-200 rounded inline-block"></span>
           {lang === 'fr' ? 'Disponible' : 'Available'}
@@ -122,6 +128,10 @@ export default function AvailabilityCalendar({ bookedRanges = [], lang = 'fr' })
         <span className="flex items-center gap-1.5">
           <span className="w-3 h-3 bg-red-100 rounded inline-block"></span>
           {lang === 'fr' ? 'Réservé' : 'Booked'}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-3 bg-orange-100 rounded inline-block"></span>
+          {lang === 'fr' ? 'Bloqué' : 'Blocked'}
         </span>
         <span className="flex items-center gap-1.5">
           <span className="w-3 h-3 bg-gray-100 rounded inline-block"></span>

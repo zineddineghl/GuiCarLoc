@@ -260,4 +260,52 @@ router.delete('/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// GET /api/cars/:id/blocked-dates (public)
+router.get('/:id/blocked-dates', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, start_date, end_date FROM blocked_dates WHERE car_id = $1 ORDER BY start_date',
+      [req.params.id]
+    );
+    res.json({ blocked: rows });
+  } catch (err) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/cars/:id/blocked-dates (owner only)
+router.post('/:id/blocked-dates', authenticateToken, async (req, res) => {
+  try {
+    const { start_date, end_date } = req.body;
+    if (!start_date || !end_date || start_date > end_date) {
+      return res.status(400).json({ error: 'Dates invalides' });
+    }
+    const { rows: carRows } = await pool.query('SELECT owner_id FROM cars WHERE id = $1', [req.params.id]);
+    if (!carRows.length || carRows[0].owner_id !== req.user.id) {
+      return res.status(403).json({ error: 'Non autorisé' });
+    }
+    const { rows } = await pool.query(
+      'INSERT INTO blocked_dates (car_id, start_date, end_date) VALUES ($1, $2, $3) RETURNING id, start_date, end_date',
+      [req.params.id, start_date, end_date]
+    );
+    res.json({ block: rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// DELETE /api/cars/:id/blocked-dates/:blockId (owner only)
+router.delete('/:id/blocked-dates/:blockId', authenticateToken, async (req, res) => {
+  try {
+    const { rows: carRows } = await pool.query('SELECT owner_id FROM cars WHERE id = $1', [req.params.id]);
+    if (!carRows.length || carRows[0].owner_id !== req.user.id) {
+      return res.status(403).json({ error: 'Non autorisé' });
+    }
+    await pool.query('DELETE FROM blocked_dates WHERE id = $1 AND car_id = $2', [req.params.blockId, req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
