@@ -28,17 +28,23 @@ function formatDate(dateStr) {
 }
 
 function BookingCard({ booking, onStatusChange, isOwnerView, onReviewSuccess }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const otherUserId = isOwnerView ? booking.renter_id : booking.owner_id;
   const [showReview, setShowReview] = useState(false);
   const [hasReview, setHasReview] = useState(Boolean(booking.has_review));
+  const [confirmCancel, setConfirmCancel] = useState(false);
 
   const canReview = !isOwnerView
     && booking.status === 'confirmed'
     && new Date(booking.end_date) < new Date()
     && !hasReview;
+
+  const canCancel = !isBookingPast(booking) && (
+    (!isOwnerView && (booking.status === 'pending' || booking.status === 'confirmed')) ||
+    (isOwnerView && booking.status === 'confirmed')
+  );
 
   const handleStatus = async (status) => {
     setLoading(true);
@@ -119,6 +125,39 @@ function BookingCard({ booking, onStatusChange, isOwnerView, onReviewSuccess }) 
 
         {/* Actions */}
         <div className="flex sm:flex-col gap-2 sm:items-end justify-end">
+          {canCancel && !confirmCancel && (
+            <button
+              onClick={() => setConfirmCancel(true)}
+              className="flex items-center gap-1 px-3 py-1.5 border border-red-300 text-red-700 rounded-lg text-xs font-semibold hover:bg-red-50 transition-colors"
+            >
+              <XMarkIcon className="h-3.5 w-3.5" />
+              {i18n.language.startsWith('fr') ? 'Annuler la réservation' : 'Cancel booking'}
+            </button>
+          )}
+          {confirmCancel && (
+            <div className="flex flex-col gap-1.5 items-end bg-red-50 border border-red-200 rounded-lg p-2">
+              <p className="text-xs text-red-700 font-medium text-right">
+                {i18n.language.startsWith('fr') ? 'Confirmer l\'annulation ?' : 'Confirm cancellation?'}
+              </p>
+              <div className="flex gap-1.5">
+                <button
+                  onClick={() => setConfirmCancel(false)}
+                  className="px-2 py-1 text-xs border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  {i18n.language.startsWith('fr') ? 'Non' : 'No'}
+                </button>
+                <button
+                  onClick={() => { setConfirmCancel(false); handleStatus('cancelled'); }}
+                  disabled={loading}
+                  className="px-2 py-1 text-xs bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {loading
+                    ? '...'
+                    : (i18n.language.startsWith('fr') ? 'Oui, annuler' : 'Yes, cancel')}
+                </button>
+              </div>
+            </div>
+          )}
           <button
             onClick={() => navigate(`/messages/${otherUserId}`)}
             className="flex items-center gap-1 px-3 py-1.5 bg-primary-50 border border-primary-200 text-primary-700 rounded-lg text-xs font-semibold hover:bg-primary-100 transition-colors"
@@ -165,16 +204,6 @@ function BookingCard({ booking, onStatusChange, isOwnerView, onReviewSuccess }) 
                 {t('booking.reject')}
               </button>
             </>
-          )}
-          {!isOwnerView && booking.status === 'pending' && (
-            <button
-              onClick={() => handleStatus('cancelled')}
-              disabled={loading}
-              className="flex items-center gap-1 px-3 py-1.5 border border-red-300 text-red-700 rounded-lg text-xs font-semibold hover:bg-red-50 transition-colors disabled:opacity-50"
-            >
-              <XMarkIcon className="h-3.5 w-3.5" />
-              {t('booking.cancel')}
-            </button>
           )}
           <p className="text-xs text-gray-400 whitespace-nowrap">
             {formatDate(booking.created_at)}
