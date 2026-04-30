@@ -15,6 +15,7 @@ router.get('/conversations', authenticateToken, async (req, res) => {
         m.content as last_message,
         m.created_at as last_message_at,
         m.sender_id as last_sender_id,
+        m.read as last_message_read,
         SUM(CASE WHEN m2.read = 0 AND m2.sender_id != $1 AND m2.receiver_id = $2 THEN 1 ELSE 0 END)::int as unread_count
       FROM (
         SELECT CASE WHEN sender_id = $3 THEN receiver_id ELSE sender_id END as other_id,
@@ -26,7 +27,7 @@ router.get('/conversations', authenticateToken, async (req, res) => {
       JOIN messages m ON m.id = conv.last_id
       JOIN users u ON u.id = conv.other_id
       LEFT JOIN messages m2 ON (m2.sender_id = conv.other_id AND m2.receiver_id = $6)
-      GROUP BY u.id, u.name, u.avatar, m.content, m.created_at, m.sender_id
+      GROUP BY u.id, u.name, u.avatar, m.content, m.created_at, m.sender_id, m.read
       ORDER BY m.created_at DESC
     `, [userId, userId, userId, userId, userId, userId]);
 

@@ -66,6 +66,10 @@ export default function Messages() {
       setMessages(prev => prev.map(m =>
         m.sender_id === user.id && m.receiver_id === by ? { ...m, read: 1 } : m
       ));
+      // Update conversation list: mark last message as read if it was sent by me to 'by'
+      setConversations(prev => prev.map(c =>
+        c.id === by && c.last_sender_id === user.id ? { ...c, last_message_read: 1 } : c
+      ));
     });
 
     socket.on('new_message', (msg) => {
@@ -179,9 +183,15 @@ export default function Messages() {
                         <p className={`text-xs truncate ${conv.unread_count > 0 ? 'text-gray-900 font-semibold' : 'text-gray-500'}`}>
                           {conv.last_sender_id === user.id ? (i18n.language === 'fr' ? 'Vous : ' : 'You: ') : ''}{conv.last_message}
                         </p>
-                        {conv.unread_count > 0 && (
+                        {conv.unread_count > 0 ? (
                           <span className="ml-1 bg-primary-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0">
                             {conv.unread_count}
+                          </span>
+                        ) : conv.last_sender_id === user.id && (
+                          <span className={`ml-1 text-xs flex-shrink-0 ${conv.last_message_read ? 'text-primary-600' : 'text-gray-400'}`}>
+                            {conv.last_message_read
+                              ? (i18n.language === 'fr' ? 'Lu' : 'Seen')
+                              : (i18n.language === 'fr' ? 'Remis' : 'Delivered')}
                           </span>
                         )}
                       </div>
