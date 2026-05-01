@@ -37,38 +37,51 @@ function MonthGrid({ viewDate, bookedRanges, lang }) {
 
   return (
     <div className="flex-1 min-w-0">
-      <p className="text-sm font-semibold text-gray-700 text-center mb-3">{monthLabelCap}</p>
+      {/* Titre du mois - Passé en blanc pour la visibilité */}
+      <p className="text-sm font-bold text-white text-center mb-6 uppercase tracking-widest">
+        {monthLabelCap}
+      </p>
 
-      <div className="grid grid-cols-7 mb-1">
+      <div className="grid grid-cols-7 mb-2">
         {DAY_LABELS[lang].map(d => (
-          <div key={d} className="text-center text-xs text-gray-400 font-medium py-1">{d}</div>
+          <div key={d} className="text-center text-[10px] text-gray-500 font-black uppercase tracking-tighter py-1">
+            {d}
+          </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-y-0.5">
+      <div className="grid grid-cols-7 gap-1">
         {days.map(day => {
           const otherMonth = !isSameMonth(day, viewDate);
           const past = isBefore(day, today);
           const status = (!otherMonth && !past) ? getStatus(day) : null;
-          const todayDay = !otherMonth && isSameDay(day, today);
+          const isToday = !otherMonth && isSameDay(day, today);
 
-          let cls = 'h-7 flex items-center justify-center text-xs rounded ';
+          if (otherMonth) return <div key={day.toISOString()} className="h-9" />;
 
-          if (otherMonth) {
-            cls += 'invisible ';
-          } else if (past) {
-            cls += 'text-gray-300 ';
+          let cls = 'h-9 flex flex-col items-center justify-center text-xs rounded-lg transition-all relative border ';
+
+          if (past) {
+            cls += 'text-gray-700 border-transparent ';
           } else if (status === 'booked') {
-            cls += 'bg-red-100 text-red-400 line-through ';
+            cls += 'bg-gnRed/10 text-gnRed border-gnRed/20 line-through ';
           } else if (status === 'blocked') {
-            cls += 'bg-orange-100 text-orange-400 line-through ';
+            cls += 'bg-orange-400/10 text-orange-400 border-orange-400/20 line-through ';
           } else {
-            cls += `bg-green-50 text-green-700 font-medium ${todayDay ? 'ring-1 ring-primary-400' : ''} `;
+            // État Disponible
+            cls += `text-white border-white/5 hover:border-gnYellow/50 hover:bg-white/5 ${isToday ? 'ring-1 ring-gnYellow/50 border-gnYellow/50' : ''} `;
           }
 
           return (
             <div key={day.toISOString()} className={cls}>
-              {otherMonth ? '' : format(day, 'd')}
+              <span className="z-10">{format(day, 'd')}</span>
+              {/* Petit point indicateur pour le style */}
+              {!past && !otherMonth && (
+                <div className={`w-1 h-1 rounded-full mt-0.5 ${
+                  status === 'booked' ? 'bg-gnRed' : 
+                  status === 'blocked' ? 'bg-orange-400' : 'bg-gnGreen'
+                }`} />
+              )}
             </div>
           );
         })}
@@ -90,53 +103,54 @@ export default function AvailabilityCalendar({ bookedRanges = [], lang = 'fr' })
   today.setHours(0, 0, 0, 0);
 
   return (
-    <div className="card p-5">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-gray-900">
+    <div className="card p-6 border border-white/5 bg-luxuryDark/20 backdrop-blur-sm">
+      <div className="flex items-center justify-between mb-8">
+        <h3 className="text-gnYellow font-bold text-xs uppercase tracking-[0.2em]">
           {lang === 'fr' ? 'Disponibilité' : 'Availability'}
         </h3>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setStartMonth(m => addMonths(m, -1))}
             disabled={isSameDay(startMonth, today) || isBefore(startMonth, today)}
-            className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="p-2 rounded-full hover:bg-white/10 disabled:opacity-10 transition-colors text-white"
           >
-            <ChevronLeftIcon className="h-4 w-4 text-gray-600" />
+            <ChevronLeftIcon className="h-4 w-4" />
           </button>
           <button
             type="button"
             onClick={() => setStartMonth(m => addMonths(m, 1))}
-            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-full hover:bg-white/10 transition-colors text-white"
           >
-            <ChevronRightIcon className="h-4 w-4 text-gray-600" />
+            <ChevronRightIcon className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      <div className="flex gap-6 overflow-x-auto">
+      <div className="flex flex-col md:flex-row gap-8 overflow-x-auto pb-2">
         <MonthGrid viewDate={startMonth} bookedRanges={bookedRanges} lang={lang} />
-        <div className="w-px bg-gray-100 flex-shrink-0 hidden sm:block" />
+        <div className="hidden md:block w-px bg-white/5 self-stretch" />
         <MonthGrid viewDate={nextMonth} bookedRanges={bookedRanges} lang={lang} />
       </div>
 
-      <div className="flex items-center gap-4 mt-4 text-xs text-gray-500 flex-wrap">
-        <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 bg-green-50 border border-green-200 rounded inline-block"></span>
-          {lang === 'fr' ? 'Disponible' : 'Available'}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 bg-red-100 rounded inline-block"></span>
-          {lang === 'fr' ? 'Réservé' : 'Booked'}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 bg-orange-100 rounded inline-block"></span>
-          {lang === 'fr' ? 'Bloqué' : 'Blocked'}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 bg-gray-100 rounded inline-block"></span>
-          {lang === 'fr' ? 'Passé' : 'Past'}
-        </span>
+      {/* Légende stylisée */}
+      <div className="flex items-center gap-6 mt-8 pt-6 border-t border-white/5 flex-wrap justify-center">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-gnGreen"></div>
+          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{lang === 'fr' ? 'Libre' : 'Free'}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-gnRed"></div>
+          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{lang === 'fr' ? 'Occupé' : 'Booked'}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-orange-400"></div>
+          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{lang === 'fr' ? 'Bloqué' : 'Blocked'}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-gray-800"></div>
+          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{lang === 'fr' ? 'Passé' : 'Past'}</span>
+        </div>
       </div>
     </div>
   );
