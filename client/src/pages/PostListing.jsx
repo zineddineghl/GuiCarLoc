@@ -12,7 +12,7 @@ const FUELS = ['petrol', 'diesel', 'electric', 'hybrid'];
 const CURRENT_YEAR = new Date().getFullYear();
 
 export default function PostListing() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
@@ -80,7 +80,7 @@ export default function PostListing() {
     const totalImages = existingImages.length + newImages.length + files.length;
 
     if (totalImages > 8) {
-      setError(t('i18n.language') === 'fr' ? 'Maximum 8 photos' : 'Maximum 8 photos');
+      setError(i18n.language.startsWith('fr') ? 'Maximum 8 photos' : 'Maximum 8 photos');
       return;
     }
 
@@ -109,12 +109,11 @@ export default function PostListing() {
 
     } catch (err) {
       console.error('Compression error:', err);
-      // Fallback : utiliser les fichiers originaux sans compression
       setNewImages(prev => [...prev, ...files]);
       const newPreviews = files.map(f => URL.createObjectURL(f));
       setPreviews(prev => [...prev, ...newPreviews]);
     }
-};
+  };
 
   const removeExistingImage = (idx) => {
     setExistingImages(prev => prev.filter((_, i) => i !== idx));
@@ -131,7 +130,7 @@ export default function PostListing() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.title || !form.brand || !form.model || !form.price_per_day || !form.city) {
-      setError(t('i18n.language') === 'fr' ? 'Veuillez remplir tous les champs obligatoires' : 'Please fill in all required fields');
+      setError(i18n.language.startsWith('fr') ? 'Veuillez remplir tous les champs obligatoires' : 'Please fill in all required fields');
       return;
     }
 
@@ -156,13 +155,13 @@ export default function PostListing() {
         res = await axios.put(`/api/cars/${id}`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        setSuccess(t('i18n.language') === 'fr' ? 'Annonce mise à jour !' : 'Listing updated!');
+        setSuccess(i18n.language.startsWith('fr') ? 'Annonce mise à jour !' : 'Listing updated!');
         setTimeout(() => navigate('/my-listings'), 1500);
       } else {
         res = await axios.post('/api/cars', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        setSuccess(t('i18n.language') === 'fr' ? 'Annonce publiée !' : 'Listing published!');
+        setSuccess(i18n.language.startsWith('fr') ? 'Annonce publiée !' : 'Listing published!');
         setTimeout(() => navigate(`/cars/${res.data.car.id}`), 1500);
       }
     } catch (err) {
@@ -174,322 +173,227 @@ export default function PostListing() {
 
   if (fetchLoading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="min-h-[60vh] flex items-center justify-center bg-luxuryBlack">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gnYellow"></div>
       </div>
     );
   }
 
+  // Helper pour les labels
+  const Label = ({ children, required }) => (
+    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
+      {children} {required && <span className="text-gnYellow">*</span>}
+    </label>
+  );
+
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">
-        {isEdit ? t('listing.edit_title') : t('listing.title')}
-      </h1>
+    <div className="bg-luxuryBlack min-h-screen">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h1 className="text-3xl md:text-4xl font-display font-black text-white mb-8 uppercase tracking-tighter text-center">
+          {isEdit ? t('listing.edit_title') : t('listing.title')}
+        </h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Title */}
-        <div className="card p-6 space-y-4">
-          <h2 className="font-semibold text-gray-700 text-sm uppercase tracking-wider">
-            {t('i18n.language') === 'fr' ? 'Informations générales' : 'General Information'}
-          </h2>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* General Information */}
+          <div className="card p-8 border border-white/5 bg-luxuryDark rounded-3xl">
+            <h2 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-6 pb-4 border-b border-white/5">
+              {i18n.language.startsWith('fr') ? 'Informations générales' : 'General Information'}
+            </h2>
 
-          <div className="form-group">
-            <label className="form-label">{t('listing.car_title')} *</label>
-            <input
-              type="text"
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              placeholder={t('listing.car_title_placeholder')}
-              className="input-field"
-              required
-            />
-          </div>
+            <div className="space-y-6">
+              <div>
+                <Label required>{t('listing.car_title')}</Label>
+                <input
+                  type="text"
+                  name="title"
+                  value={form.title}
+                  onChange={handleChange}
+                  placeholder={t('listing.car_title_placeholder')}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 focus:ring-1 focus:ring-gnYellow/50 transition-all outline-none"
+                  required
+                />
+              </div>
 
-          <div className="form-group">
-            <label className="form-label">{t('listing.description')}</label>
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              placeholder={t('listing.description_placeholder')}
-              rows={4}
-              className="input-field resize-none"
-            />
-          </div>
-        </div>
-
-        {/* Car Details */}
-        <div className="card p-6 space-y-4">
-          <h2 className="font-semibold text-gray-700 text-sm uppercase tracking-wider">
-            {t('i18n.language') === 'fr' ? 'Caractéristiques du véhicule' : 'Vehicle Details'}
-          </h2>
-
-          {/* Type */}
-          <div className="form-group">
-            <label className="form-label">{t('listing.type')} *</label>
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-              {CAR_TYPES.map(type => {
-                const icons = { sedan: '🚗', suv: '🚙', van: '🚐', sports: '🏎️', luxury: '🚘', economy: '🚕', scooter: '🛵', moto: '🏍️', boat: '⛵' };
-                return (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setForm(p => ({ ...p, type }))}
-                    className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all ${
-                      form.type === type
-                        ? 'border-primary-500 bg-primary-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <span className="text-2xl">{icons[type]}</span>
-                    <span className="text-xs font-medium text-gray-700">{t(`car.type_${type}`)}</span>
-                  </button>
-                );
-              })}
+              <div>
+                <Label>{t('listing.description')}</Label>
+                <textarea
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                  placeholder={t('listing.description_placeholder')}
+                  rows={4}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 focus:ring-1 focus:ring-gnYellow/50 transition-all outline-none resize-none"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Brand & Model */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="form-group">
-              <label className="form-label">{t('listing.brand')} *</label>
-              <input
-                type="text"
-                name="brand"
-                value={form.brand}
-                onChange={handleChange}
-                placeholder={t('listing.brand_placeholder')}
-                className="input-field"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">{t('listing.model')} *</label>
-              <input
-                type="text"
-                name="model"
-                value={form.model}
-                onChange={handleChange}
-                placeholder={t('listing.model_placeholder')}
-                className="input-field"
-                required
-              />
-            </div>
-          </div>
+          {/* Vehicle Details */}
+          <div className="card p-8 border border-white/5 bg-luxuryDark rounded-3xl">
+            <h2 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-6 pb-4 border-b border-white/5">
+              {i18n.language.startsWith('fr') ? 'Caractéristiques du véhicule' : 'Vehicle Details'}
+            </h2>
 
-          {/* Year & Seats */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="form-group">
-              <label className="form-label">{t('listing.year')} *</label>
-              <input
-                type="number"
-                name="year"
-                value={form.year}
-                onChange={handleChange}
-                min="1990"
-                max={CURRENT_YEAR + 1}
-                className="input-field"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">{t('listing.seats')} *</label>
-              <input
-                type="number"
-                name="seats"
-                value={form.seats}
-                onChange={handleChange}
-                min="1"
-                max="9"
-                className="input-field"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Transmission & Fuel */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="form-group">
-              <label className="form-label">{t('listing.transmission')} *</label>
-              <select name="transmission" value={form.transmission} onChange={handleChange} className="input-field">
-                {TRANSMISSIONS.map(t_ => (
-                  <option key={t_} value={t_}>{t(`car.transmission_${t_}`)}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label">{t('listing.fuel')} *</label>
-              <select name="fuel" value={form.fuel} onChange={handleChange} className="input-field">
-                {FUELS.map(f => (
-                  <option key={f} value={f}>{t(`car.fuel_${f}`)}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Location & Price */}
-        <div className="card p-6 space-y-4">
-          <h2 className="font-semibold text-gray-700 text-sm uppercase tracking-wider">
-            {t('i18n.language') === 'fr' ? 'Localisation & Tarif' : 'Location & Pricing'}
-          </h2>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="form-group">
-              <label className="form-label">{t('listing.city')} *</label>
-              <input
-                type="text"
-                name="city"
-                value={form.city}
-                onChange={handleChange}
-                placeholder={t('listing.city_placeholder')}
-                className="input-field"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">{t('listing.price')} *</label>
-              <input
-                type="number"
-                name="price_per_day"
-                value={form.price_per_day}
-                onChange={handleChange}
-                min="1"
-                step="0.01"
-                placeholder="50"
-                className="input-field"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">
-              {t('listing.address')} <span className="text-gray-400 font-normal">({t('common.optional')})</span>
-            </label>
-            <input
-              type="text"
-              name="address"
-              value={form.address}
-              onChange={handleChange}
-              placeholder={t('listing.address_placeholder')}
-              className="input-field"
-            />
-          </div>
-
-          {isEdit && (
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name="available"
-                checked={form.available}
-                onChange={handleChange}
-                className="w-4 h-4 accent-primary-600"
-              />
-              <span className="text-sm font-medium text-gray-700">{t('listing.available')}</span>
-            </label>
-          )}
-        </div>
-
-        {/* Photos */}
-        <div className="card p-6 space-y-4">
-          <h2 className="font-semibold text-gray-700 text-sm uppercase tracking-wider">
-            {t('listing.images')}
-          </h2>
-          <p className="text-sm text-gray-500">{t('listing.images_help')}</p>
-
-          {/* Existing images (edit mode) */}
-          {existingImages.length > 0 && (
-            <div className="flex flex-wrap gap-3">
-              {existingImages.map((img, idx) => (
-                <div key={idx} className="relative w-24 h-20 rounded-lg overflow-hidden border border-gray-200">
-                  <img src={imgUrl(img)} alt="" className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => removeExistingImage(idx)}
-                    className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
-                  >
-                    <XMarkIcon className="w-3 h-3" />
-                  </button>
+            <div className="space-y-8">
+              {/* Type Grid */}
+              <div>
+                <Label required>{t('listing.type')}</Label>
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                  {CAR_TYPES.map(type => {
+                    const icons = { sedan: '🚗', suv: '🚙', van: '🚐', sports: '🏎️', luxury: '🚘', economy: '🚕', scooter: '🛵', moto: '🏍️', boat: '⛵' };
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setForm(p => ({ ...p, type }))}
+                        className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border transition-all duration-300 ${
+                          form.type === type
+                            ? 'bg-gnYellow/10 text-gnYellow border-gnYellow/50 shadow-[0_0_15px_rgba(252,209,22,0.15)] scale-105'
+                            : 'bg-white/5 text-gray-500 border-white/5 hover:bg-white/10 hover:text-white'
+                        }`}
+                      >
+                        <span className="text-2xl drop-shadow-md">{icons[type]}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest">{t(`car.type_${type}`)}</span>
+                      </button>
+                    );
+                  })}
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
 
-          {/* New image previews */}
-          {previews.length > 0 && (
-            <div className="flex flex-wrap gap-3">
-              {previews.map((src, idx) => (
-                <div key={idx} className="relative w-24 h-20 rounded-lg overflow-hidden border border-primary-200">
-                  <img src={src} alt="" className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => removeNewImage(idx)}
-                    className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
-                  >
-                    <XMarkIcon className="w-3 h-3" />
-                  </button>
+              {/* Specs Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <Label required>{t('listing.brand')}</Label>
+                  <input type="text" name="brand" value={form.brand} onChange={handleChange} placeholder={t('listing.brand_placeholder')} required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
                 </div>
-              ))}
+                <div>
+                  <Label required>{t('listing.model')}</Label>
+                  <input type="text" name="model" value={form.model} onChange={handleChange} placeholder={t('listing.model_placeholder')} required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
+                </div>
+                <div>
+                  <Label required>{t('listing.year')}</Label>
+                  <input type="number" name="year" value={form.year} onChange={handleChange} min="1990" max={CURRENT_YEAR + 1} required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
+                </div>
+                <div>
+                  <Label required>{t('listing.seats')}</Label>
+                  <input type="number" name="seats" value={form.seats} onChange={handleChange} min="1" max="9" required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
+                </div>
+                <div>
+                  <Label required>{t('listing.transmission')}</Label>
+                  <select name="transmission" value={form.transmission} onChange={handleChange} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none appearance-none cursor-pointer">
+                    {TRANSMISSIONS.map(t_ => <option key={t_} value={t_} className="bg-luxuryBlack">{t(`car.transmission_${t_}`)}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <Label required>{t('listing.fuel')}</Label>
+                  <select name="fuel" value={form.fuel} onChange={handleChange} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none appearance-none cursor-pointer">
+                    {FUELS.map(f => <option key={f} value={f} className="bg-luxuryBlack">{t(`car.fuel_${f}`)}</option>)}
+                  </select>
+                </div>
+              </div>
             </div>
-          )}
-
-          {/* Upload button */}
-          {(existingImages.length + newImages.length) < 8 && (
-            <label className="flex flex-col items-center gap-2 p-6 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-primary-400 hover:bg-primary-50 transition-colors">
-              <PhotoIcon className="h-8 w-8 text-gray-400" />
-              <span className="text-sm text-gray-500 font-medium">
-                {t('i18n.language') === 'fr' ? 'Cliquez pour ajouter des photos' : 'Click to add photos'}
-              </span>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleImageChange}
-                className="hidden"
-              />
-            </label>
-          )}
-        </div>
-
-        {/* Error / Success */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4">
-            {error}
           </div>
-        )}
-        {success && (
-          <div className="bg-green-50 border border-green-200 text-green-700 rounded-lg p-4">
-            {success}
-          </div>
-        )}
 
-        {/* Submit */}
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="btn-secondary flex-1"
-          >
-            {t('common.cancel')}
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary flex-1"
-          >
-            {loading ? (
-              <span className="flex items-center gap-2 justify-center">
-                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-                {t('common.loading')}
-              </span>
-            ) : (
-              isEdit ? t('listing.update') : t('listing.submit')
+          {/* Location & Pricing */}
+          <div className="card p-8 border border-white/5 bg-luxuryDark rounded-3xl">
+            <h2 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-6 pb-4 border-b border-white/5">
+              {i18n.language.startsWith('fr') ? 'Localisation & Tarif' : 'Location & Pricing'}
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+              <div>
+                <Label required>{t('listing.city')}</Label>
+                <input type="text" name="city" value={form.city} onChange={handleChange} placeholder={t('listing.city_placeholder')} required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
+              </div>
+              <div>
+                <Label required>{t('listing.price')}</Label>
+                <div className="relative">
+                  <input type="number" name="price_per_day" value={form.price_per_day} onChange={handleChange} min="1" step="0.01" placeholder="Ex: 500000" required className="w-full bg-black/40 border border-white/10 rounded-xl pl-4 pr-16 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-xs uppercase tracking-widest">GNF</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <Label>{t('listing.address')} <span className="text-gray-600 font-normal ml-1 lowercase italic">({t('common.optional')})</span></Label>
+              <input type="text" name="address" value={form.address} onChange={handleChange} placeholder={t('listing.address_placeholder')} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
+            </div>
+
+            {isEdit && (
+              <label className="flex items-center gap-3 cursor-pointer mt-8 p-4 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors w-max">
+                <div className="relative flex items-center justify-center w-6 h-6 border-2 border-gray-400 rounded-md bg-transparent">
+                  <input type="checkbox" name="available" checked={form.available} onChange={handleChange} className="appearance-none absolute inset-0 cursor-pointer checked:bg-gnYellow checked:border-gnYellow transition-colors rounded-md" />
+                  {form.available && <XMarkIcon className="w-4 h-4 text-black absolute pointer-events-none stroke-[4px]" style={{ clipPath: 'polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%)' }}/>}
+                </div>
+                <span className="text-sm font-bold text-white uppercase tracking-widest">{t('listing.available')}</span>
+              </label>
             )}
-          </button>
-        </div>
-      </form>
+          </div>
+
+          {/* Photos */}
+          <div className="card p-8 border border-white/5 bg-luxuryDark rounded-3xl">
+            <h2 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-2">
+              {t('listing.images')}
+            </h2>
+            <p className="text-xs text-gray-500 font-medium mb-6 pb-4 border-b border-white/5">{t('listing.images_help')}</p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {/* Existing */}
+              {existingImages.map((img, idx) => (
+                <div key={`ext-${idx}`} className="group relative aspect-[4/3] rounded-xl overflow-hidden border border-white/10 bg-black">
+                  <img src={imgUrl(img)} alt="" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <button type="button" onClick={() => removeExistingImage(idx)} className="absolute top-2 right-2 w-7 h-7 bg-black/50 backdrop-blur-md text-white rounded-full flex items-center justify-center hover:bg-gnRed hover:scale-110 transition-all border border-white/20">
+                    <XMarkIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+
+              {/* Previews */}
+              {previews.map((src, idx) => (
+                <div key={`prev-${idx}`} className="group relative aspect-[4/3] rounded-xl overflow-hidden border-2 border-gnYellow/50 bg-black">
+                  <img src={src} alt="" className="w-full h-full object-cover" />
+                  <button type="button" onClick={() => removeNewImage(idx)} className="absolute top-2 right-2 w-7 h-7 bg-black/50 backdrop-blur-md text-white rounded-full flex items-center justify-center hover:bg-gnRed hover:scale-110 transition-all border border-white/20">
+                    <XMarkIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+
+              {/* Upload Button */}
+              {(existingImages.length + newImages.length) < 8 && (
+                <label className="flex flex-col items-center justify-center gap-3 aspect-[4/3] border-2 border-dashed border-white/20 rounded-xl cursor-pointer hover:border-gnYellow hover:bg-gnYellow/5 transition-colors bg-white/5 group">
+                  <PhotoIcon className="h-8 w-8 text-gray-500 group-hover:text-gnYellow transition-colors" />
+                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center px-2 group-hover:text-gnYellow transition-colors">
+                    {i18n.language.startsWith('fr') ? 'Ajouter' : 'Add Photo'}
+                  </span>
+                  <input type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
+                </label>
+              )}
+            </div>
+          </div>
+
+          {/* Feedback */}
+          {error && <div className="p-4 bg-gnRed/10 border border-gnRed/20 text-gnRed rounded-xl text-sm font-bold">{error}</div>}
+          {success && <div className="p-4 bg-gnGreen/10 border border-gnGreen/20 text-gnGreen rounded-xl text-sm font-bold">{success}</div>}
+
+          {/* Actions */}
+          <div className="flex flex-col-reverse sm:flex-row gap-4 pt-4">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="w-full sm:w-1/3 py-4 rounded-xl border border-white/10 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/5 transition-colors"
+            >
+              {t('common.cancel')}
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full sm:w-2/3 py-4 rounded-xl bg-gradient-to-r from-gnYellow to-[#D4AF37] text-black font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-transform shadow-[0_10px_20px_rgba(252,209,22,0.2)] disabled:opacity-50 disabled:hover:scale-100"
+            >
+              {loading ? t('common.loading') : isEdit ? t('listing.update') : t('listing.submit')}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
