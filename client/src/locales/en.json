@@ -48,6 +48,8 @@
     "type_sports": "Sports",
     "type_luxury": "Luxury",
     "type_economy": "Economy",
+    "type_scooter": "Scooter",
+    "type_moto": "Motorcycle",
     "type_all": "All Types",
     "per_day": "/ day",
     "seats": "seats",

@@ -10,7 +10,9 @@ const CAR_TYPES = [
   { value: 'van', icon: '🚐', labelKey: 'car.type_van' },
   { value: 'sports', icon: '🏎️', labelKey: 'car.type_sports' },
   { value: 'luxury', icon: '🚘', labelKey: 'car.type_luxury' },
-  { value: 'economy', icon: '🚕', labelKey: 'car.type_economy' }
+  { value: 'economy', icon: '🚕', labelKey: 'car.type_economy' },
+  { value: 'scooter', icon: '🛵', labelKey: 'car.type_scooter' },
+  { value: 'moto', icon: '🏍️', labelKey: 'car.type_moto' }
 ];
 
 export default function SearchBar({ compact = false, initialValues = {} }) {
