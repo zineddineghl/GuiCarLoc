@@ -10,22 +10,24 @@ import {
   XMarkIcon,
   PhoneIcon,
   CalendarIcon,
-  CameraIcon
+  CameraIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 
 const CAR_TYPE_ICONS = {
   sedan: '🚗', suv: '🚙', van: '🚐', sports: '🏎️', luxury: '🚘', economy: '🚕'
 };
 
+// Badges adaptés au mode sombre
 const ROLE_COLORS = {
-  owner: 'bg-blue-100 text-blue-700',
-  renter: 'bg-green-100 text-green-700',
-  both: 'bg-purple-100 text-purple-700',
+  owner: 'bg-gnYellow/10 text-gnYellow border-gnYellow/20',
+  renter: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  both: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
 };
 
 const AVATAR_COLORS = [
-  'bg-primary-500', 'bg-purple-500', 'bg-green-500',
-  'bg-orange-500', 'bg-pink-500', 'bg-teal-500'
+  'bg-blue-900', 'bg-purple-900', 'bg-emerald-900',
+  'bg-orange-900', 'bg-rose-900', 'bg-teal-900'
 ];
 
 function Avatar({ name, avatarFile, size = 'lg', onClick, isOwn }) {
@@ -33,7 +35,7 @@ function Avatar({ name, avatarFile, size = 'lg', onClick, isOwn }) {
     ? name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
     : '?';
   const color = AVATAR_COLORS[(name?.charCodeAt(0) || 0) % AVATAR_COLORS.length];
-  const sizeClass = size === 'lg' ? 'w-24 h-24 text-3xl' : 'w-12 h-12 text-lg';
+  const sizeClass = size === 'lg' ? 'w-28 h-28 text-4xl' : 'w-12 h-12 text-lg';
 
   return (
     <div
@@ -44,16 +46,17 @@ function Avatar({ name, avatarFile, size = 'lg', onClick, isOwn }) {
         <img
           src={imgUrl(avatarFile)}
           alt={name}
-          className={`${sizeClass} rounded-full object-cover`}
+          className={`${sizeClass} rounded-full object-cover border-2 border-white/10 shadow-xl`}
         />
       ) : (
-        <div className={`${color} ${sizeClass} rounded-full flex items-center justify-center text-white font-bold`}>
+        <div className={`${color} ${sizeClass} rounded-full flex items-center justify-center text-white font-black border-2 border-white/10 shadow-xl`}>
           {initials}
         </div>
       )}
       {isOwn && (
-        <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-          <CameraIcon className="h-7 w-7 text-white" />
+        <div className="absolute inset-0 rounded-full bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center border-2 border-gnYellow/50">
+          <CameraIcon className="h-8 w-8 text-gnYellow mb-1" />
+          <span className="text-[9px] font-bold text-white uppercase tracking-widest">Modifier</span>
         </div>
       )}
     </div>
@@ -155,310 +158,331 @@ export default function UserProfile() {
 
   const memberSince = (dateStr) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString(i18n.language === 'fr' ? 'fr-FR' : 'en-US', {
+    return date.toLocaleDateString(i18n.language.startsWith('fr') ? 'fr-FR' : 'en-US', {
       month: 'long', year: 'numeric'
     });
   };
 
   const roleLabel = {
-    owner: t('profile.role_owner'),
-    renter: t('profile.role_renter'),
-    both: t('profile.role_both'),
+    owner: t('profile.role_owner') || 'Propriétaire',
+    renter: t('profile.role_renter') || 'Locataire',
+    both: t('profile.role_both') || 'Propriétaire & Locataire',
   };
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-16 flex justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="bg-luxuryBlack min-h-screen pt-12 pb-20">
+        <div className="max-w-4xl mx-auto px-4 py-16 flex justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gnYellow"></div>
+        </div>
       </div>
     );
   }
 
   if (error || !profile) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-20 text-center">
-        <div className="text-6xl mb-4">👤</div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">{error || t('profile.not_found')}</h2>
-        <button onClick={() => navigate(-1)} className="btn-primary">{t('common.back')}</button>
+      <div className="bg-luxuryBlack min-h-screen pt-12 pb-20">
+        <div className="max-w-4xl mx-auto px-4 py-20 text-center bg-luxuryDark rounded-[40px] border border-white/5">
+          <div className="text-6xl mb-6 opacity-40">👤</div>
+          <h2 className="text-2xl font-display font-bold text-white mb-8">{error || t('profile.not_found')}</h2>
+          <button onClick={() => navigate(-1)} className="btn-primary px-8">{t('common.back')}</button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="bg-luxuryBlack min-h-screen pt-12 pb-20">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleAvatarChange}
-      />
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleAvatarChange}
+        />
 
-      {/* Profile Card */}
-      <div className="card p-6">
-        <div className="flex flex-col sm:flex-row gap-6">
+        {/* Profile Card */}
+        <div className="bg-luxuryDark rounded-3xl border border-white/5 shadow-2xl p-8 relative overflow-hidden">
+          {/* Décoration subtile en arrière-plan */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
 
-          {/* Avatar */}
-          <div className="flex flex-col items-center gap-1">
-            <Avatar
-              name={profile.name}
-              avatarFile={profile.avatar}
-              size="lg"
-              isOwn={isOwn}
-              onClick={handleAvatarClick}
-            />
-            {avatarUploading && (
-              <span className="text-xs text-primary-600 animate-pulse">
-                {t('common.loading')}
-              </span>
-            )}
-            {isOwn && !avatarUploading && (
-              <button
+          <div className="flex flex-col sm:flex-row gap-8 relative z-10">
+
+            {/* Avatar */}
+            <div className="flex flex-col items-center gap-2">
+              <Avatar
+                name={profile.name}
+                avatarFile={profile.avatar}
+                size="lg"
+                isOwn={isOwn}
                 onClick={handleAvatarClick}
-                className="text-xs text-gray-400 hover:text-primary-600 transition-colors mt-1"
-              >
-                {t('profile.change_photo')}
-              </button>
-            )}
-          </div>
+              />
+              {avatarUploading && (
+                <span className="text-[10px] font-bold text-gnYellow uppercase tracking-widest animate-pulse mt-2">
+                  {t('common.loading') || 'Chargement...'}
+                </span>
+              )}
+            </div>
 
-          <div className="flex-1 min-w-0">
-            {editing ? (
-              <div className="space-y-3">
-                <div>
-                  <label className="form-label text-xs">{t('auth.name')}</label>
-                  <input
-                    className="input-field"
-                    value={editForm.name}
-                    onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <label className="form-label text-xs">{t('profile.bio')}</label>
-                  <textarea
-                    className="input-field resize-none"
-                    rows={3}
-                    placeholder={t('profile.bio_placeholder')}
-                    value={editForm.bio}
-                    onChange={e => setEditForm(f => ({ ...f, bio: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <label className="form-label text-xs">{t('auth.phone')}</label>
-                  <input
-                    className="input-field"
-                    value={editForm.phone}
-                    onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))}
-                  />
-                </div>
-                {saveError && <p className="text-red-600 text-sm">{saveError}</p>}
-                <div className="flex gap-2">
-                  <button onClick={handleSave} disabled={saving} className="btn-primary btn-sm flex items-center gap-1">
-                    <CheckIcon className="h-4 w-4" />
-                    {saving ? t('common.loading') : t('common.save')}
-                  </button>
-                  <button onClick={() => { setEditing(false); setSaveError(''); }} className="btn-secondary btn-sm flex items-center gap-1">
-                    <XMarkIcon className="h-4 w-4" />
-                    {t('common.cancel')}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div className="flex items-start justify-between gap-3 flex-wrap">
+            <div className="flex-1 min-w-0">
+              {editing ? (
+                <div className="space-y-4 bg-black/40 p-6 rounded-2xl border border-white/10">
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-900">{profile.name}</h1>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${ROLE_COLORS[profile.role]}`}>
-                        {roleLabel[profile.role]}
-                      </span>
-                      {profile.avg_owner_rating && (
-                        <span className="flex items-center gap-1 text-sm">
-                          <span className="text-yellow-400">★</span>
-                          <span className="font-semibold text-gray-800">{profile.avg_owner_rating}</span>
-                          <span className="text-gray-400">({profile.review_count})</span>
-                        </span>
-                      )}
-                    </div>
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">{t('auth.name')}</label>
+                    <input
+                      className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 focus:ring-1 focus:ring-gnYellow/50 transition-all outline-none"
+                      value={editForm.name}
+                      onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
+                    />
                   </div>
-                  {isOwn ? (
-                    <button
-                      onClick={() => setEditing(true)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
-                    >
-                      <PencilIcon className="h-4 w-4" />
-                      {t('common.edit')}
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">{t('profile.bio')}</label>
+                    <textarea
+                      className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 focus:ring-1 focus:ring-gnYellow/50 transition-all outline-none resize-none"
+                      rows={3}
+                      placeholder={t('profile.bio_placeholder')}
+                      value={editForm.bio}
+                      onChange={e => setEditForm(f => ({ ...f, bio: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">{t('auth.phone')}</label>
+                    <input
+                      className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 focus:ring-1 focus:ring-gnYellow/50 transition-all outline-none"
+                      value={editForm.phone}
+                      onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))}
+                    />
+                  </div>
+                  {saveError && <p className="text-gnRed text-xs font-bold bg-gnRed/10 p-3 rounded-lg border border-gnRed/20">{saveError}</p>}
+                  
+                  <div className="flex gap-3 pt-2">
+                    <button onClick={handleSave} disabled={saving} className="btn-primary py-2.5 px-6 flex items-center gap-2 flex-1 sm:flex-none justify-center">
+                      <CheckIcon className="h-4 w-4" />
+                      {saving ? (t('common.loading') || 'Chargement...') : (t('common.save') || 'Enregistrer')}
                     </button>
-                  ) : authUser && (
-                    <Link
-                      to={`/messages/${id}`}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors border border-primary-200"
-                    >
-                      {t('messages.contact')}
-                    </Link>
-                  )}
-                </div>
-
-                <div className="mt-3 space-y-1.5 text-sm text-gray-500">
-                  <div className="flex items-center gap-1.5">
-                    <CalendarIcon className="h-4 w-4 flex-shrink-0" />
-                    <span>{t('profile.member_since')} {memberSince(profile.created_at)}</span>
+                    <button onClick={() => { setEditing(false); setSaveError(''); }} className="py-2.5 px-6 flex items-center gap-2 flex-1 sm:flex-none justify-center text-[10px] font-bold uppercase tracking-widest text-gray-400 border border-white/20 rounded-lg hover:bg-white/10 transition-colors">
+                      <XMarkIcon className="h-4 w-4" />
+                      {t('common.cancel') || 'Annuler'}
+                    </button>
                   </div>
-                  {profile.phone && (
-                    <div className="flex items-center gap-1.5">
-                      <PhoneIcon className="h-4 w-4 flex-shrink-0" />
-                      <span>{profile.phone}</span>
-                    </div>
-                  )}
                 </div>
+              ) : (
+                <div>
+                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <div>
+                      <h1 className="text-3xl md:text-4xl font-display font-black text-white tracking-tighter">{profile.name}</h1>
+                      <div className="flex items-center gap-3 mt-3 flex-wrap">
+                        <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-md border ${ROLE_COLORS[profile.role]}`}>
+                          {roleLabel[profile.role]}
+                        </span>
+                        {profile.avg_owner_rating && (
+                          <span className="flex items-center gap-1.5 text-sm bg-white/5 px-3 py-1.5 rounded-md border border-white/5">
+                            <span className="text-gnYellow mb-0.5">★</span>
+                            <span className="font-black text-white">{Number(profile.avg_owner_rating).toFixed(1)}</span>
+                            <span className="text-[10px] font-bold text-gray-500 tracking-widest">({profile.review_count})</span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
 
-                {profile.bio ? (
-                  <p className="mt-4 text-gray-600 leading-relaxed text-sm">{profile.bio}</p>
-                ) : isOwn ? (
-                  <p className="mt-4 text-gray-400 text-sm italic">{t('profile.bio_empty')}</p>
-                ) : null}
-              </div>
-            )}
-          </div>
-        </div>
+                    {isOwn ? (
+                      <button
+                        onClick={() => setEditing(true)}
+                        className="flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white bg-white/5 hover:bg-white/10 rounded-xl transition-colors border border-white/10"
+                      >
+                        <PencilIcon className="h-4 w-4 text-gnYellow" />
+                        {t('common.edit') || 'Modifier'}
+                      </button>
+                    ) : authUser && (
+                      <Link
+                        to={`/messages/${id}`}
+                        className="btn-primary flex items-center gap-2 px-6 py-2.5"
+                      >
+                        {t('messages.contact') || 'Contacter'}
+                      </Link>
+                    )}
+                  </div>
 
-        {/* Stats */}
-        <div className="mt-6 pt-5 border-t border-gray-100 grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div className="text-2xl font-bold text-gray-900">{profile.listings_count}</div>
-            <div className="text-xs text-gray-500 mt-0.5">{t('profile.stat_listings')}</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900">
-              {profile.avg_owner_rating ? `${profile.avg_owner_rating}★` : '—'}
-            </div>
-            <div className="text-xs text-gray-500 mt-0.5">{t('profile.stat_rating')}</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900">{profile.review_count}</div>
-            <div className="text-xs text-gray-500 mt-0.5">{t('profile.stat_reviews')}</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Security (2FA) - own profile only */}
-      {isOwn && (
-        <div className="card p-6">
-          <h2 className="font-bold text-gray-900 mb-4">{t('profile.security_title')}</h2>
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="font-medium text-gray-800">{t('profile.two_fa_title')}</p>
-              <p className="text-sm text-gray-500 mt-0.5">{t('profile.two_fa_desc')}</p>
-            </div>
-            <button
-              onClick={handleToggle2FA}
-              disabled={toggling2FA}
-              aria-pressed={!!profile.two_fa_enabled}
-              className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none ${
-                profile.two_fa_enabled ? 'bg-primary-600' : 'bg-gray-200'
-              } ${toggling2FA ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-            >
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                profile.two_fa_enabled ? 'translate-x-6' : 'translate-x-1'
-              }`} />
-            </button>
-          </div>
-          {twoFaMessage && (
-            <p className="text-sm text-green-600 mt-3">{twoFaMessage}</p>
-          )}
-        </div>
-      )}
-
-      {/* Listings */}
-      {listings.length > 0 && (
-        <div className="card p-6">
-          <h2 className="font-bold text-gray-900 mb-4">{t('profile.listings_title')}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {listings.map(car => (
-              <Link key={car.id} to={`/cars/${car.id}`} className="group block">
-                <div className="rounded-xl overflow-hidden border border-gray-100 hover:border-primary-300 hover:shadow-md transition-all">
-                  <div className="h-32 bg-gray-100 overflow-hidden">
-                    {car.images && car.images.length > 0 ? (
-                      <img
-                        src={imgUrl(car.images[0])}
-                        alt={car.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl opacity-30">
-                        {CAR_TYPE_ICONS[car.type] || '🚗'}
+                  <div className="mt-6 space-y-2 text-sm text-gray-400">
+                    <div className="flex items-center gap-2">
+                      <CalendarIcon className="h-4 w-4 text-gray-500" />
+                      <span>{t('profile.member_since') || 'Membre depuis'} <span className="text-gray-300 font-medium">{memberSince(profile.created_at)}</span></span>
+                    </div>
+                    {profile.phone && (
+                      <div className="flex items-center gap-2">
+                        <PhoneIcon className="h-4 w-4 text-gray-500" />
+                        <span className="text-gray-300">{profile.phone}</span>
                       </div>
                     )}
                   </div>
-                  <div className="p-3">
-                    <p className="font-semibold text-sm text-gray-900 truncate">{car.title}</p>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-primary-700 font-bold text-sm">
-                        {car.price_per_day} GNF<span className="text-gray-400 font-normal">/j</span>
-                      </span>
-                      {car.avg_car_rating && (
-                        <span className="text-xs text-gray-500">★ {car.avg_car_rating}</span>
-                      )}
+
+                  {profile.bio ? (
+                    <div className="mt-6 p-4 bg-black/30 rounded-xl border border-white/5">
+                      <p className="text-gray-300 leading-relaxed text-sm italic">"{profile.bio}"</p>
                     </div>
-                    <p className="text-xs text-gray-400 mt-1">{car.city}</p>
-                  </div>
+                  ) : isOwn ? (
+                    <p className="mt-6 text-gray-500 text-sm italic">{t('profile.bio_empty') || 'Ajoutez une bio pour vous présenter.'}</p>
+                  ) : null}
                 </div>
-              </Link>
-            ))}
+              )}
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* Reviews received */}
-      {reviews.length > 0 && (
-        <div className="card p-6">
-          <h2 className="font-bold text-gray-900 mb-4">
-            {t('profile.reviews_title')}
-            <span className="ml-2 text-sm font-normal text-gray-400">({reviews.length})</span>
-          </h2>
-          <div className="space-y-4">
-            {reviews.map(review => (
-              <div key={review.id} className="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
-                <div className="flex items-start justify-between mb-1">
-                  <div>
-                    <span className="font-medium text-gray-800 text-sm">{review.reviewer_name}</span>
-                    <Link to={`/cars/${review.car_id}`} className="ml-2 text-xs text-primary-600 hover:underline">
-                      {review.car_title}
-                    </Link>
-                  </div>
-                  <span className="text-xs text-gray-400 flex-shrink-0">
-                    {new Date(review.created_at).toLocaleDateString(i18n.language === 'fr' ? 'fr-FR' : 'en-US')}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 mb-1.5 text-xs text-gray-500">
-                  <span className="flex items-center gap-0.5">
-                    🚗 {'★★★★★'.split('').map((_, i) => (
-                      <span key={i} className={i < review.car_rating ? 'text-yellow-400' : 'text-gray-200'}>★</span>
-                    ))}
-                  </span>
-                  <span className="flex items-center gap-0.5">
-                    👤 {'★★★★★'.split('').map((_, i) => (
-                      <span key={i} className={i < review.owner_rating ? 'text-yellow-400' : 'text-gray-200'}>★</span>
-                    ))}
-                  </span>
-                </div>
-                {review.comment && (
-                  <p className="text-sm text-gray-600 italic">"{review.comment}"</p>
-                )}
+          {/* Stats Bar */}
+          <div className="mt-8 pt-6 border-t border-white/5 grid grid-cols-3 gap-4 text-center relative z-10">
+            <div className="group">
+              <div className="text-3xl font-display font-black text-white group-hover:text-gnYellow transition-colors">{profile.listings_count}</div>
+              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">{t('profile.stat_listings') || 'Annonces'}</div>
+            </div>
+            <div className="group border-x border-white/5">
+              <div className="text-3xl font-display font-black text-white group-hover:text-gnYellow transition-colors">
+                {profile.avg_owner_rating ? `${Number(profile.avg_owner_rating).toFixed(1)}` : '—'}
               </div>
-            ))}
+              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">{t('profile.stat_rating') || 'Note Moyenne'}</div>
+            </div>
+            <div className="group">
+              <div className="text-3xl font-display font-black text-white group-hover:text-gnYellow transition-colors">{profile.review_count}</div>
+              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">{t('profile.stat_reviews') || 'Avis Reçus'}</div>
+            </div>
           </div>
         </div>
-      )}
 
-      {reviews.length === 0 && listings.length === 0 && (
-        <div className="card p-10 text-center text-gray-400">
-          <div className="text-5xl mb-3">👤</div>
-          <p>{t('profile.no_activity')}</p>
-        </div>
-      )}
+        {/* Security (2FA) - own profile only */}
+        {isOwn && (
+          <div className="bg-luxuryDark rounded-3xl border border-white/5 shadow-2xl p-8">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/5">
+              <ShieldCheckIcon className="h-6 w-6 text-gnYellow" />
+              <h2 className="font-display font-black text-xl text-white uppercase tracking-wider">{t('profile.security_title') || 'Sécurité'}</h2>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+              <div>
+                <p className="font-bold text-white text-sm">{t('profile.two_fa_title') || 'Authentification à double facteur (2FA)'}</p>
+                <p className="text-xs text-gray-500 mt-1 max-w-lg leading-relaxed">{t('profile.two_fa_desc') || 'Protégez votre compte en recevant un code par email à chaque connexion.'}</p>
+              </div>
+              <button
+                onClick={handleToggle2FA}
+                disabled={toggling2FA}
+                className={`relative inline-flex h-8 w-14 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none border border-white/10 ${
+                  profile.two_fa_enabled ? 'bg-gnYellow' : 'bg-black/50'
+                } ${toggling2FA ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              >
+                <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform ${
+                  profile.two_fa_enabled ? 'translate-x-7' : 'translate-x-1'
+                }`} />
+              </button>
+            </div>
+            {twoFaMessage && (
+              <div className="mt-4 p-3 bg-gnGreen/10 border border-gnGreen/20 rounded-xl">
+                <p className="text-xs font-bold text-gnGreen uppercase tracking-widest">{twoFaMessage}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Listings */}
+        {listings.length > 0 && (
+          <div className="bg-luxuryDark rounded-3xl border border-white/5 shadow-2xl p-8">
+            <h2 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-6 pb-4 border-b border-white/5">
+              {t('profile.listings_title') || 'Véhicules proposés'}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {listings.map(car => (
+                <Link key={car.id} to={`/cars/${car.id}`} className="group block">
+                  <div className="rounded-2xl overflow-hidden border border-white/5 bg-black/40 hover:border-gnYellow/50 transition-all duration-300 shadow-lg">
+                    <div className="h-40 bg-black relative overflow-hidden">
+                      {car.images && car.images.length > 0 ? (
+                        <img
+                          src={imgUrl(car.images[0])}
+                          alt={car.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-100"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-5xl opacity-20">
+                          {CAR_TYPE_ICONS[car.type] || '🚗'}
+                        </div>
+                      )}
+                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-md border border-white/10">
+                        <span className="text-[10px] font-bold text-gnYellow uppercase tracking-widest">
+                          {car.price_per_day} GNF/j
+                        </span>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <p className="font-black text-sm text-white truncate mb-1">{car.title}</p>
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1">
+                          {car.city}
+                        </p>
+                        {car.avg_car_rating && (
+                          <span className="text-[10px] font-black text-white flex items-center gap-1">
+                            <StarIcon className="h-3 w-3 text-gnYellow fill-gnYellow" /> {Number(car.avg_car_rating).toFixed(1)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Reviews received */}
+        {reviews.length > 0 && (
+          <div className="bg-luxuryDark rounded-3xl border border-white/5 shadow-2xl p-8">
+            <h2 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-6 pb-4 border-b border-white/5 flex items-center justify-between">
+              {t('profile.reviews_title') || 'Avis reçus'}
+              <span className="bg-white/10 text-white px-2 py-1 rounded-md text-[9px]">{reviews.length}</span>
+            </h2>
+            <div className="space-y-6">
+              {reviews.map(review => (
+                <div key={review.id} className="border-b border-white/5 last:border-0 pb-6 last:pb-0">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <span className="font-black text-white text-sm">{review.reviewer_name}</span>
+                      <span className="text-gray-500 text-xs mx-2">•</span>
+                      <Link to={`/cars/${review.car_id}`} className="text-[10px] font-bold text-gnYellow uppercase tracking-widest hover:text-white transition-colors">
+                        {review.car_title}
+                      </Link>
+                    </div>
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex-shrink-0">
+                      {new Date(review.created_at).toLocaleDateString(i18n.language.startsWith('fr') ? 'fr-FR' : 'en-US')}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 mb-3 text-xs">
+                    <span className="flex items-center gap-1 bg-black/40 px-2 py-1 rounded-md border border-white/5">
+                      <span className="text-gray-500 mr-1">🚗</span>
+                      {'★★★★★'.split('').map((_, i) => (
+                        <span key={`car-${i}`} className={i < review.car_rating ? 'text-gnYellow' : 'text-gray-700'}>★</span>
+                      ))}
+                    </span>
+                    <span className="flex items-center gap-1 bg-black/40 px-2 py-1 rounded-md border border-white/5">
+                      <span className="text-gray-500 mr-1">👤</span>
+                      {'★★★★★'.split('').map((_, i) => (
+                        <span key={`owner-${i}`} className={i < review.owner_rating ? 'text-gnYellow' : 'text-gray-700'}>★</span>
+                      ))}
+                    </span>
+                  </div>
+                  {review.comment && (
+                    <p className="text-sm text-gray-300 italic leading-relaxed bg-black/20 p-4 rounded-xl border-l-2 border-gnYellow">"{review.comment}"</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {reviews.length === 0 && listings.length === 0 && (
+          <div className="bg-luxuryDark rounded-3xl border border-white/5 shadow-2xl p-16 text-center text-gray-500">
+            <div className="text-5xl mb-4 opacity-30">👤</div>
+            <p className="text-sm font-medium">{t('profile.no_activity') || 'Aucune activité pour le moment.'}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
