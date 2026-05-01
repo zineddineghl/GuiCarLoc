@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -10,9 +10,8 @@ import {
   MapPinIcon,
   UserGroupIcon,
   CogIcon,
-  CalendarIcon,
-  PhoneIcon,
   EnvelopeIcon,
+  PhoneIcon,
   ArrowLeftIcon,
   CheckCircleIcon,
   XCircleIcon,
@@ -33,15 +32,15 @@ function StatusBadge({ available }) {
   const { t } = useTranslation();
   if (available) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
-        <CheckCircleIcon className="h-4 w-4" />
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gnGreen/20 text-gnGreen rounded-full text-xs font-bold uppercase tracking-wider border border-gnGreen/30">
+        <CheckCircleIcon className="h-3.5 w-3.5" />
         {t('car.available')}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">
-      <XCircleIcon className="h-4 w-4" />
+    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gnRed/20 text-gnRed rounded-full text-xs font-bold uppercase tracking-wider border border-gnRed/30">
+      <XCircleIcon className="h-3.5 w-3.5" />
       {t('car.unavailable')}
     </span>
   );
@@ -125,14 +124,8 @@ export default function CarDetail() {
 
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    if (calculateDays() < 1) {
-      setBookingError('Please select valid dates');
-      return;
-    }
+    if (!user) { navigate('/login'); return; }
+    if (calculateDays() < 1) { setBookingError('Please select valid dates'); return; }
 
     setBookingLoading(true);
     setBookingError('');
@@ -156,55 +149,14 @@ export default function CarDetail() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-4">
-              <div className="h-80 bg-gray-200 rounded-2xl"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            </div>
-            <div className="h-80 bg-gray-200 rounded-2xl"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !car) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-        <div className="text-6xl mb-4">🚗</div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">{error || 'Car not found'}</h2>
-        <Link to="/listings" className="btn-primary mt-4 inline-block">
-          {t('common.back')}
-        </Link>
-      </div>
-    );
-  }
-
-  const days = calculateDays();
-  const total = calculateTotal();
-  const typeIcon = CAR_TYPE_ICONS[car.type] || '🚗';
-  const fuelIcon = FUEL_ICONS[car.fuel] || '⛽';
-  const isFav = favIds.has(car.id);
-
   const handleAddBlock = async (e) => {
     e.preventDefault();
-    if (!blockForm.start_date || !blockForm.end_date || blockForm.start_date > blockForm.end_date) {
-      setBlockError(i18n.language.startsWith('fr') ? 'Dates invalides' : 'Invalid dates');
-      return;
-    }
     setBlockLoading(true);
     setBlockError('');
     try {
       const res = await axios.post(`/api/cars/${id}/blocked-dates`, blockForm);
-      const newBlock = res.data.block;
-      setBlockedDates(prev => [...prev, newBlock]);
-      setBookedRanges(prev => [...prev, { ...newBlock, type: 'blocked' }]);
+      setBlockedDates(prev => [...prev, res.data.block]);
+      setBookedRanges(prev => [...prev, { ...res.data.block, type: 'blocked' }]);
     } catch (err) {
       setBlockError(err.response?.data?.error || 'Erreur');
     } finally {
@@ -217,17 +169,24 @@ export default function CarDetail() {
       await axios.delete(`/api/cars/${id}/blocked-dates/${blockId}`);
       setBlockedDates(prev => prev.filter(b => b.id !== blockId));
       setBookedRanges(prev => prev.filter(r => !(r.type === 'blocked' && r.id === blockId)));
-    } catch {
-      // ignore
-    }
+    } catch { }
   };
+
+  if (loading) return <div className="max-w-7xl mx-auto px-4 py-12 animate-pulse bg-luxuryBlack"></div>;
+  if (error || !car) return <div className="text-center py-20 text-white"><h2 className="text-2xl font-bold">{error || 'Car not found'}</h2></div>;
+
+  const days = calculateDays();
+  const total = calculateTotal();
+  const typeIcon = CAR_TYPE_ICONS[car.type] || '🚗';
+  const fuelIcon = FUEL_ICONS[car.fuel] || '⛽';
+  const isFav = favIds.has(car.id);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-gray-500 hover:text-gray-700 font-medium mb-6 transition-colors"
+        className="flex items-center gap-2 text-gray-400 hover:text-white font-medium mb-6 transition-colors"
       >
         <ArrowLeftIcon className="h-4 w-4" />
         {t('common.back')}
@@ -236,406 +195,186 @@ export default function CarDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left: Car Details */}
         <div className="lg:col-span-2 space-y-6">
+          
           {/* Image Gallery */}
-          <div className="card overflow-hidden">
+          <div className="card overflow-hidden border border-white/5">
             {car.images && car.images.length > 0 ? (
               <div>
-                <div className="relative h-72 sm:h-96 bg-gray-100 overflow-hidden">
+                <div className="relative h-72 sm:h-[450px] bg-luxuryDark overflow-hidden">
                   <img
                     src={imgUrl(car.images[activeImage])}
                     alt={car.title}
                     className="w-full h-full object-cover"
-                    onError={e => {
-                      e.target.parentElement.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-primary-50"><span class="text-8xl opacity-30">${typeIcon}</span></div>`;
-                    }}
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
                 </div>
                 {car.images.length > 1 && (
-                  <div className="p-3 flex gap-2 overflow-x-auto">
+                  <div className="p-4 flex gap-3 overflow-x-auto bg-black/20">
                     {car.images.map((img, idx) => (
                       <button
                         key={idx}
                         onClick={() => setActiveImage(idx)}
-                        className={`flex-shrink-0 w-16 h-12 rounded-lg overflow-hidden border-2 transition-all ${
-                          activeImage === idx ? 'border-primary-500 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'
+                        className={`flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-all ${
+                          activeImage === idx ? 'border-gnYellow scale-105' : 'border-transparent opacity-40 hover:opacity-100'
                         }`}
                       >
-                        <img
-                          src={imgUrl(img)}
-                          alt={`Photo ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={imgUrl(img)} alt="thumb" className="w-full h-full object-cover" />
                       </button>
                     ))}
                   </div>
                 )}
               </div>
             ) : (
-              <div className="h-72 sm:h-96 bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
-                <span className="text-9xl opacity-30">{typeIcon}</span>
+              <div className="h-72 sm:h-96 bg-luxuryDark flex items-center justify-center">
+                <span className="text-9xl opacity-10">{typeIcon}</span>
               </div>
             )}
           </div>
 
           {/* Car Info */}
-          <div className="card p-6">
-            <div className="flex flex-wrap items-start gap-3 mb-4">
+          <div className="card p-8 border border-white/5">
+            <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xl">{typeIcon}</span>
-                  <span className="text-sm text-gray-500 font-medium">{t(`car.type_${car.type}`)}</span>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-gnYellow font-bold text-xs uppercase tracking-widest">{t(`car.type_${car.type}`)}</span>
                 </div>
-                <div className="flex items-start gap-3">
-                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex-1">{car.title}</h1>
-                  {user && (
-                    <button
-                      onClick={() => toggleFavorite(car.id)}
-                      className="mt-1 p-2 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0"
-                    >
-                      {isFav
-                        ? <HeartSolidIcon className="h-6 w-6 text-red-500" />
-                        : <HeartIcon className="h-6 w-6 text-gray-400" />
-                      }
-                    </button>
-                  )}
+                <h1 className="text-3xl md:text-4xl font-display font-black text-white mb-2 uppercase tracking-tight">{car.title}</h1>
+                <div className="flex items-center gap-3 text-gray-400">
+                  <MapPinIcon className="h-4 w-4 text-gnYellow" />
+                  <span className="text-sm font-medium">{car.city}{car.address ? `, ${car.address}` : ''}</span>
                 </div>
-                {car.avg_car_rating && (
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <span className="text-yellow-400">★</span>
-                    <span className="font-semibold text-gray-800">{car.avg_car_rating}</span>
-                    <span className="text-sm text-gray-400">
-                      ({car.review_count} {car.review_count === 1 ? t('review.review') : t('review.reviews')})
-                    </span>
-                  </div>
+              </div>
+              <div className="flex flex-col items-end gap-3">
+                <StatusBadge available={car.available} />
+                {user && (
+                  <button onClick={() => toggleFavorite(car.id)} className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/10">
+                    {isFav ? <HeartSolidIcon className="h-6 w-6 text-gnRed" /> : <HeartIcon className="h-6 w-6 text-white" />}
+                  </button>
                 )}
               </div>
-              <StatusBadge available={car.available} />
-            </div>
-
-            <div className="flex items-center gap-2 text-gray-500 mb-6">
-              <MapPinIcon className="h-4 w-4 flex-shrink-0" />
-              <span>{car.city}{car.address ? `, ${car.address}` : ''}</span>
             </div>
 
             {/* Specs Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-              <div className="bg-gray-50 rounded-xl p-3 text-center">
-                <div className="text-2xl mb-1">📅</div>
-                <div className="text-xs text-gray-500">{t('car.year')}</div>
-                <div className="font-bold text-gray-900">{car.year}</div>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-3 text-center">
-                <div className="text-2xl mb-1">👥</div>
-                <div className="text-xs text-gray-500">{t('car.seats')}</div>
-                <div className="font-bold text-gray-900">{car.seats}</div>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-3 text-center">
-                <div className="text-2xl mb-1">⚙️</div>
-                <div className="text-xs text-gray-500">{t('car.transmission')}</div>
-                <div className="font-bold text-gray-900 text-sm">{t(`car.transmission_${car.transmission}`)}</div>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-3 text-center">
-                <div className="text-2xl mb-1">{fuelIcon}</div>
-                <div className="text-xs text-gray-500">{t('car.fuel')}</div>
-                <div className="font-bold text-gray-900 text-sm">{t(`car.fuel_${car.fuel}`)}</div>
-              </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+              {[
+                { label: t('car.year'), val: car.year, icon: '📅' },
+                { label: t('car.seats'), val: car.seats, icon: '👥' },
+                { label: t('car.transmission'), val: t(`car.transmission_${car.transmission}`), icon: '⚙️' },
+                { label: t('car.fuel'), val: t(`car.fuel_${car.fuel}`), icon: fuelIcon }
+              ].map((spec, i) => (
+                <div key={i} className="bg-white/5 border border-white/5 rounded-2xl p-4 text-center hover:bg-white/10 transition-colors">
+                  <div className="text-2xl mb-1">{spec.icon}</div>
+                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">{spec.label}</div>
+                  <div className="font-bold text-white text-sm mt-0.5">{spec.val}</div>
+                </div>
+              ))}
             </div>
 
             {/* Description */}
-            <div>
-              <h3 className="font-bold text-gray-900 mb-2">{t('car.description')}</h3>
-              <p className="text-gray-600 leading-relaxed">
+            <div className="pt-6 border-t border-white/5">
+              <h3 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-3">{t('car.description')}</h3>
+              <p className="text-gray-300 leading-relaxed text-base italic font-light">
                 {car.description || t('car.no_description')}
               </p>
             </div>
           </div>
 
           {/* Availability Calendar */}
-          <AvailabilityCalendar
-            bookedRanges={bookedRanges}
-            lang={i18n.language.startsWith('fr') ? 'fr' : 'en'}
-          />
+          <div className="card p-2 border border-white/5 overflow-hidden">
+            <AvailabilityCalendar bookedRanges={bookedRanges} lang={i18n.language.startsWith('fr') ? 'fr' : 'en'} />
+          </div>
 
           {/* Owner Info */}
-          <div className="card p-6">
-            <h3 className="font-bold text-gray-900 mb-4">{t('car.owner')}</h3>
-            <div className="flex items-start gap-4">
-              {car.owner_avatar ? (
-                <img
-                  src={imgUrl(car.owner_avatar)}
-                  alt={car.owner_name}
-                  className="w-12 h-12 rounded-full object-cover flex-shrink-0"
-                />
-              ) : (
-                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 font-bold text-xl flex-shrink-0">
-                  {car.owner_name?.charAt(0)?.toUpperCase() || '?'}
-                </div>
-              )}
-              <div className="flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Link to={`/profile/${car.owner_id}`} className="font-semibold text-gray-900 hover:text-primary-700 transition-colors">
-                    {car.owner_name}
-                  </Link>
-                  {car.avg_owner_rating && (
-                    <span className="flex items-center gap-1 text-sm text-gray-500">
-                      <span className="text-yellow-400">★</span>
-                      <span className="font-medium text-gray-700">{car.avg_owner_rating}</span>
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-col gap-1.5 mt-2">
-                  {car.owner_email && (
-                    <a
-                      href={`mailto:${car.owner_email}`}
-                      className="flex items-center gap-2 text-sm text-gray-500 hover:text-primary-700 transition-colors"
-                    >
-                      <EnvelopeIcon className="h-4 w-4" />
-                      {car.owner_email}
-                    </a>
-                  )}
-                  {car.owner_phone && (
-                    <a
-                      href={`tel:${car.owner_phone}`}
-                      className="flex items-center gap-2 text-sm text-gray-500 hover:text-primary-700 transition-colors"
-                    >
-                      <PhoneIcon className="h-4 w-4" />
-                      {car.owner_phone}
-                    </a>
-                  )}
-                </div>
-                {user && !isOwner && (
-                  <Link
-                    to={`/messages/${car.owner_id}`}
-                    className="mt-4 flex items-center justify-center gap-2 w-full btn-secondary text-sm"
-                  >
-                    <EnvelopeIcon className="h-4 w-4" />
-                    {t('messages.contact_owner')}
-                  </Link>
+          <div className="card p-8 border border-white/5">
+            <h3 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-6">{t('car.owner')}</h3>
+            <div className="flex items-center gap-6">
+              <div className="relative">
+                {car.owner_avatar ? (
+                  <img src={imgUrl(car.owner_avatar)} className="w-20 h-20 rounded-2xl object-cover ring-2 ring-white/10" alt="avatar" />
+                ) : (
+                  <div className="w-20 h-20 bg-gnYellow/10 rounded-2xl flex items-center justify-center text-gnYellow font-black text-3xl border border-gnYellow/20">
+                    {car.owner_name?.charAt(0)?.toUpperCase()}
+                  </div>
                 )}
+                <div className="absolute -bottom-2 -right-2 bg-gnGreen w-6 h-6 rounded-full border-4 border-luxuryBlack"></div>
+              </div>
+              <div className="flex-1">
+                <Link to={`/profile/${car.owner_id}`} className="text-2xl font-bold text-white hover:text-gnYellow transition-colors">{car.owner_name}</Link>
+                <div className="flex flex-col gap-2 mt-3">
+                  <a href={`mailto:${car.owner_email}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
+                    <EnvelopeIcon className="h-4 w-4 text-gnYellow/50" /> {car.owner_email}
+                  </a>
+                  {car.owner_phone && (
+                    <a href={`tel:${car.owner_phone}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
+                      <PhoneIcon className="h-4 w-4 text-gnYellow/50" /> {car.owner_phone}
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-          {/* Reviews */}
-          <div className="card p-6">
-            <h3 className="font-bold text-gray-900 mb-4">
-              {t('review.reviews')}
-              {reviews.length > 0 && (
-                <span className="ml-2 text-sm font-normal text-gray-400">({reviews.length})</span>
-              )}
-            </h3>
-            {reviews.length === 0 ? (
-              <p className="text-gray-400 text-sm">{t('review.no_reviews')}</p>
-            ) : (
-              <div className="space-y-4">
-                {reviews.map(review => (
-                  <div key={review.id} className="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium text-gray-800 text-sm">{review.reviewer_name}</span>
-                      <span className="text-xs text-gray-400">
-                        {new Date(review.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 mb-2">
-                      {'★★★★★'.split('').map((s, i) => (
-                        <span key={i} className={i < review.car_rating ? 'text-yellow-400' : 'text-gray-200'}>★</span>
-                      ))}
-                    </div>
-                    {review.comment && (
-                      <p className="text-sm text-gray-600 italic">"{review.comment}"</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 
         {/* Right: Booking Widget */}
         <div className="lg:col-span-1">
-          <div className="card p-6 sticky top-24">
-            {/* Price */}
-            <div className="flex items-baseline gap-2 mb-6">
-              <span className="text-3xl font-extrabold text-primary-700">{car.price_per_day} GNF</span>
-              <span className="text-gray-500">{t('car.per_day')}</span>
+          <div className="card p-8 sticky top-24 border border-white/5 bg-luxuryDark/50 backdrop-blur-xl">
+            <div className="flex items-baseline gap-2 mb-8 border-b border-white/5 pb-6">
+              <span className="text-4xl font-display font-black text-white">{new Intl.NumberFormat().format(car.price_per_day)}</span>
+              <span className="text-gnYellow font-bold text-sm">GNF / {t('car.per_day')}</span>
             </div>
 
             {isOwner ? (
-              <div className="space-y-3">
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                  <p className="text-blue-700 font-medium text-sm mb-3 text-center">This is your listing</p>
-                  <div className="flex flex-col gap-2">
-                    <Link to={`/edit-listing/${car.id}`} className="btn-secondary btn-sm w-full text-center">
-                      {t('common.edit')}
-                    </Link>
-                    <button
-                      onClick={() => setShowBlocker(v => !v)}
-                      className="flex items-center justify-center gap-2 px-3 py-2 bg-orange-50 border border-orange-200 text-orange-700 rounded-lg text-sm font-semibold hover:bg-orange-100 transition-colors"
-                    >
-                      <NoSymbolIcon className="h-4 w-4" />
-                      {i18n.language.startsWith('fr') ? 'Bloquer des dates' : 'Block dates'}
-                      {showBlocker ? <ChevronUpIcon className="h-3.5 w-3.5 ml-auto" /> : <ChevronDownIcon className="h-3.5 w-3.5 ml-auto" />}
-                    </button>
-                  </div>
+              <div className="space-y-4">
+                <div className="bg-gnYellow/5 border border-gnYellow/20 rounded-2xl p-5 text-center">
+                  <p className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-4">Votre Annonce</p>
+                  <Link to={`/edit-listing/${car.id}`} className="btn-primary w-full block mb-3">{t('common.edit')}</Link>
+                  <button onClick={() => setShowBlocker(v => !v)} className="w-full text-xs font-bold text-gray-400 hover:text-white transition-colors">
+                    {showBlocker ? 'Fermer le gestionnaire' : 'Gérer les disponibilités'}
+                  </button>
                 </div>
-
                 {showBlocker && (
-                  <div className="border border-orange-200 rounded-xl p-4 bg-orange-50/50 space-y-3">
-                    <p className="text-xs font-semibold text-orange-700">
-                      {i18n.language.startsWith('fr') ? 'Bloquer une période' : 'Block a period'}
-                    </p>
-                    <form onSubmit={handleAddBlock} className="space-y-2">
-                      <div>
-                        <label className="text-xs text-gray-500 block mb-0.5">
-                          {i18n.language.startsWith('fr') ? 'Du' : 'From'}
-                        </label>
-                        <input
-                          type="date"
-                          value={blockForm.start_date}
-                          min={today}
-                          onChange={e => setBlockForm(p => ({ ...p, start_date: e.target.value }))}
-                          className="input-field text-sm py-1.5"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs text-gray-500 block mb-0.5">
-                          {i18n.language.startsWith('fr') ? 'Au' : 'To'}
-                        </label>
-                        <input
-                          type="date"
-                          value={blockForm.end_date}
-                          min={blockForm.start_date || today}
-                          onChange={e => setBlockForm(p => ({ ...p, end_date: e.target.value }))}
-                          className="input-field text-sm py-1.5"
-                          required
-                        />
-                      </div>
-                      {blockError && (
-                        <p className="text-xs text-red-600">{blockError}</p>
-                      )}
-                      <button
-                        type="submit"
-                        disabled={blockLoading}
-                        className="w-full py-2 px-3 bg-orange-600 text-white text-sm font-semibold rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50"
-                      >
-                        {blockLoading
-                          ? (i18n.language.startsWith('fr') ? 'En cours...' : 'Loading...')
-                          : (i18n.language.startsWith('fr') ? 'Bloquer ces dates' : 'Block these dates')}
-                      </button>
-                    </form>
-
-                    {blockedDates.length > 0 && (
-                      <div className="space-y-1.5 pt-1 border-t border-orange-200">
-                        <p className="text-xs font-semibold text-orange-700">
-                          {i18n.language.startsWith('fr') ? 'Périodes bloquées' : 'Blocked periods'}
-                        </p>
+                   <div className="p-4 bg-white/5 rounded-2xl border border-white/10 animate-fadeIn">
+                      <form onSubmit={handleAddBlock} className="space-y-3">
+                        <input type="date" value={blockForm.start_date} min={today} onChange={e => setBlockForm(p => ({ ...p, start_date: e.target.value }))} className="input-field text-sm" required />
+                        <input type="date" value={blockForm.end_date} min={blockForm.start_date} onChange={e => setBlockForm(p => ({ ...p, end_date: e.target.value }))} className="input-field text-sm" required />
+                        <button type="submit" disabled={blockLoading} className="btn-primary w-full py-2 text-xs">Bloquer ces dates</button>
+                      </form>
+                      <div className="mt-4 space-y-2">
                         {blockedDates.map(b => (
-                          <div key={b.id} className="flex items-center justify-between bg-white rounded-lg px-2.5 py-1.5 border border-orange-100">
-                            <span className="text-xs text-gray-700">
-                              {b.start_date} → {b.end_date}
-                            </span>
-                            <button
-                              onClick={() => handleRemoveBlock(b.id)}
-                              className="text-red-400 hover:text-red-600 transition-colors ml-2"
-                              title={i18n.language.startsWith('fr') ? 'Supprimer' : 'Remove'}
-                            >
-                              <TrashIcon className="h-3.5 w-3.5" />
-                            </button>
+                          <div key={b.id} className="flex items-center justify-between bg-black/40 p-2 rounded-lg text-[10px] text-gray-300">
+                            <span>{b.start_date} → {b.end_date}</span>
+                            <button onClick={() => handleRemoveBlock(b.id)}><TrashIcon className="h-3 w-3 text-gnRed" /></button>
                           </div>
                         ))}
                       </div>
-                    )}
-                  </div>
+                   </div>
                 )}
               </div>
             ) : (
-              <form onSubmit={handleBookingSubmit} className="space-y-4">
-                <h3 className="font-bold text-gray-900">{t('booking.title')}</h3>
-
-                {/* Date Picker */}
-                <DateRangePicker
-                  startDate={booking.start_date}
-                  endDate={booking.end_date}
-                  onChange={handleDateChange}
-                  bookedRanges={bookedRanges}
-                  lang={i18n.language.startsWith('fr') ? 'fr' : 'en'}
-                />
-                {booking.start_date && !booking.end_date && (
-                  <p className="text-xs text-primary-600 text-center -mt-1">
-                    {i18n.language.startsWith('fr') ? 'Cliquez sur la date de fin' : 'Click the end date'}
-                  </p>
-                )}
-
-                {/* Duration & Price */}
+              <form onSubmit={handleBookingSubmit} className="space-y-6">
+                <DateRangePicker startDate={booking.start_date} endDate={booking.end_date} onChange={handleDateChange} bookedRanges={bookedRanges} lang={i18n.language.startsWith('fr') ? 'fr' : 'en'} />
+                
                 {days > 0 && (
-                  <div className="bg-primary-50 rounded-xl p-4 space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">
-                        {car.price_per_day} GNF × {days} {days === 1 ? t('booking.day') : t('booking.days')}
-                      </span>
-                      <span className="font-semibold">{total} GNF</span>
+                  <div className="bg-white/5 rounded-2xl p-5 space-y-3 border border-white/5">
+                    <div className="flex justify-between text-xs text-gray-400">
+                      <span>{new Intl.NumberFormat().format(car.price_per_day)} GNF × {days} j</span>
+                      <span className="text-white font-bold">{new Intl.NumberFormat().format(total)} GNF</span>
                     </div>
-                    <div className="border-t border-primary-200 pt-2 flex justify-between font-bold">
-                      <span>{t('booking.total')}</span>
-                      <span className="text-primary-700">{total} GNF</span>
+                    <div className="border-t border-white/5 pt-3 flex justify-between">
+                      <span className="text-sm font-bold text-white">Total</span>
+                      <span className="text-xl font-display font-black text-gnYellow">{new Intl.NumberFormat().format(total)} GNF</span>
                     </div>
                   </div>
                 )}
 
-                {/* Message */}
-                <div>
-                  <label className="form-label text-xs">{t('booking.message')}</label>
-                  <textarea
-                    name="message"
-                    value={booking.message}
-                    onChange={e => { setBooking(prev => ({ ...prev, message: e.target.value })); }}
-                    placeholder={t('booking.message_placeholder')}
-                    rows={3}
-                    className="input-field text-sm resize-none"
-                  />
-                </div>
+                <textarea value={booking.message} onChange={e => setBooking(prev => ({ ...prev, message: e.target.value }))} placeholder={t('booking.message_placeholder')} rows={3} className="input-field text-sm bg-black/20" />
 
-                {/* Error / Success */}
-                {bookingError && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">
-                    {bookingError}
-                  </div>
-                )}
-                {bookingSuccess && (
-                  <div className="bg-green-50 border border-green-200 text-green-700 rounded-lg p-3 text-sm">
-                    {bookingSuccess}
-                  </div>
-                )}
+                {bookingError && <div className="p-3 bg-gnRed/10 border border-gnRed/20 text-gnRed text-xs rounded-xl text-center">{bookingError}</div>}
+                {bookingSuccess && <div className="p-3 bg-gnGreen/10 border border-gnGreen/20 text-gnGreen text-xs rounded-xl text-center">{bookingSuccess}</div>}
 
-                {user ? (
-                  <button
-                    type="submit"
-                    disabled={bookingLoading || !car.available || days < 1}
-                    className="btn-primary w-full"
-                  >
-                    {bookingLoading ? (
-                      <span className="flex items-center gap-2 justify-center">
-                        <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-                        {t('common.loading')}
-                      </span>
-                    ) : (
-                      t('booking.submit')
-                    )}
-                  </button>
-                ) : (
-                  <div>
-                    <p className="text-sm text-gray-500 text-center mb-3">
-                      {t('booking.login_to_book')}
-                    </p>
-                    <Link to="/login" className="btn-primary w-full block text-center">
-                      {t('auth.login')}
-                    </Link>
-                  </div>
-                )}
-
-                {!car.available && (
-                  <p className="text-red-500 text-sm text-center">{t('car.unavailable')}</p>
-                )}
+                <button type="submit" disabled={bookingLoading || !car.available || days < 1} className="btn-primary w-full py-4 text-lg font-black uppercase tracking-tighter">
+                  {bookingLoading ? t('common.loading') : t('booking.submit')}
+                </button>
               </form>
             )}
           </div>
