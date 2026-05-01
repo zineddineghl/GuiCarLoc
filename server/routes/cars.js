@@ -2,35 +2,36 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const pool = require('../db');
 const { authenticateToken, optionalAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'guicarloc/cars',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [{ width: 1200, height: 800, crop: 'limit' }],
   },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, 'car-' + uniqueSuffix + ext);
-  }
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|webp|gif/;
-  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const allowedTypes = /jpeg|jpg|png|webp/;
   const mimetype = allowedTypes.test(file.mimetype);
-  if (extname && mimetype) return cb(null, true);
+  if (mimetype) return cb(null, true);
   cb(new Error('Only image files are allowed'));
 };
 
-const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
+const upload = multer({ storage, fileFilter, limits: { fileSize: 10 * 1024 * 1024 } });
 
 function withUpload(req, res, next) {
   upload.array('images', 8)(req, res, (err) => {
@@ -162,12 +163,12 @@ router.post('/', authenticateToken, withUpload, async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const validTypes = ['sedan', 'suv', 'van', 'sports', 'luxury', 'economy'];
+    const validTypes = ['sedan', 'suv', 'van', 'sports', 'luxury', 'economy', 'scooter', 'moto', 'boat'];
     if (!validTypes.includes(type)) {
       return res.status(400).json({ error: 'Invalid car type' });
     }
 
-    const images = req.files ? req.files.map(f => f.filename) : [];
+    const images = req.files ? req.files.map(f => f.path) : [];
 
     const { rows } = await pool.query(`
       INSERT INTO cars (owner_id, title, description, type, brand, model, year, seats, transmission, fuel, price_per_day, city, address, images)
@@ -200,7 +201,7 @@ router.put('/:id', authenticateToken, withUpload, async (req, res) => {
       images = safeParseJSON(existing_images, []);
     }
     if (req.files && req.files.length > 0) {
-      images = [...images, ...req.files.map(f => f.filename)];
+      images = [...images, ...req.files.map(f => f.path)];
     }
 
     const { rows } = await pool.query(`
@@ -247,10 +248,15 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     if (car.owner_id !== req.user.id) return res.status(403).json({ error: 'Not authorized to delete this listing' });
 
     const images = safeParseJSON(car.images, []);
-    images.forEach(filename => {
-      const filePath = path.join(__dirname, '../uploads', filename);
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    });
+    await Promise.all(images.map(async (url) => {
+      try {
+        if (url && url.startsWith('http')) {
+          const parts = url.split('/');
+          const publicId = parts.slice(parts.indexOf('guicarloc')).join('/').replace(/\.[^/.]+$/, '');
+          await cloudinary.uploader.destroy(publicId);
+        }
+      } catch (e) { /* ignore */ }
+    }));
 
     await pool.query('DELETE FROM cars WHERE id = $1', [req.params.id]);
     res.json({ message: 'Car listing deleted successfully' });

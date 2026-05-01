@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { imgUrl } from '../utils/imageUrl';
 import imageCompression from 'browser-image-compression';
 
 const CAR_TYPES = ['sedan', 'suv', 'van', 'sports', 'luxury', 'economy', 'scooter', 'moto', 'boat'];
@@ -403,7 +404,7 @@ export default function PostListing() {
             <div className="flex flex-wrap gap-3">
               {existingImages.map((img, idx) => (
                 <div key={idx} className="relative w-24 h-20 rounded-lg overflow-hidden border border-gray-200">
-                  <img src={`/uploads/${img}`} alt="" className="w-full h-full object-cover" />
+                  <img src={imgUrl(img)} alt="" className="w-full h-full object-cover" />
                   <button
                     type="button"
                     onClick={() => removeExistingImage(idx)}

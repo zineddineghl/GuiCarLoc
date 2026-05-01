@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../App';
+import { imgUrl } from '../utils/imageUrl';
 import { CalendarIcon, MapPinIcon, CheckIcon, XMarkIcon, StarIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 import ReviewModal from '../components/ReviewModal';
 
@@ -65,7 +66,7 @@ function BookingCard({ booking, onStatusChange, isOwnerView, onReviewSuccess }) 
           <div className="w-full sm:w-28 h-20 rounded-xl overflow-hidden bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
             {firstImage ? (
               <img
-                src={`/uploads/${firstImage}`}
+                src={imgUrl(firstImage)}
                 alt={booking.car_title}
                 className="w-full h-full object-cover"
                 loading="lazy"

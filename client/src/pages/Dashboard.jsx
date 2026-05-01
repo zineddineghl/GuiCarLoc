@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../App';
+import { imgUrl } from '../utils/imageUrl';
 import {
   BanknotesIcon,
   CalendarDaysIcon,
@@ -268,7 +269,7 @@ export default function Dashboard() {
                       <Link to={`/cars/${car.id}`} className="flex items-center gap-3 group">
                         <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                           {car.images && car.images[0]
-                            ? <img src={`/uploads/${car.images[0]}`} alt="" className="w-full h-full object-cover" />
+                            ? <img src={imgUrl(car.images[0])} alt="" className="w-full h-full object-cover" />
                             : <span className="w-full h-full flex items-center justify-center text-lg">🚗</span>
                           }
                         </div>

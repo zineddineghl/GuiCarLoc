@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../App';
+import { imgUrl } from '../utils/imageUrl';
 import {
   PencilIcon,
   CheckIcon,
@@ -41,7 +42,7 @@ function Avatar({ name, avatarFile, size = 'lg', onClick, isOwn }) {
     >
       {avatarFile ? (
         <img
-          src={`/uploads/${avatarFile}`}
+          src={imgUrl(avatarFile)}
           alt={name}
           className={`${sizeClass} rounded-full object-cover`}
         />
@@ -381,7 +382,7 @@ export default function UserProfile() {
                   <div className="h-32 bg-gray-100 overflow-hidden">
                     {car.images && car.images.length > 0 ? (
                       <img
-                        src={`/uploads/${car.images[0]}`}
+                        src={imgUrl(car.images[0])}
                         alt={car.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />

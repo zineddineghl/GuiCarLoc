@@ -1,22 +1,25 @@
 const express = require('express');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const pool = require('../db');
 const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
-const avatarStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../uploads');
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-    cb(null, uploadDir);
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const avatarStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'guicarloc/avatars',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [{ width: 200, height: 200, crop: 'fill', gravity: 'face' }],
   },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `avatar-${req.user.id}-${Date.now()}${ext}`);
-  }
 });
 
 const avatarUpload = multer({
@@ -33,8 +36,8 @@ router.post('/me/avatar', authenticateToken, (req, res) => {
   avatarUpload.single('avatar')(req, res, async (err) => {
     if (err) return res.status(400).json({ error: err.message });
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-    await pool.query('UPDATE users SET avatar = $1 WHERE id = $2', [req.file.filename, req.user.id]);
-    res.json({ avatar: req.file.filename });
+    await pool.query('UPDATE users SET avatar = $1 WHERE id = $2', [req.file.path, req.user.id]);
+    res.json({ avatar: req.file.path });
   });
 });
 

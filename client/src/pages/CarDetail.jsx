@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../App';
+import { imgUrl } from '../utils/imageUrl';
 import DateRangePicker from '../components/DateRangePicker';
 import AvailabilityCalendar from '../components/AvailabilityCalendar';
 import {
@@ -241,7 +242,7 @@ export default function CarDetail() {
               <div>
                 <div className="relative h-72 sm:h-96 bg-gray-100 overflow-hidden">
                   <img
-                    src={`/uploads/${car.images[activeImage]}`}
+                    src={imgUrl(car.images[activeImage])}
                     alt={car.title}
                     className="w-full h-full object-cover"
                     onError={e => {
@@ -260,7 +261,7 @@ export default function CarDetail() {
                         }`}
                       >
                         <img
-                          src={`/uploads/${img}`}
+                          src={imgUrl(img)}
                           alt={`Photo ${idx + 1}`}
                           className="w-full h-full object-cover"
                         />
@@ -361,7 +362,7 @@ export default function CarDetail() {
             <div className="flex items-start gap-4">
               {car.owner_avatar ? (
                 <img
-                  src={`/uploads/${car.owner_avatar}`}
+                  src={imgUrl(car.owner_avatar)}
                   alt={car.owner_name}
                   className="w-12 h-12 rounded-full object-cover flex-shrink-0"
                 />

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../App';
+import { imgUrl } from '../utils/imageUrl';
 import {
   UsersIcon,
   TruckIcon,
@@ -402,7 +403,7 @@ function CarsTab() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       {car.images?.[0] ? (
-                        <img src={`/uploads/${car.images[0]}`} alt={car.title} className="h-10 w-14 object-cover rounded-lg flex-shrink-0" onError={e => { e.target.style.display = 'none'; }} />
+                        <img src={imgUrl(car.images[0])} alt={car.title} className="h-10 w-14 object-cover rounded-lg flex-shrink-0" onError={e => { e.target.style.display = 'none'; }} />
                       ) : (
                         <div className="h-10 w-14 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center text-gray-300 text-lg">🚗</div>
                       )}

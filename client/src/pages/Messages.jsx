@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { io } from 'socket.io-client';
+import { imgUrl } from '../utils/imageUrl';
 import { useAuth } from '../App';
 import { PaperAirplaneIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 
@@ -16,7 +17,7 @@ function Avatar({ name, avatarFile, size = 'sm' }) {
   const color = AVATAR_COLORS[(name?.charCodeAt(0) || 0) % AVATAR_COLORS.length];
   const sizeClass = size === 'sm' ? 'w-10 h-10 text-sm' : 'w-12 h-12 text-base';
   if (avatarFile) {
-    return <img src={`/uploads/${avatarFile}`} alt={name} className={`${sizeClass} rounded-full object-cover flex-shrink-0`} />;
+    return <img src={imgUrl(avatarFile)} alt={name} className={`${sizeClass} rounded-full object-cover flex-shrink-0`} />;
   }
   return (
     <div className={`${color} ${sizeClass} rounded-full flex items-center justify-center text-white font-bold flex-shrink-0`}>

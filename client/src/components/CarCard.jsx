@@ -30,7 +30,7 @@ export default function CarCard({ car }) {
   const isFav = favIds.has(car.id);
 
   const firstImage = car.images && car.images.length > 0
-    ? `/uploads/${car.images[0]}`
+    ? (car.images[0].startsWith('http') ? car.images[0] : `/uploads/${car.images[0]}`)
     : null;
 
   const typeIcon = CAR_TYPE_ICONS[car.type] || '🚗';

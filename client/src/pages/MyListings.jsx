@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { imgUrl } from '../utils/imageUrl';
 import {
   PlusCircleIcon,
   PencilSquareIcon,
@@ -122,7 +123,7 @@ export default function MyListings() {
                   <div className="w-full sm:w-32 h-24 rounded-xl overflow-hidden bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
                     {firstImage ? (
                       <img
-                        src={`/uploads/${firstImage}`}
+                        src={imgUrl(firstImage)}
                         alt={car.title}
                         className="w-full h-full object-cover"
                         onError={e => { e.target.style.display = 'none'; }}
