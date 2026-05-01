@@ -56,7 +56,6 @@ export default function Navbar() {
             
             {/* Logo synchronisé avec le Footer */}
             <Link to="/" className="flex items-center gap-2 font-display font-black text-2xl hover:opacity-80 transition-opacity tracking-tighter">
-              <span className="text-2xl drop-shadow-md">🚗</span>
               <span className="text-white">Gui<span className="text-gnYellow">Car</span>Loc</span>
             </Link>
 
