@@ -5,7 +5,7 @@ import axios from 'axios';
 import { PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import imageCompression from 'browser-image-compression';
 
-const CAR_TYPES = ['sedan', 'suv', 'van', 'sports', 'luxury', 'economy', 'scooter', 'moto'];
+const CAR_TYPES = ['sedan', 'suv', 'van', 'sports', 'luxury', 'economy', 'scooter', 'moto', 'boat'];
 const TRANSMISSIONS = ['auto', 'manual'];
 const FUELS = ['petrol', 'diesel', 'electric', 'hybrid'];
 const CURRENT_YEAR = new Date().getFullYear();
@@ -229,7 +229,7 @@ export default function PostListing() {
             <label className="form-label">{t('listing.type')} *</label>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               {CAR_TYPES.map(type => {
-                const icons = { sedan: '🚗', suv: '🚙', van: '🚐', sports: '🏎️', luxury: '🚘', economy: '🚕', scooter: '🛵', moto: '🏍️' };
+                const icons = { sedan: '🚗', suv: '🚙', van: '🚐', sports: '🏎️', luxury: '🚘', economy: '🚕', scooter: '🛵', moto: '🏍️', boat: '⛵' };
                 return (
                   <button
                     key={type}

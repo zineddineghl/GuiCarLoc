@@ -12,7 +12,8 @@ const CAR_TYPES = [
   { value: 'luxury', icon: '🚘', labelKey: 'car.type_luxury' },
   { value: 'economy', icon: '🚕', labelKey: 'car.type_economy' },
   { value: 'scooter', icon: '🛵', labelKey: 'car.type_scooter' },
-  { value: 'moto', icon: '🏍️', labelKey: 'car.type_moto' }
+  { value: 'moto', icon: '🏍️', labelKey: 'car.type_moto' },
+  { value: 'boat', icon: '⛵', labelKey: 'car.type_boat' }
 ];
 
 export default function SearchBar({ compact = false, initialValues = {} }) {

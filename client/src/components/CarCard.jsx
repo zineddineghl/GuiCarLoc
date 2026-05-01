@@ -13,7 +13,8 @@ const CAR_TYPE_ICONS = {
   luxury: '🚘',
   economy: '🚕',
   scooter: '🛵',
-  moto: '🏍️'
+  moto: '🏍️',
+  boat: '⛵'
 };
 
 const FUEL_ICONS = {

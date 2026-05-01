@@ -50,6 +50,7 @@
     "type_economy": "Economy",
     "type_scooter": "Scooter",
     "type_moto": "Motorcycle",
+    "type_boat": "Boat",
     "type_all": "All Types",
     "per_day": "/ day",
     "seats": "seats",

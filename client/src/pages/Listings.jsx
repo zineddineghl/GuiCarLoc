@@ -6,7 +6,7 @@ import CarCard from '../components/CarCard';
 import SearchBar from '../components/SearchBar';
 import { AdjustmentsHorizontalIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
-const CAR_TYPES = ['all', 'sedan', 'suv', 'van', 'sports', 'luxury', 'economy', 'scooter', 'moto'];
+const CAR_TYPES = ['all', 'sedan', 'suv', 'van', 'sports', 'luxury', 'economy', 'scooter', 'moto', 'boat'];
 const TRANSMISSIONS = ['', 'auto', 'manual'];
 const FUELS = ['', 'petrol', 'diesel', 'electric', 'hybrid'];
 
@@ -255,7 +255,7 @@ export default function Listings() {
                 : 'bg-white text-gray-600 border border-gray-200 hover:border-primary-300 hover:text-primary-700'
             }`}
           >
-            {type === 'sedan' ? '🚗' : type === 'suv' ? '🚙' : type === 'van' ? '🚐' : type === 'sports' ? '🏎️' : type === 'luxury' ? '🚘' : type === 'economy' ? '🚕' : type === 'scooter' ? '🛵' : type === 'moto' ? '🏍️' : '🚗'}{' '}
+            {type === 'sedan' ? '🚗' : type === 'suv' ? '🚙' : type === 'van' ? '🚐' : type === 'sports' ? '🏎️' : type === 'luxury' ? '🚘' : type === 'economy' ? '🚕' : type === 'scooter' ? '🛵' : type === 'moto' ? '🏍️' : type === 'boat' ? '⛵' : '🚗'}{' '}
             {t(type === 'all' ? 'car.type_all' : `car.type_${type}`)}
           </button>
         ))}
