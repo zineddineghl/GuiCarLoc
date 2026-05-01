@@ -28,6 +28,7 @@ router.post('/register', async (req, res) => {
 
     const password_hash = await bcrypt.hash(password, 8);
 
+    // email_verified est mis à 0 par défaut
     const result = await pool.query(
       'INSERT INTO users (name, email, password_hash, phone, role, email_verified) VALUES ($1, $2, $3, $4, $5, 0) RETURNING id, name, email, phone, role, created_at',
       [name, email, password_hash, phone || null, role || 'renter']
@@ -38,6 +39,7 @@ router.post('/register', async (req, res) => {
     const expires = Date.now() + 10 * 60 * 1000;
     await pool.query('UPDATE users SET email_verify_code = $1, email_verify_expires = $2 WHERE id = $3', [code, expires, user.id]);
 
+    // On envoie le mail mais on ne renvoie PAS de token ici (sécurité)
     sendVerificationEmail(user.email, code).catch(err => console.error('[VERIFY] Email failed:', err.message));
 
     res.status(201).json({ requires_verification: true, userId: user.id });
@@ -65,6 +67,15 @@ router.post('/login', async (req, res) => {
     const validPassword = await bcrypt.compare(password, user.password_hash);
     if (!validPassword) {
       return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // --- LE VERROU DE SÉCURITÉ : Vérification de l'email ---
+    if (user.email_verified === 0 || user.email_verified === false) {
+      return res.status(403).json({ 
+        error: 'Veuillez vérifier votre email avant de vous connecter',
+        requires_verification: true, 
+        userId: user.id 
+      });
     }
 
     if (user.banned) {
@@ -97,23 +108,15 @@ router.post('/login', async (req, res) => {
 router.post('/verify-2fa', async (req, res) => {
   try {
     const { userId, code } = req.body;
-    if (!userId || !code) {
-      return res.status(400).json({ error: 'Missing fields' });
-    }
+    if (!userId || !code) return res.status(400).json({ error: 'Missing fields' });
 
     const { rows } = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
     const user = rows[0];
     if (!user) return res.status(401).json({ error: 'Invalid' });
 
-    if (!user.two_fa_code || !user.two_fa_expires) {
-      return res.status(401).json({ error: 'No pending code' });
-    }
-    if (Date.now() > Number(user.two_fa_expires)) {
-      return res.status(401).json({ error: 'Code expired' });
-    }
-    if (user.two_fa_code !== String(code)) {
-      return res.status(401).json({ error: 'Invalid code' });
-    }
+    if (!user.two_fa_code || !user.two_fa_expires) return res.status(401).json({ error: 'No pending code' });
+    if (Date.now() > Number(user.two_fa_expires)) return res.status(401).json({ error: 'Code expired' });
+    if (user.two_fa_code !== String(code)) return res.status(401).json({ error: 'Invalid code' });
 
     await pool.query('UPDATE users SET two_fa_code = NULL, two_fa_expires = NULL WHERE id = $1', [user.id]);
 
@@ -123,7 +126,7 @@ router.post('/verify-2fa', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    const { password_hash, two_fa_code, two_fa_expires, email_verify_code, email_verify_expires, reset_token, reset_token_expires, ...userWithoutSensitive } = user;
+    const { password_hash, ...userWithoutSensitive } = user;
     res.json({ token, user: userWithoutSensitive });
   } catch (err) {
     console.error('2FA verify error:', err);
@@ -151,15 +154,17 @@ router.post('/verify-email', async (req, res) => {
       return res.status(401).json({ error: 'Invalid code' });
     }
 
+    // On valide enfin l'utilisateur
     await pool.query('UPDATE users SET email_verified = 1, email_verify_code = NULL, email_verify_expires = NULL WHERE id = $1', [user.id]);
 
+    // C'est seulement ici qu'on donne le TOKEN final
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role, name: user.name, is_admin: user.is_admin || 0 },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    const { password_hash, two_fa_code, two_fa_expires, email_verify_code, email_verify_expires, reset_token, reset_token_expires, ...userWithoutSensitive } = user;
+    const { password_hash, ...userWithoutSensitive } = user;
     res.json({ token, user: { ...userWithoutSensitive, email_verified: 1 } });
   } catch (err) {
     console.error('Verify email error:', err);
@@ -195,9 +200,7 @@ router.get('/me', async (req, res) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
-  if (!token) {
-    return res.status(401).json({ error: 'No token provided' });
-  }
+  if (!token) return res.status(401).json({ error: 'No token provided' });
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -205,9 +208,7 @@ router.get('/me', async (req, res) => {
       'SELECT id, name, email, phone, role, is_admin, banned, created_at FROM users WHERE id = $1',
       [decoded.id]
     );
-    if (!rows[0]) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+    if (!rows[0]) return res.status(404).json({ error: 'User not found' });
     res.json({ user: rows[0] });
   } catch (err) {
     res.status(403).json({ error: 'Invalid token' });
