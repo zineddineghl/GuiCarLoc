@@ -17,10 +17,10 @@ function isBookingPast(booking) {
 }
 
 const STATUS_BADGE = {
-  pending: 'badge-pending',
-  confirmed: 'badge-confirmed',
-  rejected: 'badge-rejected',
-  cancelled: 'badge-cancelled'
+  pending: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
+  confirmed: 'bg-gnGreen/10 text-gnGreen border-gnGreen/20',
+  rejected: 'bg-gnRed/10 text-gnRed border-gnRed/20',
+  cancelled: 'bg-gray-500/10 text-gray-400 border-gray-500/20'
 };
 
 function formatDate(dateStr) {
@@ -59,157 +59,160 @@ function BookingCard({ booking, onStatusChange, isOwnerView, onReviewSuccess }) 
   const firstImage = booking.images && booking.images.length > 0 ? booking.images[0] : null;
 
   return (
-    <div className="card p-5">
-      <div className="flex flex-col sm:flex-row gap-4">
-        {/* Car Image */}
-        <Link to={`/cars/${booking.car_id}`} className="flex-shrink-0">
-          <div className="w-full sm:w-28 h-20 rounded-xl overflow-hidden bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
-            {firstImage ? (
-              <img
-                src={imgUrl(firstImage)}
-                alt={booking.car_title}
-                className="w-full h-full object-cover"
-                loading="lazy"
-                onError={e => { 
-                  e.target.onerror = null; // Évite une boucle infinie
-                  e.target.src = "data:image/svg+xml,..."; // Ou simplement cacher et montrer l'emoji
-                }}
-              />
-            ) : (
-              <span className="text-3xl opacity-40">🚗</span>
-            )}
-          </div>
-        </Link>
+    <div className="card p-5 border border-white/5 bg-luxuryDark rounded-3xl flex flex-col sm:flex-row gap-6 hover:bg-white/5 transition-colors group">
+      {/* Car Image */}
+      <Link to={`/cars/${booking.car_id}`} className="flex-shrink-0">
+        <div className="w-full sm:w-32 h-24 rounded-2xl overflow-hidden bg-black/50 flex items-center justify-center relative border border-white/5">
+          {firstImage ? (
+            <img
+              src={imgUrl(firstImage)}
+              alt={booking.car_title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              loading="lazy"
+              onError={e => { 
+                e.target.onerror = null;
+                e.target.style.display = 'none';
+              }}
+            />
+          ) : (
+            <span className="text-4xl opacity-20">🚗</span>
+          )}
+        </div>
+      </Link>
 
-        {/* Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-start gap-2 mb-2">
-            <Link to={`/cars/${booking.car_id}`} className="font-bold text-gray-900 hover:text-primary-700 transition-colors">
+      {/* Info */}
+      <div className="flex-1 min-w-0 flex flex-col justify-between">
+        <div>
+          <div className="flex flex-wrap items-start gap-3 mb-2">
+            <Link to={`/cars/${booking.car_id}`} className="font-display font-black text-lg text-white hover:text-gnYellow transition-colors line-clamp-1">
               {booking.car_title || `${booking.brand} ${booking.model}`}
             </Link>
-            <span className={STATUS_BADGE[booking.status] || 'badge-pending'}>
+            <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border ${STATUS_BADGE[booking.status] || STATUS_BADGE.pending}`}>
               {t(`booking.status_${booking.status}`)}
             </span>
           </div>
 
-          <p className="text-sm text-gray-500 flex items-center gap-1 mb-1">
-            <MapPinIcon className="h-3.5 w-3.5" />
+          <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1.5 mb-3">
+            <MapPinIcon className="h-4 w-4 text-gnYellow/50" />
             {booking.city}
           </p>
 
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
-            <span className="flex items-center gap-1">
-              <CalendarIcon className="h-3.5 w-3.5 text-gray-400" />
-              {formatDate(booking.start_date)} → {formatDate(booking.end_date)}
+          <div className="flex flex-wrap gap-4 text-sm bg-black/20 p-3 rounded-xl border border-white/5 mb-3">
+            <span className="flex items-center gap-1.5 text-gray-300 font-bold text-xs uppercase tracking-wider">
+              <CalendarIcon className="h-4 w-4 text-gnYellow/70" />
+              {formatDate(booking.start_date)} <span className="opacity-50">→</span> {formatDate(booking.end_date)}
             </span>
-            <span className="font-semibold text-primary-700">
-              {t('booking.total')}: {booking.total_price} GNF
+            <span className="font-black text-white ml-auto">
+              {new Intl.NumberFormat().format(booking.total_price)} <span className="text-gnYellow text-xs">GNF</span>
             </span>
           </div>
-
-          {isOwnerView ? (
-            <p className="text-xs text-gray-400 mt-1">
-              {t('booking.renter')}: <span className="text-gray-600 font-medium">{booking.renter_name}</span>
-              {booking.renter_phone && ` · ${booking.renter_phone}`}
-            </p>
-          ) : (
-            <p className="text-xs text-gray-400 mt-1">
-              {t('car.owner')}: <span className="text-gray-600 font-medium">{booking.owner_name}</span>
-              {booking.owner_phone && ` · ${booking.owner_phone}`}
-            </p>
-          )}
-
-          {booking.message && (
-            <p className="text-xs text-gray-500 mt-1 italic">"{booking.message}"</p>
-          )}
         </div>
 
-        {/* Actions */}
-        <div className="flex sm:flex-col gap-2 sm:items-end justify-end">
-          {canCancel && !confirmCancel && (
-            <button
-              onClick={() => setConfirmCancel(true)}
-              className="flex items-center gap-1 px-3 py-1.5 border border-red-300 text-red-700 rounded-lg text-xs font-semibold hover:bg-red-50 transition-colors"
-            >
-              <XMarkIcon className="h-3.5 w-3.5" />
-              {i18n.language.startsWith('fr') ? 'Annuler la réservation' : 'Cancel booking'}
-            </button>
-          )}
-          {confirmCancel && (
-            <div className="flex flex-col gap-1.5 items-end bg-red-50 border border-red-200 rounded-lg p-2">
-              <p className="text-xs text-red-700 font-medium text-right">
-                {i18n.language.startsWith('fr') ? 'Confirmer l\'annulation ?' : 'Confirm cancellation?'}
-              </p>
-              <div className="flex gap-1.5">
-                <button
-                  onClick={() => setConfirmCancel(false)}
-                  className="px-2 py-1 text-xs border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  {i18n.language.startsWith('fr') ? 'Non' : 'No'}
-                </button>
-                <button
-                  onClick={() => { setConfirmCancel(false); handleStatus('cancelled'); }}
-                  disabled={loading}
-                  className="px-2 py-1 text-xs bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-                >
-                  {loading
-                    ? '...'
-                    : (i18n.language.startsWith('fr') ? 'Oui, annuler' : 'Yes, cancel')}
-                </button>
-              </div>
-            </div>
-          )}
-          <button
-            onClick={() => navigate(`/messages/${otherUserId}`)}
-            className="flex items-center gap-1 px-3 py-1.5 bg-primary-50 border border-primary-200 text-primary-700 rounded-lg text-xs font-semibold hover:bg-primary-100 transition-colors"
-          >
-            <ChatBubbleLeftIcon className="h-3.5 w-3.5" />
-            {t('booking.send_message')}
-          </button>
-          {canReview && (
-            <button
-              onClick={() => setShowReview(true)}
-              className="flex items-center gap-1 px-3 py-1.5 bg-yellow-50 border border-yellow-300 text-yellow-700 rounded-lg text-xs font-semibold hover:bg-yellow-100 transition-colors"
-            >
-              <StarIcon className="h-3.5 w-3.5" />
-              {t('review.leave_review')}
-            </button>
-          )}
-          {showReview && (
-            <ReviewModal
-              booking={booking}
-              onClose={() => setShowReview(false)}
-              onSuccess={() => {
-                setShowReview(false);
-                setHasReview(true);
-                onReviewSuccess?.();
-              }}
-            />
-          )}
-          {isOwnerView && booking.status === 'pending' && (
-            <>
-              <button
-                onClick={() => handleStatus('confirmed')}
-                disabled={loading}
-                className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700 transition-colors disabled:opacity-50"
-              >
-                <CheckIcon className="h-3.5 w-3.5" />
-                {t('booking.confirm')}
-              </button>
-              <button
-                onClick={() => handleStatus('rejected')}
-                disabled={loading}
-                className="flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-semibold hover:bg-red-700 transition-colors disabled:opacity-50"
-              >
-                <XMarkIcon className="h-3.5 w-3.5" />
-                {t('booking.reject')}
-              </button>
-            </>
-          )}
-          <p className="text-xs text-gray-400 whitespace-nowrap">
-            {formatDate(booking.created_at)}
+        {isOwnerView ? (
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+            {t('booking.renter')}: <span className="text-white">{booking.renter_name}</span>
+            {booking.renter_phone && <span className="text-gnYellow/70 lowercase normal-case italic ml-1">({booking.renter_phone})</span>}
           </p>
-        </div>
+        ) : (
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+            {t('car.owner')}: <span className="text-white">{booking.owner_name}</span>
+            {booking.owner_phone && <span className="text-gnYellow/70 lowercase normal-case italic ml-1">({booking.owner_phone})</span>}
+          </p>
+        )}
+
+        {booking.message && (
+          <p className="text-xs text-gray-400 mt-2 italic bg-white/5 p-2 rounded-lg border-l-2 border-gnYellow">"{booking.message}"</p>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="flex sm:flex-col gap-2 justify-end sm:justify-start border-t sm:border-t-0 sm:border-l border-white/5 pt-4 sm:pt-0 sm:pl-6 shrink-0 min-w-[140px]">
+        {canCancel && !confirmCancel && (
+          <button
+            onClick={() => setConfirmCancel(true)}
+            className="flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-gnRed/20 text-gnRed bg-gnRed/5 hover:bg-gnRed/10 transition-all"
+          >
+            <XMarkIcon className="h-3.5 w-3.5" />
+            {i18n.language.startsWith('fr') ? 'Annuler' : 'Cancel'}
+          </button>
+        )}
+        {confirmCancel && (
+          <div className="flex flex-col gap-2 items-center bg-gnRed/10 border border-gnRed/20 rounded-xl p-3 w-full">
+            <p className="text-[10px] text-gnRed font-bold uppercase tracking-widest text-center">
+              {i18n.language.startsWith('fr') ? 'Confirmer ?' : 'Confirm?'}
+            </p>
+            <div className="flex gap-2 w-full">
+              <button
+                onClick={() => setConfirmCancel(false)}
+                className="flex-1 py-1.5 text-[10px] font-bold border border-white/20 text-gray-400 rounded-lg hover:bg-white/10 transition-colors uppercase"
+              >
+                {i18n.language.startsWith('fr') ? 'Non' : 'No'}
+              </button>
+              <button
+                onClick={() => { setConfirmCancel(false); handleStatus('cancelled'); }}
+                disabled={loading}
+                className="flex-1 py-1.5 text-[10px] font-bold bg-gnRed text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 uppercase"
+              >
+                {loading ? '...' : (i18n.language.startsWith('fr') ? 'Oui' : 'Yes')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={() => navigate(`/messages/${otherUserId}`)}
+          className="flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/10 text-white hover:bg-white/10 hover:border-white/20 transition-all"
+        >
+          <ChatBubbleLeftIcon className="h-4 w-4 text-gnYellow" />
+          Message
+        </button>
+
+        {canReview && (
+          <button
+            onClick={() => setShowReview(true)}
+            className="flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-gnYellow/50 text-gnYellow bg-gnYellow/10 hover:bg-gnYellow/20 transition-all mt-auto"
+          >
+            <StarIcon className="h-4 w-4" />
+            {t('review.leave_review')}
+          </button>
+        )}
+
+        {showReview && (
+          <ReviewModal
+            booking={booking}
+            onClose={() => setShowReview(false)}
+            onSuccess={() => {
+              setShowReview(false);
+              setHasReview(true);
+              onReviewSuccess?.();
+            }}
+          />
+        )}
+
+        {isOwnerView && booking.status === 'pending' && (
+          <div className="flex flex-col gap-2 mt-auto w-full">
+            <button
+              onClick={() => handleStatus('confirmed')}
+              disabled={loading}
+              className="flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-gnGreen text-white hover:bg-green-600 transition-all disabled:opacity-50 shadow-lg"
+            >
+              <CheckIcon className="h-4 w-4" />
+              {t('booking.confirm')}
+            </button>
+            <button
+              onClick={() => handleStatus('rejected')}
+              disabled={loading}
+              className="flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-gnRed/20 text-gnRed bg-gnRed/5 hover:bg-gnRed/10 transition-all disabled:opacity-50"
+            >
+              <XMarkIcon className="h-4 w-4" />
+              {t('booking.reject')}
+            </button>
+          </div>
+        )}
+        
+        <p className="text-[9px] text-gray-600 font-bold uppercase tracking-widest text-center mt-auto pt-2">
+          {formatDate(booking.created_at)}
+        </p>
       </div>
     </div>
   );
@@ -269,162 +272,178 @@ export default function MyBookings() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="animate-pulse space-y-4">
-          {[1, 2, 3].map(i => <div key={i} className="card h-28 bg-gray-100" />)}
+      <div className="bg-luxuryBlack min-h-screen pt-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="animate-pulse space-y-4">
+            {[1, 2, 3].map(i => <div key={i} className="card h-32 bg-white/5 border border-white/5 rounded-3xl" />)}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">
-        {t('booking.my_bookings_title')}
-      </h1>
+    <div className="bg-luxuryBlack min-h-screen">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h1 className="text-3xl md:text-4xl font-display font-black text-white uppercase tracking-tighter mb-8">
+          {t('booking.my_bookings_title') || 'Mes Réservations'}
+        </h1>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 mb-6">
-          {error}
-        </div>
-      )}
-
-      {/* Tabs */}
-      {isOwner && (
-        <div className="flex gap-2 mb-6 border-b border-gray-200">
-          <button
-            onClick={() => setActiveTab('my')}
-            className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px ${
-              activeTab === 'my'
-                ? 'border-primary-600 text-primary-700'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            {t('booking.my_bookings_title')}
-            {myBookings.length > 0 && (
-              <span className="ml-2 inline-flex items-center justify-center w-5 h-5 bg-primary-100 text-primary-700 rounded-full text-xs">
-                {myBookings.length}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('received')}
-            className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px ${
-              activeTab === 'received'
-                ? 'border-primary-600 text-primary-700'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            {t('booking.received_bookings_title')}
-            {receivedBookings.filter(b => b.status === 'pending').length > 0 && (
-              <span className="ml-2 inline-flex items-center justify-center w-5 h-5 bg-orange-100 text-orange-700 rounded-full text-xs font-bold">
-                {receivedBookings.filter(b => b.status === 'pending').length}
-              </span>
-            )}
-          </button>
-        </div>
-      )}
-
-      {/* My Bookings */}
-      {(!isOwner || activeTab === 'my') && (() => {
-        const active = myBookings.filter(b => !isBookingPast(b));
-        const past = myBookings.filter(b => isBookingPast(b));
-        return (
-          <div className="space-y-4">
-            {active.length === 0 && past.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="text-5xl mb-3">📋</div>
-                <p className="text-gray-500">{t('booking.no_bookings')}</p>
-                <Link to="/listings" className="btn-primary mt-4 inline-block">
-                  {t('nav.listings')}
-                </Link>
-              </div>
-            ) : (
-              <>
-                {active.map(booking => (
-                  <BookingCard
-                    key={booking.id}
-                    booking={booking}
-                    onStatusChange={handleStatusChange}
-                    isOwnerView={false}
-                    onReviewSuccess={() => {}}
-                  />
-                ))}
-                {past.length > 0 && (
-                  <div className="mt-8">
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="flex-1 border-t border-gray-200" />
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                        {t('booking.history')}
-                      </span>
-                      <span className="flex-1 border-t border-gray-200" />
-                    </div>
-                    <div className="space-y-4 opacity-80">
-                      {past.map(booking => (
-                        <BookingCard
-                          key={booking.id}
-                          booking={booking}
-                          onStatusChange={handleStatusChange}
-                          isOwnerView={false}
-                          onReviewSuccess={() => {}}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
+        {error && (
+          <div className="bg-gnRed/10 border border-gnRed/20 text-gnRed rounded-xl p-4 mb-8 text-sm font-bold">
+            {error}
           </div>
-        );
-      })()}
+        )}
 
-      {/* Received Bookings */}
-      {isOwner && activeTab === 'received' && (() => {
-        const active = receivedBookings.filter(b => !isBookingPast(b));
-        const past = receivedBookings.filter(b => isBookingPast(b));
-        return (
-          <div className="space-y-4">
-            {active.length === 0 && past.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="text-5xl mb-3">📬</div>
-                <p className="text-gray-500">{t('booking.no_received')}</p>
-              </div>
-            ) : (
-              <>
-                {active.map(booking => (
-                  <BookingCard
-                    key={booking.id}
-                    booking={booking}
-                    onStatusChange={handleStatusChange}
-                    isOwnerView={true}
-                  />
-                ))}
-                {past.length > 0 && (
-                  <div className="mt-8">
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="flex-1 border-t border-gray-200" />
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                        {t('booking.history')}
-                      </span>
-                      <span className="flex-1 border-t border-gray-200" />
-                    </div>
-                    <div className="space-y-4 opacity-80">
-                      {past.map(booking => (
-                        <BookingCard
-                          key={booking.id}
-                          booking={booking}
-                          onStatusChange={handleStatusChange}
-                          isOwnerView={true}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
+        {/* Tabs */}
+        {isOwner && (
+          <div className="flex gap-4 mb-8 border-b border-white/10 pb-1">
+            <button
+              onClick={() => setActiveTab('my')}
+              className={`pb-3 text-xs font-black uppercase tracking-widest transition-colors relative ${
+                activeTab === 'my'
+                  ? 'text-gnYellow'
+                  : 'text-gray-500 hover:text-white'
+              }`}
+            >
+              {t('booking.my_bookings_title') || 'Mes voyages'}
+              {myBookings.length > 0 && (
+                <span className="ml-2 inline-flex items-center justify-center w-5 h-5 bg-white/10 text-white rounded-full text-[9px] border border-white/20">
+                  {myBookings.length}
+                </span>
+              )}
+              {activeTab === 'my' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gnYellow shadow-[0_0_10px_rgba(252,209,22,0.5)]" />}
+            </button>
+            <button
+              onClick={() => setActiveTab('received')}
+              className={`pb-3 text-xs font-black uppercase tracking-widest transition-colors relative ${
+                activeTab === 'received'
+                  ? 'text-gnYellow'
+                  : 'text-gray-500 hover:text-white'
+              }`}
+            >
+              {t('booking.received_bookings_title') || 'Demandes reçues'}
+              {receivedBookings.filter(b => b.status === 'pending').length > 0 && (
+                <span className="ml-2 inline-flex items-center justify-center w-5 h-5 bg-gnYellow text-black rounded-full text-[9px] border border-gnYellow/20 animate-pulse">
+                  {receivedBookings.filter(b => b.status === 'pending').length}
+                </span>
+              )}
+              {activeTab === 'received' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gnYellow shadow-[0_0_10px_rgba(252,209,22,0.5)]" />}
+            </button>
           </div>
-        );
-      })()}
+        )}
+
+        {/* My Bookings */}
+        {(!isOwner || activeTab === 'my') && (() => {
+          const active = myBookings.filter(b => !isBookingPast(b));
+          const past = myBookings.filter(b => isBookingPast(b));
+          return (
+            <div className="space-y-6">
+              {active.length === 0 && past.length === 0 ? (
+                <div className="text-center py-24 bg-luxuryDark rounded-[40px] border border-white/5 border-dashed">
+                  <div className="text-6xl mb-6 opacity-40">🛣️</div>
+                  <h3 className="text-2xl font-display font-bold text-white mb-3">
+                    {t('booking.no_bookings') || 'Aucun voyage prévu'}
+                  </h3>
+                  <p className="text-gray-500 mb-8 max-w-sm mx-auto text-sm">
+                    Prêt pour votre prochaine aventure ? Découvrez nos véhicules premium.
+                  </p>
+                  <Link to="/listings" className="btn-primary px-8">
+                    {t('nav.listings') || 'Explorer les véhicules'}
+                  </Link>
+                </div>
+              ) : (
+                <>
+                  {active.map(booking => (
+                    <BookingCard
+                      key={booking.id}
+                      booking={booking}
+                      onStatusChange={handleStatusChange}
+                      isOwnerView={false}
+                      onReviewSuccess={() => {}}
+                    />
+                  ))}
+                  {past.length > 0 && (
+                    <div className="mt-12">
+                      <div className="flex items-center gap-4 mb-6">
+                        <span className="flex-1 border-t border-white/10" />
+                        <span className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em]">
+                          {t('booking.history') || 'Historique'}
+                        </span>
+                        <span className="flex-1 border-t border-white/10" />
+                      </div>
+                      <div className="space-y-4 opacity-60 hover:opacity-100 transition-opacity duration-500">
+                        {past.map(booking => (
+                          <BookingCard
+                            key={booking.id}
+                            booking={booking}
+                            onStatusChange={handleStatusChange}
+                            isOwnerView={false}
+                            onReviewSuccess={() => {}}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* Received Bookings */}
+        {isOwner && activeTab === 'received' && (() => {
+          const active = receivedBookings.filter(b => !isBookingPast(b));
+          const past = receivedBookings.filter(b => isBookingPast(b));
+          return (
+            <div className="space-y-6">
+              {active.length === 0 && past.length === 0 ? (
+                <div className="text-center py-24 bg-luxuryDark rounded-[40px] border border-white/5 border-dashed">
+                  <div className="text-6xl mb-6 opacity-40">📬</div>
+                  <h3 className="text-2xl font-display font-bold text-white mb-3">
+                    {t('booking.no_received') || 'Aucune demande'}
+                  </h3>
+                  <p className="text-gray-500 mb-8 max-w-sm mx-auto text-sm">
+                    Vous n'avez pas encore reçu de demande de location pour vos véhicules.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {active.map(booking => (
+                    <BookingCard
+                      key={booking.id}
+                      booking={booking}
+                      onStatusChange={handleStatusChange}
+                      isOwnerView={true}
+                    />
+                  ))}
+                  {past.length > 0 && (
+                    <div className="mt-12">
+                      <div className="flex items-center gap-4 mb-6">
+                        <span className="flex-1 border-t border-white/10" />
+                        <span className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em]">
+                          {t('booking.history') || 'Historique'}
+                        </span>
+                        <span className="flex-1 border-t border-white/10" />
+                      </div>
+                      <div className="space-y-4 opacity-60 hover:opacity-100 transition-opacity duration-500">
+                        {past.map(booking => (
+                          <BookingCard
+                            key={booking.id}
+                            booking={booking}
+                            onStatusChange={handleStatusChange}
+                            isOwnerView={true}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })()}
+      </div>
     </div>
   );
 }
