@@ -49,7 +49,14 @@ export default function Navbar() {
     }`;
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <div className="sticky top-0 z-50">
+      {/* Guinea flag tricolor bar */}
+      <div className="h-1 flex">
+        <div className="flex-1 bg-[#CE1126]" />
+        <div className="flex-1 bg-[#FCD116]" />
+        <div className="flex-1 bg-[#009460]" />
+      </div>
+    <nav className="bg-white border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -245,5 +252,6 @@ export default function Navbar() {
         )}
       </div>
     </nav>
+    </div>
   );
 }

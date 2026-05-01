@@ -95,3 +95,36 @@
 .gallery-img {
   @apply w-full h-full object-cover transition-transform duration-300 hover:scale-105;
 }
+
+/* Tricolor Guinea flag decorative line */
+.triline {
+  display: flex;
+  gap: 4px;
+  margin: 12px 0 20px;
+}
+.triline span {
+  height: 3px;
+  border-radius: 2px;
+  width: 48px;
+}
+
+/* Section label (small uppercase tag above title) */
+.section-label-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #1d4ed8;
+  margin-bottom: 10px;
+}
+.section-label-tag::before {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+}

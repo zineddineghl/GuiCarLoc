@@ -53,21 +53,21 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-3 divide-x divide-gray-100">
             <div className="py-5 text-center">
-              <div className="text-2xl font-bold text-primary-700">500+</div>
+              <div className="text-2xl font-bold text-[#CE1126]">500+</div>
               <div className="text-xs text-gray-500 mt-0.5">
-                {t('i18n.language') === 'fr' ? 'Voitures disponibles' : 'Available cars'}
+                {i18n.language === 'fr' ? 'Véhicules disponibles' : 'Available vehicles'}
               </div>
             </div>
             <div className="py-5 text-center">
-              <div className="text-2xl font-bold text-primary-700">50+</div>
+              <div className="text-2xl font-bold text-[#c8a800]">50+</div>
               <div className="text-xs text-gray-500 mt-0.5">
-                {t('i18n.language') === 'fr' ? 'Villes couvertes' : 'Cities covered'}
+                {i18n.language === 'fr' ? 'Villes couvertes' : 'Cities covered'}
               </div>
             </div>
             <div className="py-5 text-center">
-              <div className="text-2xl font-bold text-primary-700">1000+</div>
+              <div className="text-2xl font-bold text-[#009460]">1000+</div>
               <div className="text-xs text-gray-500 mt-0.5">
-                {t('i18n.language') === 'fr' ? 'Clients satisfaits' : 'Happy customers'}
+                {i18n.language === 'fr' ? 'Clients satisfaits' : 'Happy customers'}
               </div>
             </div>
           </div>
@@ -78,8 +78,13 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="flex items-center justify-between mb-8">
           <div>
+            <div className="section-label-tag">{i18n.language === 'fr' ? 'Annonces récentes' : 'Recent listings'}</div>
             <h2 className="section-title">{t('home.featured_title')}</h2>
-            <p className="text-gray-500 mt-1">{t('home.featured_subtitle')}</p>
+            <div className="triline">
+              <span style={{background:'#CE1126'}} />
+              <span style={{background:'#FCD116'}} />
+              <span style={{background:'#009460'}} />
+            </div>
           </div>
           <Link to="/listings" className="btn-secondary btn-sm hidden sm:inline-flex">
             {t('home.view_all')}
@@ -127,7 +132,15 @@ export default function Home() {
       {/* How It Works */}
       <section className="bg-primary-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="section-title text-center mb-12">{t('home.how_it_works')}</h2>
+          <div className="text-center mb-12">
+            <div className="section-label-tag justify-center">{i18n.language === 'fr' ? 'Simple & rapide' : 'Simple & fast'}</div>
+            <h2 className="section-title">{t('home.how_it_works')}</h2>
+            <div className="triline justify-center">
+              <span style={{background:'#CE1126'}} />
+              <span style={{background:'#FCD116'}} />
+              <span style={{background:'#009460'}} />
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { step: 1, icon: '🔍', title: t('home.step1_title'), desc: t('home.step1_desc') },
@@ -153,25 +166,33 @@ export default function Home() {
 
       {/* Why Us */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h2 className="section-title text-center mb-12">{t('home.why_us')}</h2>
+        <div className="text-center mb-12">
+          <div className="section-label-tag justify-center">{i18n.language === 'fr' ? 'Nos avantages' : 'Our advantages'}</div>
+          <h2 className="section-title">{t('home.why_us')}</h2>
+          <div className="triline justify-center">
+            <span style={{background:'#CE1126'}} />
+            <span style={{background:'#FCD116'}} />
+            <span style={{background:'#009460'}} />
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="flex flex-col items-center text-center p-6 rounded-2xl hover:bg-primary-50 transition-colors">
-            <div className="w-14 h-14 bg-primary-100 rounded-2xl flex items-center justify-center mb-4">
-              <ShieldCheckIcon className="h-8 w-8 text-primary-600" />
+          <div className="flex flex-col items-center text-center p-6 rounded-2xl border border-gray-100 hover:border-[#CE1126]/30 hover:shadow-md transition-all">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{background:'rgba(206,17,38,0.1)'}}>
+              <ShieldCheckIcon className="h-8 w-8 text-[#CE1126]" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">{t('home.benefit1_title')}</h3>
             <p className="text-gray-600">{t('home.benefit1_desc')}</p>
           </div>
-          <div className="flex flex-col items-center text-center p-6 rounded-2xl hover:bg-primary-50 transition-colors">
-            <div className="w-14 h-14 bg-primary-100 rounded-2xl flex items-center justify-center mb-4">
-              <BanknotesIcon className="h-8 w-8 text-primary-600" />
+          <div className="flex flex-col items-center text-center p-6 rounded-2xl border border-gray-100 hover:border-[#c8a800]/30 hover:shadow-md transition-all">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{background:'rgba(252,209,22,0.15)'}}>
+              <BanknotesIcon className="h-8 w-8 text-[#c8a800]" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">{t('home.benefit2_title')}</h3>
             <p className="text-gray-600">{t('home.benefit2_desc')}</p>
           </div>
-          <div className="flex flex-col items-center text-center p-6 rounded-2xl hover:bg-primary-50 transition-colors">
-            <div className="w-14 h-14 bg-primary-100 rounded-2xl flex items-center justify-center mb-4">
-              <ClockIcon className="h-8 w-8 text-primary-600" />
+          <div className="flex flex-col items-center text-center p-6 rounded-2xl border border-gray-100 hover:border-[#009460]/30 hover:shadow-md transition-all">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{background:'rgba(0,148,96,0.1)'}}>
+              <ClockIcon className="h-8 w-8 text-[#009460]" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">{t('home.benefit3_title')}</h3>
             <p className="text-gray-600">{t('home.benefit3_desc')}</p>
