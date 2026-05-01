@@ -3,12 +3,20 @@ import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import CarCard from '../components/CarCard';
-import SearchBar from '../components/SearchBar';
-import { AdjustmentsHorizontalIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { AdjustmentsHorizontalIcon, XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
-const CAR_TYPES = ['all', 'sedan', 'suv', 'van', 'sports', 'luxury', 'economy', 'scooter', 'moto', 'boat'];
-const TRANSMISSIONS = ['', 'auto', 'manual'];
-const FUELS = ['', 'petrol', 'diesel', 'electric', 'hybrid'];
+const CAR_TYPES = [
+  { val: 'all', icon: '🚗' },
+  { val: 'sedan', icon: '🚗' },
+  { val: 'suv', icon: '🚙' },
+  { val: 'van', icon: '🚐' },
+  { val: 'sports', icon: '🏎️' },
+  { val: 'luxury', icon: '🚘' },
+  { val: 'economy', icon: '🚕' },
+  { val: 'scooter', icon: '🛵' },
+  { val: 'moto', icon: '🏍️' },
+  { val: 'boat', icon: '⛵' }
+];
 
 export default function Listings() {
   const { t } = useTranslation();
@@ -57,254 +65,156 @@ export default function Listings() {
 
   const clearFilters = () => {
     setFilters({
-      type: 'all',
-      city: '',
-      start_date: '',
-      end_date: '',
-      min_price: '',
-      max_price: '',
-      transmission: '',
-      fuel: '',
-      seats: ''
+      type: 'all', city: '', start_date: '', end_date: '',
+      min_price: '', max_price: '', transmission: '', fuel: '', seats: ''
     });
     setSearchParams({});
   };
 
-  const hasActiveFilters = Object.entries(filters).some(
-    ([k, v]) => v && v !== 'all'
-  );
+  const activeFiltersCount = Object.values(filters).filter(v => v && v !== 'all').length;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('nav.listings')}</h1>
-          <p className="text-gray-500 text-sm mt-1">
-            {loading ? t('common.loading') : `${cars.length} ${cars.length === 1 ? t('filters.result') : t('filters.results')}`}
-          </p>
-        </div>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
-            showFilters || hasActiveFilters
-              ? 'bg-primary-600 text-white border-primary-600'
-              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-          }`}
-        >
-          <AdjustmentsHorizontalIcon className="h-4 w-4" />
-          {t('filters.title')}
-          {hasActiveFilters && (
-            <span className="ml-1 inline-flex items-center justify-center w-5 h-5 bg-white text-primary-700 rounded-full text-xs font-bold">
-              {Object.values(filters).filter(v => v && v !== 'all').length}
-            </span>
-          )}
-        </button>
-      </div>
-
-      {/* Filters Panel */}
-      {showFilters && (
-        <div className="card p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-900">{t('filters.title')}</h2>
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="flex items-center gap-1 text-sm text-red-600 hover:text-red-700 font-medium"
-              >
-                <XMarkIcon className="h-4 w-4" />
-                {t('filters.clear')}
-              </button>
-            )}
+    <div className="bg-luxuryBlack min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+          <div>
+            <h1 className="text-4xl font-display font-black text-white uppercase tracking-tighter mb-2">
+              {t('nav.listings')}
+            </h1>
+            <p className="text-gnYellow font-bold text-xs uppercase tracking-widest opacity-80">
+              {loading ? t('common.loading') : `${cars.length} ${cars.length <= 1 ? t('filters.result') : t('filters.results')}`}
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {/* Type */}
-            <div>
-              <label className="form-label">{t('home.search_type')}</label>
-              <select
-                value={filters.type}
-                onChange={e => handleFilterChange('type', e.target.value)}
-                className="input-field text-sm py-2"
-              >
-                {CAR_TYPES.map(type => (
-                  <option key={type} value={type}>
-                    {t(`car.type_${type === 'all' ? 'all' : type}`)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* City */}
-            <div>
-              <label className="form-label">{t('home.search_city')}</label>
-              <input
-                type="text"
-                value={filters.city}
-                onChange={e => handleFilterChange('city', e.target.value)}
-                placeholder={t('home.search_city_placeholder')}
-                className="input-field text-sm py-2"
-              />
-            </div>
-
-            {/* Start Date */}
-            <div>
-              <label className="form-label">{t('home.pickup_date')}</label>
-              <input
-                type="date"
-                value={filters.start_date}
-                onChange={e => handleFilterChange('start_date', e.target.value)}
-                className="input-field text-sm py-2"
-              />
-            </div>
-
-            {/* End Date */}
-            <div>
-              <label className="form-label">{t('home.return_date')}</label>
-              <input
-                type="date"
-                value={filters.end_date}
-                min={filters.start_date}
-                onChange={e => handleFilterChange('end_date', e.target.value)}
-                className="input-field text-sm py-2"
-              />
-            </div>
-
-            {/* Min Price */}
-            <div>
-              <label className="form-label">{t('filters.min_price')} (GNF)</label>
-              <input
-                type="number"
-                value={filters.min_price}
-                onChange={e => handleFilterChange('min_price', e.target.value)}
-                min="0"
-                placeholder="0"
-                className="input-field text-sm py-2"
-              />
-            </div>
-
-            {/* Max Price */}
-            <div>
-              <label className="form-label">{t('filters.max_price')} (GNF)</label>
-              <input
-                type="number"
-                value={filters.max_price}
-                onChange={e => handleFilterChange('max_price', e.target.value)}
-                min="0"
-                placeholder="500"
-                className="input-field text-sm py-2"
-              />
-            </div>
-
-            {/* Transmission */}
-            <div>
-              <label className="form-label">{t('filters.transmission')}</label>
-              <select
-                value={filters.transmission}
-                onChange={e => handleFilterChange('transmission', e.target.value)}
-                className="input-field text-sm py-2"
-              >
-                <option value="">{t('filters.any')}</option>
-                <option value="auto">{t('car.transmission_auto')}</option>
-                <option value="manual">{t('car.transmission_manual')}</option>
-              </select>
-            </div>
-
-            {/* Fuel */}
-            <div>
-              <label className="form-label">{t('filters.fuel')}</label>
-              <select
-                value={filters.fuel}
-                onChange={e => handleFilterChange('fuel', e.target.value)}
-                className="input-field text-sm py-2"
-              >
-                <option value="">{t('filters.any')}</option>
-                <option value="petrol">{t('car.fuel_petrol')}</option>
-                <option value="diesel">{t('car.fuel_diesel')}</option>
-                <option value="electric">{t('car.fuel_electric')}</option>
-                <option value="hybrid">{t('car.fuel_hybrid')}</option>
-              </select>
-            </div>
-
-            {/* Min Seats */}
-            <div>
-              <label className="form-label">{t('filters.seats')}</label>
-              <input
-                type="number"
-                value={filters.seats}
-                onChange={e => handleFilterChange('seats', e.target.value)}
-                min="1"
-                max="9"
-                placeholder="2"
-                className="input-field text-sm py-2"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Car Type Quick Filter Pills */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-none">
-        {CAR_TYPES.map(type => (
           <button
-            key={type}
-            onClick={() => handleFilterChange('type', type)}
-            className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
-              filters.type === type
-                ? 'bg-primary-600 text-white shadow-sm'
-                : 'bg-white text-gray-600 border border-gray-200 hover:border-primary-300 hover:text-primary-700'
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-3 px-6 py-3 rounded-xl border transition-all duration-300 font-bold text-xs uppercase tracking-widest ${
+              showFilters || activeFiltersCount > 0
+                ? 'bg-gnYellow text-black border-gnYellow shadow-[0_0_20px_rgba(252,209,22,0.3)]'
+                : 'bg-white/5 text-white border-white/10 hover:bg-white/10'
             }`}
           >
-            {type === 'sedan' ? '🚗' : type === 'suv' ? '🚙' : type === 'van' ? '🚐' : type === 'sports' ? '🏎️' : type === 'luxury' ? '🚘' : type === 'economy' ? '🚕' : type === 'scooter' ? '🛵' : type === 'moto' ? '🏍️' : type === 'boat' ? '⛵' : '🚗'}{' '}
-            {t(type === 'all' ? 'car.type_all' : `car.type_${type}`)}
+            <AdjustmentsHorizontalIcon className="h-4 w-4" />
+            {t('filters.title')}
+            {activeFiltersCount > 0 && (
+              <span className="ml-2 px-2 py-0.5 bg-black text-gnYellow rounded-full text-[10px]">
+                {activeFiltersCount}
+              </span>
+            )}
           </button>
-        ))}
-      </div>
-
-      {/* Error */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 mb-6">
-          {error}
         </div>
-      )}
 
-      {/* Cars Grid */}
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-            <div key={i} className="card animate-pulse">
-              <div className="h-44 bg-gray-200"></div>
-              <div className="p-4 space-y-3">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                <div className="h-6 bg-gray-200 rounded w-1/3 mt-4"></div>
+        {/* Quick Filter Pills */}
+        <div className="flex gap-3 overflow-x-auto pb-6 mb-8 scrollbar-hide">
+          {CAR_TYPES.map(ct => (
+            <button
+              key={ct.val}
+              onClick={() => handleFilterChange('type', ct.val)}
+              className={`flex-shrink-0 px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all border ${
+                filters.type === ct.val
+                  ? 'bg-white text-black border-white shadow-lg'
+                  : 'bg-white/5 text-gray-400 border-white/5 hover:border-white/20 hover:text-white'
+              }`}
+            >
+              <span className="mr-2">{ct.icon}</span>
+              {t(ct.val === 'all' ? 'car.type_all' : `car.type_${ct.val}`)}
+            </button>
+          ))}
+        </div>
+
+        {/* Filters Panel Expansion */}
+        {showFilters && (
+          <div className="bg-luxuryDark border border-white/5 p-8 rounded-3xl mb-10 animate-fadeIn">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-white font-bold text-sm uppercase tracking-widest flex items-center gap-2">
+                <MagnifyingGlassIcon className="h-4 w-4 text-gnYellow" />
+                Affiner la recherche
+              </h2>
+              {activeFiltersCount > 0 && (
+                <button onClick={clearFilters} className="text-[10px] font-black text-gnRed uppercase tracking-widest flex items-center gap-1 hover:opacity-80">
+                  <XMarkIcon className="h-3 w-3" /> Effacer tout
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { id: 'city', label: t('home.search_city'), type: 'text', placeholder: 'Ex: Conakry' },
+                { id: 'start_date', label: t('home.pickup_date'), type: 'date' },
+                { id: 'end_date', label: t('home.return_date'), type: 'date', min: filters.start_date },
+                { id: 'min_price', label: 'Prix Min (GNF)', type: 'number' },
+                { id: 'max_price', label: 'Prix Max (GNF)', type: 'number' },
+              ].map(f => (
+                <div key={f.id}>
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase mb-2 ml-1 tracking-widest">{f.label}</label>
+                  <input
+                    type={f.type}
+                    value={filters[f.id]}
+                    min={f.min}
+                    placeholder={f.placeholder}
+                    onChange={e => handleFilterChange(f.id, e.target.value)}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 transition-colors outline-none"
+                  />
+                </div>
+              ))}
+
+              {/* Selects */}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase mb-2 ml-1 tracking-widest">Transmission</label>
+                <select 
+                  value={filters.transmission} 
+                  onChange={e => handleFilterChange('transmission', e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none appearance-none"
+                >
+                  <option value="" className="bg-luxuryBlack">Toutes</option>
+                  <option value="auto" className="bg-luxuryBlack">Automatique</option>
+                  <option value="manual" className="bg-luxuryBlack">Manuelle</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase mb-2 ml-1 tracking-widest">Carburant</label>
+                <select 
+                  value={filters.fuel} 
+                  onChange={e => handleFilterChange('fuel', e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none appearance-none"
+                >
+                  <option value="" className="bg-luxuryBlack">Tous</option>
+                  <option value="petrol" className="bg-luxuryBlack">Essence</option>
+                  <option value="diesel" className="bg-luxuryBlack">Diesel</option>
+                  <option value="electric" className="bg-luxuryBlack">Électrique</option>
+                </select>
               </div>
             </div>
-          ))}
-        </div>
-      ) : cars.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {cars.map(car => (
-            <CarCard key={car.id} car={car} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-20">
-          <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            {t('home.no_cars')}
-          </h3>
-          {hasActiveFilters && (
-            <button
-              onClick={clearFilters}
-              className="btn-primary mt-4"
-            >
-              {t('filters.clear')}
-            </button>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+
+        {/* Cars Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="bg-white/5 h-[400px] rounded-3xl animate-pulse border border-white/5" />
+            ))}
+          </div>
+        ) : cars.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {cars.map(car => (
+              <CarCard key={car.id} car={car} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-32 bg-white/5 rounded-[40px] border border-white/5 border-dashed">
+            <div className="text-6xl mb-6 opacity-40">🔍</div>
+            <h3 className="text-2xl font-display font-bold text-white mb-2">{t('home.no_cars')}</h3>
+            <p className="text-gray-500 text-sm mb-8">Essayez de modifier vos filtres pour trouver votre perle rare.</p>
+            {activeFiltersCount > 0 && (
+              <button onClick={clearFilters} className="btn-primary px-10">Réinitialiser</button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
