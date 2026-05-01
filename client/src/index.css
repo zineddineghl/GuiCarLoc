@@ -8,7 +8,8 @@
   }
 
   body {
-    @apply font-sans text-gray-900 bg-gray-50 antialiased;
+    /* On passe sur le fond noir de luxe et texte clair */
+    @apply font-sans text-gray-200 bg-luxuryBlack antialiased;
   }
 
   * {
@@ -18,55 +19,61 @@
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center px-6 py-2.5 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 active:bg-primary-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    /* Le bouton principal devient le bouton Jaune (gnYellow) */
+    @apply inline-flex items-center justify-center px-6 py-3 bg-gnYellow text-black font-bold tracking-wider uppercase text-sm rounded-lg hover:bg-white active:scale-95 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gnYellow focus:ring-offset-2 focus:ring-offset-luxuryBlack disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_8px_32px_rgba(252,209,22,0.3)];
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center px-6 py-2.5 bg-white text-primary-600 font-semibold rounded-lg border-2 border-primary-600 hover:bg-primary-50 active:bg-primary-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    /* Le bouton secondaire devient transparent avec bordure jaune */
+    @apply inline-flex items-center justify-center px-6 py-3 bg-transparent text-white font-bold tracking-wider uppercase text-sm rounded-lg border border-white/20 hover:border-gnYellow hover:text-gnYellow active:scale-95 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gnYellow focus:ring-offset-2 focus:ring-offset-luxuryBlack disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-danger {
-    @apply inline-flex items-center justify-center px-6 py-2.5 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 active:bg-red-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center px-6 py-2.5 bg-gnRed text-white font-semibold rounded-lg hover:opacity-80 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gnRed focus:ring-offset-2 focus:ring-offset-luxuryBlack disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-sm {
-    @apply px-4 py-1.5 text-sm;
+    @apply px-4 py-1.5 text-xs;
   }
 
   .input-field {
-    @apply w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+    /* Les champs de formulaire adaptés au mode sombre */
+    @apply w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gnYellow focus:bg-gnYellow/5 focus:border-transparent transition-all duration-200;
   }
 
   .input-field-sm {
-    @apply w-full px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+    @apply w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gnYellow focus:bg-gnYellow/5 focus:border-transparent transition-all duration-200;
   }
 
   .card {
-    @apply bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden;
+    /* Les cartes (comme les voitures) passent en gris très foncé */
+    @apply bg-luxuryDark rounded-2xl shadow-lg border border-white/5 overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:border-gnYellow/30 hover:shadow-[0_24px_60px_rgba(0,0,0,0.4)];
   }
 
+  /* Badges - Légèrement adaptés pour ressortir sur fond noir */
   .badge-pending {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-gnYellow/20 text-gnYellow border border-gnYellow/30;
   }
 
   .badge-confirmed {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-gnGreen/20 text-green-400 border border-gnGreen/30;
   }
 
   .badge-rejected {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-gnRed/20 text-red-400 border border-gnRed/30;
   }
 
   .badge-cancelled {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-gray-800 text-gray-400 border border-gray-700;
   }
 
   .section-title {
-    @apply text-2xl md:text-3xl font-bold text-gray-900;
+    /* Utilisation de la police Playfair Display (si ajoutée dans Tailwind) pour le côté Luxe */
+    @apply text-3xl md:text-5xl font-display font-bold text-white leading-tight;
   }
 
   .form-label {
-    @apply block text-sm font-semibold text-gray-700 mb-1.5;
+    @apply block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-widest;
   }
 
   .form-group {
@@ -74,26 +81,26 @@
   }
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - Aux couleurs de GuiCarLoc */
 ::-webkit-scrollbar {
   width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100;
+  @apply bg-luxuryBlack;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-400 rounded-full;
+  @apply bg-gnYellow rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-500;
+  @apply bg-white;
 }
 
 /* Image gallery */
 .gallery-img {
-  @apply w-full h-full object-cover transition-transform duration-300 hover:scale-105;
+  @apply w-full h-full object-cover transition-transform duration-500 hover:scale-105;
 }
 
 /* Tricolor Guinea flag decorative line */
@@ -107,6 +114,9 @@
   border-radius: 2px;
   width: 48px;
 }
+.triline .t-red { @apply bg-gnRed; }
+.triline .t-yellow { @apply bg-gnYellow; }
+.triline .t-green { @apply bg-gnGreen; }
 
 /* Section label (small uppercase tag above title) */
 .section-label-tag {
@@ -117,7 +127,8 @@
   font-weight: 600;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: #1d4ed8;
+  /* Remplacement du bleu par le jaune or */
+  color: theme('colors.gnYellow');
   margin-bottom: 10px;
 }
 .section-label-tag::before {

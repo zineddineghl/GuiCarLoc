@@ -70,23 +70,30 @@ export default function Login() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        <div className="card p-8">
-          {/* Logo */}
-          <div className="text-center mb-8">
+        
+        {/* La classe .card gère déjà le fond sombre grâce à notre index.css */}
+        <div className="card p-8 relative overflow-hidden">
+          
+          {/* Petit effet de lueur dorée en arrière-plan de la carte */}
+          <div className="absolute -top-20 -right-20 w-40 h-40 bg-gnYellow/10 blur-3xl rounded-full pointer-events-none"></div>
+
+          {/* Logo & En-tête */}
+          <div className="text-center mb-8 relative z-10">
             <div className="text-5xl mb-3">🚗</div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('auth.login')}</h1>
-            <p className="text-gray-500 text-sm mt-1">
+            {/* Titre en blanc avec la police Luxe */}
+            <h1 className="text-3xl font-display font-bold text-white tracking-wide">{t('auth.login')}</h1>
+            <p className="text-gray-400 text-sm mt-2">
               {i18n.language === 'fr' ? 'Connectez-vous à votre compte' : 'Sign in to your account'}
             </p>
           </div>
 
           {twoFaStep ? (
             /* --- 2FA step --- */
-            <form onSubmit={handleVerifyOtp} className="space-y-4">
-              <div className="text-center mb-2">
+            <form onSubmit={handleVerifyOtp} className="space-y-5 relative z-10">
+              <div className="text-center mb-4">
                 <div className="text-4xl mb-3">📧</div>
-                <p className="text-gray-700 font-medium">{t('auth.two_fa_title')}</p>
-                <p className="text-gray-500 text-sm mt-1">{t('auth.two_fa_hint')}</p>
+                <p className="text-white font-medium">{t('auth.two_fa_title')}</p>
+                <p className="text-gray-400 text-sm mt-1">{t('auth.two_fa_hint')}</p>
               </div>
 
               <input
@@ -94,6 +101,7 @@ export default function Login() {
                 inputMode="numeric"
                 pattern="[0-9]*"
                 maxLength={6}
+                /* input-field est déjà adapté au mode sombre dans index.css */
                 className="input-field text-center text-3xl tracking-[0.5em] font-bold"
                 placeholder="000000"
                 value={otp}
@@ -102,7 +110,8 @@ export default function Login() {
               />
 
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">
+                /* Alerte d'erreur adaptée au mode sombre */
+                <div className="bg-gnRed/10 border border-gnRed/20 text-red-400 rounded-lg p-3 text-sm text-center">
                   {error}
                 </div>
               )}
@@ -114,7 +123,8 @@ export default function Login() {
               >
                 {loading ? (
                   <span className="flex items-center gap-2 justify-center">
-                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                    {/* Spinner noir pour contraster avec le bouton jaune */}
+                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></span>
                     {t('common.loading')}
                   </span>
                 ) : (
@@ -125,14 +135,14 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => { setTwoFaStep(false); setPendingUserId(null); setOtp(''); setError(''); }}
-                className="w-full text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                className="w-full text-sm text-gray-400 hover:text-white transition-colors"
               >
                 {t('common.back')}
               </button>
             </form>
           ) : (
             /* --- Login form --- */
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
               <div className="form-group">
                 <label className="form-label">{t('auth.email')}</label>
                 <input
@@ -163,7 +173,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
                   >
                     {showPassword ? (
                       <EyeSlashIcon className="h-5 w-5" />
@@ -175,13 +185,13 @@ export default function Login() {
               </div>
 
               <div className="flex justify-end">
-                <Link to="/forgot-password" className="text-sm text-primary-600 hover:underline">
+                <Link to="/forgot-password" className="text-sm text-gnYellow hover:text-white transition-colors">
                   Mot de passe oublié ?
                 </Link>
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">
+                <div className="bg-gnRed/10 border border-gnRed/20 text-red-400 rounded-lg p-3 text-sm text-center">
                   {error}
                 </div>
               )}
@@ -193,7 +203,8 @@ export default function Login() {
               >
                 {loading ? (
                   <span className="flex items-center gap-2 justify-center">
-                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                    {/* Spinner noir pour contraster avec le bouton jaune */}
+                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></span>
                     {t('common.loading')}
                   </span>
                 ) : (
@@ -204,9 +215,9 @@ export default function Login() {
           )}
 
           {!twoFaStep && (
-            <p className="text-center text-sm text-gray-500 mt-6">
+            <p className="text-center text-sm text-gray-400 mt-8 relative z-10">
               {t('auth.no_account')}{' '}
-              <Link to="/register" className="text-primary-600 font-semibold hover:underline">
+              <Link to="/register" className="text-gnYellow font-bold hover:text-white transition-colors tracking-wide">
                 {t('auth.register_link')}
               </Link>
             </p>

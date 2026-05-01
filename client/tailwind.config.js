@@ -1,30 +1,23 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    './index.html',
-    './src/**/*.{js,ts,jsx,tsx}'
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-          950: '#172554'
-        }
+        // Couleurs du drapeau et thème sombre
+        gnRed: '#CE1126',
+        gnYellow: '#FCD116',
+        gnGreen: '#009460',
+        luxuryBlack: '#07090f',
+        luxuryDark: '#0d1018',
+        mutedGray: '#8892a4',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif']
-      }
-    }
+        // Ajoute Playfair Display pour les titres (Luxe)
+        display: ['Playfair Display', 'serif'],
+        sans: ['Jost', 'sans-serif'],
+      },
+    },
   },
-  plugins: []
+  plugins: [],
 };
