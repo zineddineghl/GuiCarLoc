@@ -62,7 +62,7 @@ export default function SearchBar({ compact = false, initialValues = {} }) {
     return (
       <form onSubmit={handleSubmit} className="flex flex-wrap gap-3 items-end">
         <div className="flex-1 min-w-[140px]">
-          <label className="form-label text-white">{t('home.search_type')}</label>
+          <label className="form-label text-gray-400">{t('home.search_type')}</label>
           <select
             name="type"
             value={form.type}
@@ -70,14 +70,14 @@ export default function SearchBar({ compact = false, initialValues = {} }) {
             className="input-field"
           >
             {CAR_TYPES.map(ct => (
-              <option key={ct.value} value={ct.value}>
+              <option key={ct.value} value={ct.value} className="bg-luxuryDark text-white">
                 {ct.icon} {t(ct.labelKey)}
               </option>
             ))}
           </select>
         </div>
         <div className="flex-1 min-w-[140px]">
-          <label className="form-label text-white">{t('home.search_city')}</label>
+          <label className="form-label text-gray-400">{t('home.search_city')}</label>
           <input
             type="text"
             name="city"
@@ -88,7 +88,7 @@ export default function SearchBar({ compact = false, initialValues = {} }) {
           />
         </div>
         <div className="flex-1 min-w-[130px]">
-          <label className="form-label text-white">{t('home.pickup_date')}</label>
+          <label className="form-label text-gray-400">{t('home.pickup_date')}</label>
           <input
             type="date"
             name="start_date"
@@ -99,7 +99,7 @@ export default function SearchBar({ compact = false, initialValues = {} }) {
           />
         </div>
         <div className="flex-1 min-w-[130px]">
-          <label className="form-label text-white">{t('home.return_date')}</label>
+          <label className="form-label text-gray-400">{t('home.return_date')}</label>
           <input
             type="date"
             name="end_date"
@@ -109,7 +109,7 @@ export default function SearchBar({ compact = false, initialValues = {} }) {
             className="input-field"
           />
         </div>
-        <button type="submit" className="btn-primary flex items-center gap-2 whitespace-nowrap">
+        <button type="submit" className="btn-primary flex items-center gap-2 whitespace-nowrap py-3">
           <MagnifyingGlassIcon className="h-4 w-4" />
           {t('home.search_button')}
         </button>
@@ -121,22 +121,22 @@ export default function SearchBar({ compact = false, initialValues = {} }) {
     <form onSubmit={handleSubmit} className="w-full">
       {/* Car Type Selector */}
       <div className="mb-6">
-        <p className="text-sm font-semibold text-white/80 mb-3 uppercase tracking-wider">
+        <p className="text-xs font-bold text-gray-400 mb-3 uppercase tracking-widest">
           {t('home.search_type')}
         </p>
-        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-3">
           {CAR_TYPES.map(ct => (
             <button
               key={ct.value}
               type="button"
               onClick={() => handleTypeSelect(ct.value)}
-              className={`flex flex-col items-center gap-1 p-2.5 rounded-xl text-center transition-all duration-200 ${
+              className={`flex flex-col items-center gap-2 p-3 rounded-xl text-center transition-all duration-300 border ${
                 form.type === ct.value
-                  ? 'bg-white text-primary-700 shadow-lg scale-105'
-                  : 'bg-white/20 text-white hover:bg-white/30'
+                  ? 'bg-gnYellow/10 text-gnYellow border-gnYellow/50 shadow-[0_0_15px_rgba(252,209,22,0.15)] scale-105' // ✅ Correction : Fond sombre transparent + Texte Jaune
+                  : 'bg-white/5 text-gray-400 border-white/5 hover:bg-white/10 hover:text-white' // Inactif : Gris
               }`}
             >
-              <span className="text-2xl">{ct.icon}</span>
+              <span className="text-2xl drop-shadow-md">{ct.icon}</span>
               <span className="text-xs font-medium leading-tight">{t(ct.labelKey)}</span>
             </button>
           ))}
@@ -144,9 +144,9 @@ export default function SearchBar({ compact = false, initialValues = {} }) {
       </div>
 
       {/* Search Fields */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div>
-          <label className="form-label text-white/90">{t('home.search_city')}</label>
+          <label className="form-label text-gray-400">{t('home.search_city')}</label>
           <input
             type="text"
             name="city"
@@ -157,7 +157,7 @@ export default function SearchBar({ compact = false, initialValues = {} }) {
           />
         </div>
         <div>
-          <label className="form-label text-white/90">{t('home.pickup_date')}</label>
+          <label className="form-label text-gray-400">{t('home.pickup_date')}</label>
           <input
             type="date"
             name="start_date"
@@ -168,7 +168,7 @@ export default function SearchBar({ compact = false, initialValues = {} }) {
           />
         </div>
         <div>
-          <label className="form-label text-white/90">{t('home.return_date')}</label>
+          <label className="form-label text-gray-400">{t('home.return_date')}</label>
           <input
             type="date"
             name="end_date"
@@ -181,7 +181,7 @@ export default function SearchBar({ compact = false, initialValues = {} }) {
         <div className="flex items-end">
           <button
             type="submit"
-            className="btn-primary w-full flex items-center justify-center gap-2 py-3 text-base"
+            className="btn-primary w-full flex items-center justify-center gap-2 py-[14px] text-sm"
           >
             <MagnifyingGlassIcon className="h-5 w-5" />
             {t('home.search_button')}
