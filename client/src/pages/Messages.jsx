@@ -5,7 +5,7 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 import { imgUrl } from '../utils/imageUrl';
 import { useAuth } from '../App';
-import { PaperAirplaneIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { PaperAirplaneIcon, ArrowLeftIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 
 const AVATAR_COLORS = [
   'bg-blue-900', 'bg-purple-900', 'bg-emerald-900',
