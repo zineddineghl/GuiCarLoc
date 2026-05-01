@@ -40,15 +40,15 @@ export default function Home() {
               <div className="w-12 h-[1px] bg-gnYellow"></div>
             </div>
 
-            {/* Titre Luxe (Mélange de tes traductions et du style visuel) */}
+            {/* Nouveau Titre Accrocheur */}
             <h1 className="text-5xl md:text-7xl font-display font-black leading-[1.1] tracking-tight mb-6">
-              Le <span className="text-gnYellow">luxe</span><br />
-              au volant,<br />
-              <span className="text-gnGreen">sans limites.</span>
+              Ta voiture dort<br />
+              le <span className="text-gnYellow">week-end ?</span><br />
+              Mets-la à <span className="text-gnGreen">disposition.</span>
             </h1>
             
-            <p className="text-lg md:text-xl text-gray-400 font-light max-w-2xl mx-auto leading-relaxed">
-              {t('home.hero_subtitle')}
+            <p className="text-xl md:text-2xl text-gray-300 font-bold max-w-2xl mx-auto leading-relaxed">
+              Gagne de l'argent avec GuiCarLoc !
             </p>
           </div>
 
