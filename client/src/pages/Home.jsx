@@ -48,32 +48,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats Bar */}
-      <section className="bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-3 divide-x divide-gray-100">
-            <div className="py-5 text-center">
-              <div className="text-2xl font-bold text-[#CE1126]">500+</div>
-              <div className="text-xs text-gray-500 mt-0.5">
-                {i18n.language === 'fr' ? 'Véhicules disponibles' : 'Available vehicles'}
-              </div>
-            </div>
-            <div className="py-5 text-center">
-              <div className="text-2xl font-bold text-[#c8a800]">50+</div>
-              <div className="text-xs text-gray-500 mt-0.5">
-                {i18n.language === 'fr' ? 'Villes couvertes' : 'Cities covered'}
-              </div>
-            </div>
-            <div className="py-5 text-center">
-              <div className="text-2xl font-bold text-[#009460]">1000+</div>
-              <div className="text-xs text-gray-500 mt-0.5">
-                {i18n.language === 'fr' ? 'Clients satisfaits' : 'Happy customers'}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Featured Cars */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="flex items-center justify-between mb-8">
