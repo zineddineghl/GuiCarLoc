@@ -70,12 +70,12 @@ export default function About() {
             </div>
 
             <a 
-              href="https://instagram.com/zinou14200" 
+              href="https://instagram.com/Zinou.ghl" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-block text-center bg-gnYellow text-black hover:brightness-110 font-black text-xs uppercase tracking-widest py-3 px-6 rounded-xl transition-all w-full"
             >
-              Voir mon profil @zinou14200
+              Voir mon profil @Zinou.ghl
             </a>
           </div>
 
