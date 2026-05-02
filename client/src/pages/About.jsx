@@ -111,11 +111,7 @@ export default function About() {
               <p className="text-gnYellow text-[10px] font-bold uppercase tracking-widest mb-4">
                 Développeur Fullstack
               </p>
-              <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                Passionné par le code et l'automobile, j'ai conçu et développé la plateforme 
-                GuiCarLoc de A à Z. Mon objectif : créer l'outil le plus performant et le plus 
-                sécurisé pour faciliter la mobilité de chacun.
-              </p>
+              
             </div>
 
             <a 
