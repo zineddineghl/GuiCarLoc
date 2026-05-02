@@ -28,21 +28,30 @@ router.post('/register', async (req, res) => {
 
     const password_hash = await bcrypt.hash(password, 8);
 
-    // email_verified est mis à 0 par défaut
+    // BYPASS TEMPORAIRE : On force email_verified à 1 par défaut au lieu de 0
     const result = await pool.query(
-      'INSERT INTO users (name, email, password_hash, phone, role, email_verified) VALUES ($1, $2, $3, $4, $5, 0) RETURNING id, name, email, phone, role, created_at',
+      'INSERT INTO users (name, email, password_hash, phone, role, email_verified) VALUES ($1, $2, $3, $4, $5, 1) RETURNING id, name, email, phone, role, created_at, email_verified',
       [name, email, password_hash, phone || null, role || 'renter']
     );
     const user = result.rows[0];
 
+    // BYPASS TEMPORAIRE : On désactive la génération du code et l'envoi du mail
+    /*
     const code = String(Math.floor(100000 + Math.random() * 900000));
     const expires = Date.now() + 10 * 60 * 1000;
     await pool.query('UPDATE users SET email_verify_code = $1, email_verify_expires = $2 WHERE id = $3', [code, expires, user.id]);
-
-    // On envoie le mail mais on ne renvoie PAS de token ici (sécurité)
     sendVerificationEmail(user.email, code).catch(err => console.error('[VERIFY] Email failed:', err.message));
-
     res.status(201).json({ requires_verification: true, userId: user.id });
+    */
+
+    // NOUVEAU COMPORTEMENT : On connecte l'utilisateur directement après l'inscription
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role, name: user.name, is_admin: user.is_admin || 0 },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+    res.status(201).json({ token, user });
+
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -69,7 +78,8 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // --- LE VERROU DE SÉCURITÉ : Vérification de l'email ---
+    // BYPASS TEMPORAIRE : On désactive le verrou de sécurité à la connexion
+    /*
     if (user.email_verified === 0 || user.email_verified === false) {
       return res.status(403).json({ 
         error: 'Veuillez vérifier votre email avant de vous connecter',
@@ -77,6 +87,7 @@ router.post('/login', async (req, res) => {
         userId: user.id 
       });
     }
+    */
 
     if (user.banned) {
       return res.status(403).json({ error: 'Your account has been suspended' });
@@ -134,7 +145,7 @@ router.post('/verify-2fa', async (req, res) => {
   }
 });
 
-// POST /api/auth/verify-email
+// POST /api/auth/verify-email (Laissé actif au cas où, ne gêne pas)
 router.post('/verify-email', async (req, res) => {
   try {
     const { userId, code } = req.body;
@@ -154,10 +165,8 @@ router.post('/verify-email', async (req, res) => {
       return res.status(401).json({ error: 'Invalid code' });
     }
 
-    // On valide enfin l'utilisateur
     await pool.query('UPDATE users SET email_verified = 1, email_verify_code = NULL, email_verify_expires = NULL WHERE id = $1', [user.id]);
 
-    // C'est seulement ici qu'on donne le TOKEN final
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role, name: user.name, is_admin: user.is_admin || 0 },
       JWT_SECRET,
@@ -172,7 +181,7 @@ router.post('/verify-email', async (req, res) => {
   }
 });
 
-// POST /api/auth/resend-verify
+// POST /api/auth/resend-verify (Laissé actif au cas où, ne gêne pas)
 router.post('/resend-verify', async (req, res) => {
   try {
     const { userId } = req.body;
