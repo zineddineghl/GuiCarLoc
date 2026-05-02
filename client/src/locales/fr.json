@@ -123,7 +123,7 @@
     "fuel": "Type de carburant",
     "price": "Prix par jour (GNF)",
     "city": "Ville",
-    "city_placeholder": "ex. Paris",
+    "city_placeholder": "ex. Conakry",
     "address": "Adresse (optionnel)",
     "address_placeholder": "Adresse pour le ramassage",
     "images": "Photos de la voiture",
@@ -284,8 +284,5 @@
     "go_home": "Retour à l'accueil",
     "details" : "Voir l'annonce",
     "toggle_availability": "Changer la disponibilité"
-    
-    
-    
   }
 }
