@@ -172,8 +172,8 @@ export default function CarDetail() {
     } catch { }
   };
 
-  if (loading) return <div className="max-w-7xl mx-auto px-4 py-12 animate-pulse bg-luxuryBlack"></div>;
-  if (error || !car) return <div className="text-center py-20 text-white"><h2 className="text-2xl font-bold">{error || 'Car not found'}</h2></div>;
+  if (loading) return <div className="min-h-screen max-w-7xl mx-auto px-4 py-12 animate-pulse bg-luxuryBlack"></div>;
+  if (error || !car) return <div className="min-h-screen text-center py-20 bg-luxuryBlack text-white"><h2 className="text-2xl font-bold">{error || 'Car not found'}</h2></div>;
 
   const days = calculateDays();
   const total = calculateTotal();
@@ -182,201 +182,212 @@ export default function CarDetail() {
   const isFav = favIds.has(car.id);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Back Button */}
-      <button
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-gray-400 hover:text-white font-medium mb-6 transition-colors"
-      >
-        <ArrowLeftIcon className="h-4 w-4" />
-        {t('common.back')}
-      </button>
+    // AJOUT PRINCIPAL : Le wrapper min-h-screen avec bg-luxuryBlack
+    <div className="min-h-screen bg-luxuryBlack text-white pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {/* Back Button Stylisé Premium */}
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-gray-400 hover:text-gnYellow transition-colors font-bold uppercase tracking-widest text-xs mb-8"
+        >
+          <ArrowLeftIcon className="h-4 w-4" />
+          {t('common.back')}
+        </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left: Car Details */}
-        <div className="lg:col-span-2 space-y-6">
-          
-          {/* Image Gallery */}
-          <div className="card overflow-hidden border border-white/5">
-            {car.images && car.images.length > 0 ? (
-              <div>
-                <div className="relative h-72 sm:h-[450px] bg-luxuryDark overflow-hidden">
-                  <img
-                    src={imgUrl(car.images[activeImage])}
-                    alt={car.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
-                </div>
-                {car.images.length > 1 && (
-                  <div className="p-4 flex gap-3 overflow-x-auto bg-black/20">
-                    {car.images.map((img, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setActiveImage(idx)}
-                        className={`flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-all ${
-                          activeImage === idx ? 'border-gnYellow scale-105' : 'border-transparent opacity-40 hover:opacity-100'
-                        }`}
-                      >
-                        <img src={imgUrl(img)} alt="thumb" className="w-full h-full object-cover" />
-                      </button>
-                    ))}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left: Car Details */}
+          <div className="lg:col-span-2 space-y-6">
+            
+            {/* Image Gallery */}
+            <div className="card overflow-hidden border border-white/5 bg-[#111] rounded-2xl">
+              {car.images && car.images.length > 0 ? (
+                <div>
+                  <div className="relative h-72 sm:h-[450px] bg-luxuryDark overflow-hidden">
+                    <img
+                      src={imgUrl(car.images[activeImage])}
+                      alt={car.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-luxuryBlack/80 to-transparent pointer-events-none" />
                   </div>
-                )}
-              </div>
-            ) : (
-              <div className="h-72 sm:h-96 bg-luxuryDark flex items-center justify-center">
-                <span className="text-9xl opacity-10">{typeIcon}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Car Info */}
-          <div className="card p-8 border border-white/5">
-            <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-gnYellow font-bold text-xs uppercase tracking-widest">{t(`car.type_${car.type}`)}</span>
+                  {car.images.length > 1 && (
+                    <div className="p-4 flex gap-3 overflow-x-auto bg-black/40">
+                      {car.images.map((img, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setActiveImage(idx)}
+                          className={`flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-all ${
+                            activeImage === idx ? 'border-gnYellow scale-105' : 'border-transparent opacity-40 hover:opacity-100'
+                          }`}
+                        >
+                          <img src={imgUrl(img)} alt="thumb" className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <h1 className="text-3xl md:text-4xl font-display font-black text-white mb-2 uppercase tracking-tight">{car.title}</h1>
-                <div className="flex items-center gap-3 text-gray-400">
-                  <MapPinIcon className="h-4 w-4 text-gnYellow" />
-                  <span className="text-sm font-medium">{car.city}{car.address ? `, ${car.address}` : ''}</span>
+              ) : (
+                <div className="h-72 sm:h-96 bg-luxuryDark flex items-center justify-center">
+                  <span className="text-9xl opacity-10">{typeIcon}</span>
                 </div>
-              </div>
-              <div className="flex flex-col items-end gap-3">
-                <StatusBadge available={car.available} />
-                {user && (
-                  <button onClick={() => toggleFavorite(car.id)} className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/10">
-                    {isFav ? <HeartSolidIcon className="h-6 w-6 text-gnRed" /> : <HeartIcon className="h-6 w-6 text-white" />}
-                  </button>
-                )}
-              </div>
+              )}
             </div>
 
-            {/* Specs Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-              {[
-                { label: t('car.year'), val: car.year, icon: '📅' },
-                { label: t('car.seats'), val: car.seats, icon: '👥' },
-                { label: t('car.transmission'), val: t(`car.transmission_${car.transmission}`), icon: '⚙️' },
-                { label: t('car.fuel'), val: t(`car.fuel_${car.fuel}`), icon: fuelIcon }
-              ].map((spec, i) => (
-                <div key={i} className="bg-white/5 border border-white/5 rounded-2xl p-4 text-center hover:bg-white/10 transition-colors">
-                  <div className="text-2xl mb-1">{spec.icon}</div>
-                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">{spec.label}</div>
-                  <div className="font-bold text-white text-sm mt-0.5">{spec.val}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Description */}
-            <div className="pt-6 border-t border-white/5">
-              <h3 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-3">{t('car.description')}</h3>
-              <p className="text-gray-300 leading-relaxed text-base italic font-light">
-                {car.description || t('car.no_description')}
-              </p>
-            </div>
-          </div>
-
-          {/* Availability Calendar */}
-          <div className="card p-2 border border-white/5 overflow-hidden">
-            <AvailabilityCalendar bookedRanges={bookedRanges} lang={i18n.language.startsWith('fr') ? 'fr' : 'en'} />
-          </div>
-
-          {/* Owner Info */}
-          <div className="card p-8 border border-white/5">
-            <h3 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-6">{t('car.owner')}</h3>
-            <div className="flex items-center gap-6">
-              <div className="relative">
-                {car.owner_avatar ? (
-                  <img src={imgUrl(car.owner_avatar)} className="w-20 h-20 rounded-2xl object-cover ring-2 ring-white/10" alt="avatar" />
-                ) : (
-                  <div className="w-20 h-20 bg-gnYellow/10 rounded-2xl flex items-center justify-center text-gnYellow font-black text-3xl border border-gnYellow/20">
-                    {car.owner_name?.charAt(0)?.toUpperCase()}
+            {/* Car Info */}
+            <div className="card p-8 border border-white/5 bg-[#111] rounded-2xl">
+              <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-gnYellow font-bold text-xs uppercase tracking-widest">{t(`car.type_${car.type}`)}</span>
                   </div>
-                )}
-                <div className="absolute -bottom-2 -right-2 bg-gnGreen w-6 h-6 rounded-full border-4 border-luxuryBlack"></div>
-              </div>
-              <div className="flex-1">
-                <Link to={`/profile/${car.owner_id}`} className="text-2xl font-bold text-white hover:text-gnYellow transition-colors">{car.owner_name}</Link>
-                <div className="flex flex-col gap-2 mt-3">
-                  <a href={`mailto:${car.owner_email}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
-                    <EnvelopeIcon className="h-4 w-4 text-gnYellow/50" /> {car.owner_email}
-                  </a>
-                  {car.owner_phone && (
-                    <a href={`tel:${car.owner_phone}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
-                      <PhoneIcon className="h-4 w-4 text-gnYellow/50" /> {car.owner_phone}
-                    </a>
+                  <h1 className="text-3xl md:text-4xl font-display font-black text-white mb-2 uppercase tracking-tight">{car.title}</h1>
+                  <div className="flex items-center gap-3 text-gray-400">
+                    <MapPinIcon className="h-4 w-4 text-gnYellow" />
+                    <span className="text-sm font-medium">{car.city}{car.address ? `, ${car.address}` : ''}</span>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-3">
+                  <StatusBadge available={car.available} />
+                  {user && (
+                    <button onClick={() => toggleFavorite(car.id)} className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/10">
+                      {isFav ? <HeartSolidIcon className="h-6 w-6 text-gnRed" /> : <HeartIcon className="h-6 w-6 text-white" />}
+                    </button>
                   )}
                 </div>
               </div>
+
+              {/* Specs Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+                {[
+                  { label: t('car.year'), val: car.year, icon: '📅' },
+                  { label: t('car.seats'), val: car.seats, icon: '👥' },
+                  { label: t('car.transmission'), val: t(`car.transmission_${car.transmission}`), icon: '⚙️' },
+                  { label: t('car.fuel'), val: t(`car.fuel_${car.fuel}`), icon: fuelIcon }
+                ].map((spec, i) => (
+                  <div key={i} className="bg-white/5 border border-white/5 rounded-2xl p-4 text-center hover:bg-white/10 transition-colors">
+                    <div className="text-2xl mb-1">{spec.icon}</div>
+                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">{spec.label}</div>
+                    <div className="font-bold text-white text-sm mt-0.5">{spec.val}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Description */}
+              <div className="pt-6 border-t border-white/5">
+                <h3 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-3">{t('car.description')}</h3>
+                <p className="text-gray-300 leading-relaxed text-base italic font-light">
+                  {car.description || t('car.no_description')}
+                </p>
+              </div>
+            </div>
+
+            {/* Availability Calendar */}
+            <div className="card p-4 border border-white/5 bg-[#111] rounded-2xl overflow-hidden">
+               <h3 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-4">Disponibilités</h3>
+              <AvailabilityCalendar bookedRanges={bookedRanges} lang={i18n.language.startsWith('fr') ? 'fr' : 'en'} />
+            </div>
+
+            {/* Owner Info */}
+            <div className="card p-8 border border-white/5 bg-[#111] rounded-2xl">
+              <h3 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-6">{t('car.owner')}</h3>
+              <div className="flex items-center gap-6">
+                <div className="relative">
+                  {car.owner_avatar ? (
+                    <img src={imgUrl(car.owner_avatar)} className="w-20 h-20 rounded-2xl object-cover ring-2 ring-white/10" alt="avatar" />
+                  ) : (
+                    <div className="w-20 h-20 bg-gnYellow/10 rounded-2xl flex items-center justify-center text-gnYellow font-black text-3xl border border-gnYellow/20">
+                      {car.owner_name?.charAt(0)?.toUpperCase()}
+                    </div>
+                  )}
+                  <div className="absolute -bottom-2 -right-2 bg-gnGreen w-6 h-6 rounded-full border-4 border-luxuryBlack"></div>
+                </div>
+                <div className="flex-1">
+                  <Link to={`/profile/${car.owner_id}`} className="text-2xl font-bold text-white hover:text-gnYellow transition-colors">{car.owner_name}</Link>
+                  <div className="flex flex-col gap-2 mt-3">
+                    <a href={`mailto:${car.owner_email}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
+                      <EnvelopeIcon className="h-4 w-4 text-gnYellow/50" /> {car.owner_email}
+                    </a>
+                    {car.owner_phone && (
+                      <a href={`tel:${car.owner_phone}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
+                        <PhoneIcon className="h-4 w-4 text-gnYellow/50" /> {car.owner_phone}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Right: Booking Widget */}
-        <div className="lg:col-span-1">
-          <div className="card p-8 sticky top-24 border border-white/5 bg-luxuryDark/50 backdrop-blur-xl">
-            <div className="flex items-baseline gap-2 mb-8 border-b border-white/5 pb-6">
-              <span className="text-4xl font-display font-black text-white">{new Intl.NumberFormat().format(car.price_per_day)}</span>
-              <span className="text-gnYellow font-bold text-sm">GNF / {t('car.per_day')}</span>
-            </div>
+          {/* Right: Booking Widget avec effet Premium */}
+          <div className="lg:col-span-1">
+            <div className="relative overflow-hidden bg-gray-900/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 sticky top-28 shadow-2xl">
+              
+              {/* Effet de lumière dorée subtil */}
+              <div className="absolute -top-12 -right-12 w-48 h-48 bg-gnYellow/10 blur-[50px] rounded-full pointer-events-none"></div>
 
-            {isOwner ? (
-              <div className="space-y-4">
-                <div className="bg-gnYellow/5 border border-gnYellow/20 rounded-2xl p-5 text-center">
-                  <p className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-4">Votre Annonce</p>
-                  <Link to={`/edit-listing/${car.id}`} className="btn-primary w-full block mb-3">{t('common.edit')}</Link>
-                  <button onClick={() => setShowBlocker(v => !v)} className="w-full text-xs font-bold text-gray-400 hover:text-white transition-colors">
-                    {showBlocker ? 'Fermer le gestionnaire' : 'Gérer les disponibilités'}
-                  </button>
-                </div>
-                {showBlocker && (
-                   <div className="p-4 bg-white/5 rounded-2xl border border-white/10 animate-fadeIn">
-                      <form onSubmit={handleAddBlock} className="space-y-3">
-                        <input type="date" value={blockForm.start_date} min={today} onChange={e => setBlockForm(p => ({ ...p, start_date: e.target.value }))} className="input-field text-sm" required />
-                        <input type="date" value={blockForm.end_date} min={blockForm.start_date} onChange={e => setBlockForm(p => ({ ...p, end_date: e.target.value }))} className="input-field text-sm" required />
-                        <button type="submit" disabled={blockLoading} className="btn-primary w-full py-2 text-xs">Bloquer ces dates</button>
-                      </form>
-                      <div className="mt-4 space-y-2">
-                        {blockedDates.map(b => (
-                          <div key={b.id} className="flex items-center justify-between bg-black/40 p-2 rounded-lg text-[10px] text-gray-300">
-                            <span>{b.start_date} → {b.end_date}</span>
-                            <button onClick={() => handleRemoveBlock(b.id)}><TrashIcon className="h-3 w-3 text-gnRed" /></button>
+              <div className="flex items-baseline gap-2 mb-8 border-b border-white/10 pb-6 relative z-10">
+                <span className="text-4xl font-display font-black text-white">{new Intl.NumberFormat().format(car.price_per_day)}</span>
+                <span className="text-gnYellow font-bold text-sm uppercase tracking-widest">GNF / {t('car.per_day')}</span>
+              </div>
+
+              <div className="relative z-10">
+                {isOwner ? (
+                  <div className="space-y-4">
+                    <div className="bg-gnYellow/5 border border-gnYellow/20 rounded-2xl p-5 text-center">
+                      <p className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-4">Votre Annonce</p>
+                      <Link to={`/edit-listing/${car.id}`} className="btn-primary w-full block mb-3">{t('common.edit')}</Link>
+                      <button onClick={() => setShowBlocker(v => !v)} className="w-full text-xs font-bold text-gray-400 hover:text-white transition-colors">
+                        {showBlocker ? 'Fermer le gestionnaire' : 'Gérer les disponibilités'}
+                      </button>
+                    </div>
+                    {showBlocker && (
+                        <div className="p-4 bg-black/40 rounded-2xl border border-white/10 animate-fadeIn">
+                          <form onSubmit={handleAddBlock} className="space-y-3">
+                            <input type="date" value={blockForm.start_date} min={today} onChange={e => setBlockForm(p => ({ ...p, start_date: e.target.value }))} className="input-field text-sm bg-luxuryBlack" required />
+                            <input type="date" value={blockForm.end_date} min={blockForm.start_date} onChange={e => setBlockForm(p => ({ ...p, end_date: e.target.value }))} className="input-field text-sm bg-luxuryBlack" required />
+                            <button type="submit" disabled={blockLoading} className="btn-primary w-full py-2 text-xs">Bloquer ces dates</button>
+                          </form>
+                          <div className="mt-4 space-y-2">
+                            {blockedDates.map(b => (
+                              <div key={b.id} className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/5 text-[11px] font-bold text-gray-300">
+                                <span>{b.start_date} → {b.end_date}</span>
+                                <button onClick={() => handleRemoveBlock(b.id)} className="p-1.5 hover:bg-gnRed/20 rounded-lg transition-colors"><TrashIcon className="h-4 w-4 text-gnRed" /></button>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        </div>
+                    )}
+                  </div>
+                ) : (
+                  <form onSubmit={handleBookingSubmit} className="space-y-6">
+                    <DateRangePicker startDate={booking.start_date} endDate={booking.end_date} onChange={handleDateChange} bookedRanges={bookedRanges} lang={i18n.language.startsWith('fr') ? 'fr' : 'en'} />
+                    
+                    {days > 0 && (
+                      <div className="bg-black/40 rounded-2xl p-5 space-y-3 border border-white/5 shadow-inner">
+                        <div className="flex justify-between text-xs text-gray-400">
+                          <span>{new Intl.NumberFormat().format(car.price_per_day)} GNF × {days} j</span>
+                          <span className="text-white font-bold">{new Intl.NumberFormat().format(total)} GNF</span>
+                        </div>
+                        <div className="border-t border-white/5 pt-3 flex items-end justify-between">
+                          <span className="text-sm font-bold text-white uppercase tracking-widest">Total</span>
+                          <span className="text-2xl font-display font-black text-gnYellow">{new Intl.NumberFormat().format(total)} GNF</span>
+                        </div>
                       </div>
-                   </div>
+                    )}
+
+                    <textarea value={booking.message} onChange={e => setBooking(prev => ({ ...prev, message: e.target.value }))} placeholder={t('booking.message_placeholder')} rows={3} className="input-field text-sm bg-black/40 border-white/10" />
+
+                    {bookingError && <div className="p-3 bg-gnRed/10 border border-gnRed/20 text-gnRed text-xs font-bold rounded-xl text-center">{bookingError}</div>}
+                    {bookingSuccess && <div className="p-3 bg-gnGreen/10 border border-gnGreen/20 text-gnGreen text-xs font-bold rounded-xl text-center">{bookingSuccess}</div>}
+
+                    <button type="submit" disabled={bookingLoading || !car.available || days < 1} className="btn-primary w-full py-4 text-sm font-black uppercase tracking-widest shadow-[0_0_20px_rgba(252,209,22,0.2)]">
+                      {bookingLoading ? t('common.loading') : t('booking.submit')}
+                    </button>
+                  </form>
                 )}
               </div>
-            ) : (
-              <form onSubmit={handleBookingSubmit} className="space-y-6">
-                <DateRangePicker startDate={booking.start_date} endDate={booking.end_date} onChange={handleDateChange} bookedRanges={bookedRanges} lang={i18n.language.startsWith('fr') ? 'fr' : 'en'} />
-                
-                {days > 0 && (
-                  <div className="bg-white/5 rounded-2xl p-5 space-y-3 border border-white/5">
-                    <div className="flex justify-between text-xs text-gray-400">
-                      <span>{new Intl.NumberFormat().format(car.price_per_day)} GNF × {days} j</span>
-                      <span className="text-white font-bold">{new Intl.NumberFormat().format(total)} GNF</span>
-                    </div>
-                    <div className="border-t border-white/5 pt-3 flex justify-between">
-                      <span className="text-sm font-bold text-white">Total</span>
-                      <span className="text-xl font-display font-black text-gnYellow">{new Intl.NumberFormat().format(total)} GNF</span>
-                    </div>
-                  </div>
-                )}
-
-                <textarea value={booking.message} onChange={e => setBooking(prev => ({ ...prev, message: e.target.value }))} placeholder={t('booking.message_placeholder')} rows={3} className="input-field text-sm bg-black/20" />
-
-                {bookingError && <div className="p-3 bg-gnRed/10 border border-gnRed/20 text-gnRed text-xs rounded-xl text-center">{bookingError}</div>}
-                {bookingSuccess && <div className="p-3 bg-gnGreen/10 border border-gnGreen/20 text-gnGreen text-xs rounded-xl text-center">{bookingSuccess}</div>}
-
-                <button type="submit" disabled={bookingLoading || !car.available || days < 1} className="btn-primary w-full py-4 text-lg font-black uppercase tracking-tighter">
-                  {bookingLoading ? t('common.loading') : t('booking.submit')}
-                </button>
-              </form>
-            )}
+            </div>
           </div>
         </div>
       </div>
