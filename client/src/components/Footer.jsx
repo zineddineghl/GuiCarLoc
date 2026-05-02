@@ -8,30 +8,6 @@ export default function Footer() {
 
   return (
     <footer className="bg-black text-gray-400 mt-auto border-t border-white/5">
-      {/* 
-          SECTION CTA (Bannière Jaune/Or) 
-      */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 mb-16">
-        <div className="relative overflow-hidden bg-gradient-to-r from-gnYellow to-[#D4AF37] rounded-[2rem] p-8 md:p-12 text-center shadow-[0_20px_50px_rgba(252,209,22,0.15)]">
-          {/* Décoration subtile en arrière-plan */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full -mr-32 -mt-32 blur-3xl" />
-          
-          <h2 className="relative z-10 text-2xl md:text-4xl font-display font-black text-black uppercase tracking-tighter mb-4">
-            {t('footer.cta_title') || 'Vous avez une voiture à louer ?'}
-          </h2>
-          <p className="relative z-10 text-black/80 font-bold uppercase text-[10px] tracking-[0.2em] mb-8">
-            {t('footer.cta_subtitle') || 'Publiez votre annonce gratuitement et commencez à générer des revenus.'}
-          </p>
-          <Link
-            to="/post-listing"
-            className="relative z-10 inline-flex items-center gap-2 bg-black text-white px-8 py-4 rounded-xl font-black uppercase text-xs tracking-widest hover:scale-105 transition-transform shadow-2xl"
-          >
-            <span>🚗</span>
-            {t('nav.post_listing') || 'Publier une annonce'}
-          </Link>
-        </div>
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand & Description */}
@@ -66,14 +42,12 @@ export default function Footer() {
                   {t('nav.post_listing') || 'Publier une annonce'}
                 </Link>
               </li>
-              {/* Ajout de la page Contact ici */}
               <li>
                 <Link to="/contact" className="hover:text-gnYellow text-sm transition-colors flex items-center gap-2 group">
                   <span className="w-0 group-hover:w-2 h-px bg-gnYellow transition-all" />
                   Nous contacter
                 </Link>
               </li>
-              {/* Déplacement de la page À propos ici */}
               <li>
                 <Link to="/about" className="hover:text-gnYellow text-sm transition-colors flex items-center gap-2 group">
                   <span className="w-0 group-hover:w-2 h-px bg-gnYellow transition-all" />
