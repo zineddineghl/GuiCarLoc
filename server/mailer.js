@@ -2,7 +2,7 @@ const { Resend } = require('resend');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = 'GuiCarLoc <no-reply@guicarloc.com>';
-
+const ADMIN_EMAIL = 'Sow.saikou@gmail.com';
 async function sendEmail({ to, subject, html }) {
   if (!process.env.RESEND_API_KEY) {
     console.log(`\n[EMAIL DEV] To: ${to} | Subject: ${subject}\n`);
@@ -177,4 +177,34 @@ async function sendNewMessageEmail({ to, receiverName, senderName, content, mess
   await sendEmail({ to, subject, html });
 }
 
-module.exports = { sendOTPEmail, sendVerificationEmail, sendNewBookingEmail, sendBookingConfirmedEmail, sendBookingRejectedEmail, sendPasswordResetEmail, sendNewMessageEmail };
+// La nouvelle fonction pour le formulaire de contact
+async function sendContactEmail(name, replyToEmail, subject, message) {
+  const emailSubject = `[GuiCarLoc Contact] ${subject}`;
+  const html = baseTemplate(`
+    <h3 style="color:#1e40af;margin-top:0;">Nouveau message de contact</h3>
+    <p><strong>Nom :</strong> ${name}</p>
+    <p><strong>Email :</strong> <a href="mailto:${replyToEmail}">${replyToEmail}</a></p>
+    <p><strong>Sujet :</strong> ${subject}</p>
+    <div style="background:#f3f4f6;border-left:4px solid #1e40af;border-radius:4px;padding:14px 18px;margin:16px 0;white-space:pre-wrap;">${message}</div>
+    <div style="text-align:center;margin:24px 0;">
+      <a href="mailto:${replyToEmail}" style="background:#1e40af;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:bold;font-size:15px;display:inline-block;">
+        Répondre au client
+      </a>
+    </div>
+  `);
+  
+  // On utilise la fonction sendEmail qui existe déjà dans ton fichier
+  await sendEmail({ to: ADMIN_EMAIL, subject: emailSubject, html });
+}
+
+// On exporte tout, y compris la nouvelle fonction
+module.exports = { 
+  sendOTPEmail, 
+  sendVerificationEmail, 
+  sendNewBookingEmail, 
+  sendBookingConfirmedEmail, 
+  sendBookingRejectedEmail, 
+  sendPasswordResetEmail, 
+  sendNewMessageEmail,
+  sendContactEmail // <- LA NOUVELLE FONCTION EST EXPORTÉE ICI
+};
