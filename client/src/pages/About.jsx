@@ -92,10 +92,10 @@ export default function About() {
                 Saikou Sow
               </h2>
               <p className="text-blue-500 text-[10px] font-bold uppercase tracking-widest mb-4">
-                Propriétaire & Partenaire
+                Propriétaire
               </p>
               <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                Partenaire de confiance sur la plateforme GuiCarLoc. Je mets à disposition 
+                Je mets à disposition 
                 des véhicules fiables et bien entretenus pour répondre à tous vos besoins 
                 de déplacement en Guinée.
               </p>
