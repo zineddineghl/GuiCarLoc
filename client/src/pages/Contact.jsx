@@ -57,7 +57,7 @@ export default function Contact() {
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gnYellow transition-colors"
-                    placeholder="John Doe"
+                    placeholder="Mohamed Kamara"
                   />
                 </div>
                 <div>
@@ -68,7 +68,7 @@ export default function Contact() {
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                     className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gnYellow transition-colors"
-                    placeholder="john@example.com"
+                    placeholder="Kamara@example.com"
                   />
                 </div>
               </div>
