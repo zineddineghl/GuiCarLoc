@@ -5,7 +5,9 @@ const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
-const { sendNewMessageEmail } = require('./mailer');
+
+// AJOUT DE sendContactEmail ICI 👇
+const { sendNewMessageEmail, sendContactEmail } = require('./mailer');
 
 const pool = require('./db');
 const migrate = require('./migrate');
@@ -131,6 +133,24 @@ app.use('/api/messages', messagesRoutes);
 app.use('/api/favorites', favoritesRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/admin', adminRoutes);
+
+// LA NOUVELLE ROUTE POUR LE FORMULAIRE DE CONTACT 👇
+app.post('/api/contact', async (req, res) => {
+  const { name, email, subject, message } = req.body;
+  
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: 'Veuillez remplir tous les champs.' });
+  }
+
+  try {
+    // Fait appel à ta fonction dans mailer.js
+    await sendContactEmail(name, email, subject, message);
+    res.status(200).json({ success: true, message: 'Message envoyé' });
+  } catch (error) {
+    console.error('Erreur route contact:', error);
+    res.status(500).json({ error: 'Erreur lors de l\'envoi' });
+  }
+});
 
 // Health check
 app.get('/api/health', (req, res) => {
