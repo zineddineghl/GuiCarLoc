@@ -65,7 +65,7 @@ export default function About() {
                 Propriétaire & Fondateur
               </p>
               <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                Partenaire de confiance sur la plateforme GuiCarLoc. Je mets à disposition 
+                Je mets à disposition 
                 des véhicules fiables et bien entretenus pour répondre à tous vos besoins 
                 de déplacement en Guinée.
               </p>
