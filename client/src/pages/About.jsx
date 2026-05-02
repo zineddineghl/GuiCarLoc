@@ -106,12 +106,15 @@ export default function About() {
                 </svg>
               </div>
               <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1">
-                Zineddine
+                Zineddine GHALMI
               </h2>
               <p className="text-gnYellow text-[10px] font-bold uppercase tracking-widest mb-4">
                 Développeur Fullstack
               </p>
-              
+              <p className="text-gray-400 text-sm leading-relaxed mb-6">
+                Architecte numérique de la plateforme, 
+                je m'assure que la technologie soit au service de votre mobilité. 
+              </p>
             </div>
 
             <a 
