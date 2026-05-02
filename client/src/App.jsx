@@ -19,6 +19,10 @@ import Admin from './pages/Admin';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 
+// Nouvelles pages ajoutées
+import About from './pages/About';
+import Contact from './pages/Contact';
+
 // Auth Context
 const AuthContext = createContext(null);
 
@@ -128,6 +132,11 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            
+            {/* Routes ajoutées pour le Footer */}
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+
             <Route
               path="/post-listing"
               element={
