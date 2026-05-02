@@ -284,5 +284,18 @@
     "go_home": "Go to Home",
     "toggle_availability": "Toggle Availability",
     "details": "View details"
+  },
+  "about": {
+    "title_prefix": "About",
+    "mission": "Our mission is to revolutionize car rental in Guinea. We believe in a simple, secure, and transparent platform that connects trusted car owners with those seeking the freedom to move.",
+    "insta_title": "The GuiCarLoc Adventure",
+    "insta_desc": "Join our online community! Follow us on Instagram to discover newly added vehicles, exclusive offers, and the most beautiful destinations to explore with our rental cars.",
+    "insta_btn": "Follow @guicarloc",
+    "saikou_role": "Owner & Founder",
+    "saikou_desc": "I provide reliable and well-maintained vehicles to meet all your travel needs in Guinea.",
+    "call_btn": "Call",
+    "zinou_role": "Fullstack Developer",
+    "zinou_desc": "Digital architect of the platform, I ensure that technology serves your mobility.",
+    "zinou_btn": "View my profile @Zinou.ghl"
   }
 }

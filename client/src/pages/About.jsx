@@ -11,12 +11,10 @@ export default function About() {
         {/* Section 1 : Introduction / Notre Mission */}
         <div className="text-center space-y-6">
           <h1 className="text-3xl md:text-5xl font-display font-black text-white uppercase tracking-tighter">
-            À propos de <span className="text-gnYellow">GuiCarLoc</span>
+            {t('about.title_prefix')} <span className="text-gnYellow">GuiCarLoc</span>
           </h1>
           <p className="text-gray-400 text-lg leading-relaxed max-w-2xl mx-auto">
-            Notre mission est de révolutionner la location de véhicules en Guinée. 
-            Nous croyons en une plateforme simple, sécurisée et transparente, qui connecte 
-            les propriétaires de voitures de confiance avec ceux qui cherchent la liberté de se déplacer.
+            {t('about.mission')}
           </p>
         </div>
 
@@ -31,12 +29,10 @@ export default function About() {
                 </svg>
               </div>
               <h2 className="text-xl font-black text-white uppercase tracking-wider mb-3">
-                L'aventure GuiCarLoc
+                {t('about.insta_title')}
               </h2>
               <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                Rejoignez notre communauté en ligne ! Suivez-nous sur Instagram pour découvrir 
-                les nouveaux véhicules ajoutés, des offres exclusives et les plus belles 
-                destinations à explorer avec nos voitures de location.
+                {t('about.insta_desc')}
               </p>
             </div>
             
@@ -46,7 +42,7 @@ export default function About() {
               rel="noopener noreferrer"
               className="inline-block text-center bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-widest border border-white/10 py-3 px-6 rounded-xl transition-colors w-full"
             >
-              Suivre @guicarloc
+              {t('about.insta_btn')}
             </a>
           </div>
 
@@ -62,12 +58,10 @@ export default function About() {
                 Saikou Sow
               </h2>
               <p className="text-blue-500 text-[10px] font-bold uppercase tracking-widest mb-4">
-                Propriétaire & Fondateur
+                {t('about.saikou_role')}
               </p>
               <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                Je mets à disposition 
-                des véhicules fiables et bien entretenus pour répondre à tous vos besoins 
-                de déplacement en Guinée.
+                {t('about.saikou_desc')}
               </p>
             </div>
 
@@ -92,7 +86,7 @@ export default function About() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
-                Appeler
+                {t('about.call_btn')}
               </a>
             </div>
           </div>
@@ -109,11 +103,10 @@ export default function About() {
                 Zineddine GHALMI
               </h2>
               <p className="text-gnYellow text-[10px] font-bold uppercase tracking-widest mb-4">
-                Développeur Fullstack
+                {t('about.zinou_role')}
               </p>
               <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                Architecte numérique de la plateforme, 
-                je m'assure que la technologie soit au service de votre mobilité. 
+                {t('about.zinou_desc')}
               </p>
             </div>
 
@@ -123,7 +116,7 @@ export default function About() {
               rel="noopener noreferrer"
               className="inline-block text-center bg-gnYellow text-black hover:brightness-110 font-black text-xs uppercase tracking-widest py-3 px-6 rounded-xl transition-all w-full"
             >
-              Voir mon profil @Zinou.ghl
+              {t('about.zinou_btn')}
             </a>
           </div>
 

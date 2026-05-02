@@ -284,5 +284,18 @@
     "go_home": "Retour à l'accueil",
     "details" : "Voir l'annonce",
     "toggle_availability": "Changer la disponibilité"
+  },
+  "about": {
+    "title_prefix": "À propos de",
+    "mission": "Notre mission est de révolutionner la location de véhicules en Guinée. Nous croyons en une plateforme simple, sécurisée et transparente, qui connecte les propriétaires de voitures de confiance avec ceux qui cherchent la liberté de se déplacer.",
+    "insta_title": "L'aventure GuiCarLoc",
+    "insta_desc": "Rejoignez notre communauté en ligne ! Suivez-nous sur Instagram pour découvrir les nouveaux véhicules ajoutés, des offres exclusives et les plus belles destinations à explorer avec nos voitures de location.",
+    "insta_btn": "Suivre @guicarloc",
+    "saikou_role": "Propriétaire & Fondateur",
+    "saikou_desc": "Je mets à disposition des véhicules fiables et bien entretenus pour répondre à tous vos besoins de déplacement en Guinée.",
+    "call_btn": "Appeler",
+    "zinou_role": "Développeur Fullstack",
+    "zinou_desc": "Architecte numérique de la plateforme, je m'assure que la technologie soit au service de votre mobilité.",
+    "zinou_btn": "Voir mon profil @Zinou.ghl"
   }
 }
