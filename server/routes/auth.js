@@ -35,14 +35,14 @@ router.post('/register', async (req, res) => {
     );
     const user = result.rows[0];
 
-    // BYPASS TEMPORAIRE : On désactive la génération du code et l'envoi du mail
-    /*
+   
+    
     const code = String(Math.floor(100000 + Math.random() * 900000));
     const expires = Date.now() + 10 * 60 * 1000;
     await pool.query('UPDATE users SET email_verify_code = $1, email_verify_expires = $2 WHERE id = $3', [code, expires, user.id]);
     sendVerificationEmail(user.email, code).catch(err => console.error('[VERIFY] Email failed:', err.message));
     res.status(201).json({ requires_verification: true, userId: user.id });
-    */
+    
 
     // NOUVEAU COMPORTEMENT : On connecte l'utilisateur directement après l'inscription
     const token = jwt.sign(
@@ -78,8 +78,8 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // BYPASS TEMPORAIRE : On désactive le verrou de sécurité à la connexion
-    /*
+   
+    
     if (user.email_verified === 0 || user.email_verified === false) {
       return res.status(403).json({ 
         error: 'Veuillez vérifier votre email avant de vous connecter',
@@ -87,7 +87,7 @@ router.post('/login', async (req, res) => {
         userId: user.id 
       });
     }
-    */
+    
 
     if (user.banned) {
       return res.status(403).json({ error: 'Your account has been suspended' });
