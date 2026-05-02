@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Listings from './pages/Listings';
 import CarDetail from './pages/CarDetail';
@@ -100,7 +101,6 @@ function App() {
       if (isFav) await axios.delete(`/api/favorites/${carId}`);
       else await axios.post(`/api/favorites/${carId}`);
     } catch {
-      // revert on error
       setFavIds(prev => {
         const next = new Set(prev);
         isFav ? next.add(carId) : next.delete(carId);
@@ -122,7 +122,12 @@ function App() {
   return (
     <AuthContext.Provider value={{ user, token, login, logout, loading, notifCount, setNotifCount, msgCount, setMsgCount, favIds, toggleFavorite }}>
       <div className="min-h-screen flex flex-col bg-gray-50">
+        
+        {/* Règle le problème du scroll */}
+        <ScrollToTop />
+        
         <Navbar />
+        
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Home />} />
@@ -133,86 +138,26 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             
-            {/* Routes ajoutées pour le Footer */}
+            {/* Routes Pages d'information */}
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
 
-            <Route
-              path="/post-listing"
-              element={
-                <ProtectedRoute>
-                  <PostListing />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/edit-listing/:id"
-              element={
-                <ProtectedRoute>
-                  <PostListing />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/my-listings"
-              element={
-                <ProtectedRoute>
-                  <MyListings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/my-bookings"
-              element={
-                <ProtectedRoute>
-                  <MyBookings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/messages"
-              element={
-                <ProtectedRoute>
-                  <Messages />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/messages/:userId"
-              element={
-                <ProtectedRoute>
-                  <Messages />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/favorites"
-              element={
-                <ProtectedRoute>
-                  <Favorites />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <Admin />
-                </ProtectedRoute>
-              }
-            />
+            {/* Routes Protégées */}
+            <Route path="/post-listing" element={<ProtectedRoute><PostListing /></ProtectedRoute>} />
+            <Route path="/edit-listing/:id" element={<ProtectedRoute><PostListing /></ProtectedRoute>} />
+            <Route path="/my-listings" element={<ProtectedRoute><MyListings /></ProtectedRoute>} />
+            <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
+            <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+            <Route path="/messages/:userId" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+            <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+            
             <Route path="/profile/:id" element={<UserProfile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
+        
         <Footer />
       </div>
     </AuthContext.Provider>
