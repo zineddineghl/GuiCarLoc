@@ -2,7 +2,7 @@ const { Resend } = require('resend');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = 'GuiCarLoc <no-reply@guicarloc.com>';
-const ADMIN_EMAIL = 'Sow.saikou@gmail.com';
+const ADMIN_EMAIL = 'noreply.guicarloc@gmail.com';
 async function sendEmail({ to, subject, html }) {
   if (!process.env.RESEND_API_KEY) {
     console.log(`\n[EMAIL DEV] To: ${to} | Subject: ${subject}\n`);
