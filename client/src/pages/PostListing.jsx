@@ -30,8 +30,18 @@ export default function PostListing() {
     price_per_day: '',
     city: '',
     address: '',
-    available: true
+    available: true,
+    // Nouveaux champs Tarifs & Conditions :
+    weekend_price: '',
+    min_rental_days: '',
+    max_rental_days: '',
+    requires_deposit: false,
+    deposit_amount: '',
+    // Nouveaux champs de réductions (%) :
+    discount_3_days: '',
+    discount_7_days: ''
   });
+  
   const [newImages, setNewImages] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
   const [previews, setPreviews] = useState([]);
@@ -58,7 +68,15 @@ export default function PostListing() {
             price_per_day: car.price_per_day || '',
             city: car.city || '',
             address: car.address || '',
-            available: Boolean(car.available)
+            available: Boolean(car.available),
+            weekend_price: car.weekend_price || '',
+            min_rental_days: car.min_rental_days || '',
+            max_rental_days: car.max_rental_days || '',
+            requires_deposit: Boolean(car.requires_deposit),
+            deposit_amount: car.deposit_amount || '',
+            // Chargement des réductions existantes
+            discount_3_days: car.discount_3_days || '',
+            discount_7_days: car.discount_7_days || ''
           });
           setExistingImages(car.images || []);
         })
@@ -134,6 +152,17 @@ export default function PostListing() {
       return;
     }
 
+    if (form.requires_deposit && !form.deposit_amount) {
+      setError(i18n.language.startsWith('fr') ? 'Veuillez indiquer le montant de la caution' : 'Please provide the deposit amount');
+      return;
+    }
+
+    // Vérification des réductions pour éviter les erreurs de saisie
+    if ((form.discount_3_days && form.discount_3_days > 100) || (form.discount_7_days && form.discount_7_days > 100)) {
+      setError(i18n.language.startsWith('fr') ? 'La réduction ne peut pas dépasser 100%' : 'Discount cannot exceed 100%');
+      return;
+    }
+
     setLoading(true);
     setError('');
     setSuccess('');
@@ -179,7 +208,6 @@ export default function PostListing() {
     );
   }
 
-  // Helper pour les labels
   const Label = ({ children, required }) => (
     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
       {children} {required && <span className="text-gnYellow">*</span>}
@@ -194,36 +222,20 @@ export default function PostListing() {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-8">
+          
           {/* General Information */}
           <div className="card p-8 border border-white/5 bg-luxuryDark rounded-3xl">
             <h2 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-6 pb-4 border-b border-white/5">
               {i18n.language.startsWith('fr') ? 'Informations générales' : 'General Information'}
             </h2>
-
             <div className="space-y-6">
               <div>
                 <Label required>{t('listing.car_title')}</Label>
-                <input
-                  type="text"
-                  name="title"
-                  value={form.title}
-                  onChange={handleChange}
-                  placeholder={t('listing.car_title_placeholder')}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 focus:ring-1 focus:ring-gnYellow/50 transition-all outline-none"
-                  required
-                />
+                <input type="text" name="title" value={form.title} onChange={handleChange} placeholder={t('listing.car_title_placeholder')} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 focus:ring-1 focus:ring-gnYellow/50 transition-all outline-none" required />
               </div>
-
               <div>
                 <Label>{t('listing.description')}</Label>
-                <textarea
-                  name="description"
-                  value={form.description}
-                  onChange={handleChange}
-                  placeholder={t('listing.description_placeholder')}
-                  rows={4}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 focus:ring-1 focus:ring-gnYellow/50 transition-all outline-none resize-none"
-                />
+                <textarea name="description" value={form.description} onChange={handleChange} placeholder={t('listing.description_placeholder')} rows={4} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 focus:ring-1 focus:ring-gnYellow/50 transition-all outline-none resize-none" />
               </div>
             </div>
           </div>
@@ -233,7 +245,6 @@ export default function PostListing() {
             <h2 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-6 pb-4 border-b border-white/5">
               {i18n.language.startsWith('fr') ? 'Caractéristiques du véhicule' : 'Vehicle Details'}
             </h2>
-
             <div className="space-y-8">
               {/* Type Grid */}
               <div>
@@ -262,31 +273,19 @@ export default function PostListing() {
 
               {/* Specs Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div>
-                  <Label required>{t('listing.brand')}</Label>
-                  <input type="text" name="brand" value={form.brand} onChange={handleChange} placeholder={t('listing.brand_placeholder')} required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
-                </div>
-                <div>
-                  <Label required>{t('listing.model')}</Label>
-                  <input type="text" name="model" value={form.model} onChange={handleChange} placeholder={t('listing.model_placeholder')} required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
-                </div>
-                <div>
-                  <Label required>{t('listing.year')}</Label>
-                  <input type="number" name="year" value={form.year} onChange={handleChange} min="1990" max={CURRENT_YEAR + 1} required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
-                </div>
-                <div>
-                  <Label required>{t('listing.seats')}</Label>
-                  <input type="number" name="seats" value={form.seats} onChange={handleChange} min="1" max="9" required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
-                </div>
+                <div><Label required>{t('listing.brand')}</Label><input type="text" name="brand" value={form.brand} onChange={handleChange} required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" /></div>
+                <div><Label required>{t('listing.model')}</Label><input type="text" name="model" value={form.model} onChange={handleChange} required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" /></div>
+                <div><Label required>{t('listing.year')}</Label><input type="number" name="year" value={form.year} onChange={handleChange} min="1990" max={CURRENT_YEAR + 1} required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" /></div>
+                <div><Label required>{t('listing.seats')}</Label><input type="number" name="seats" value={form.seats} onChange={handleChange} min="1" max="9" required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" /></div>
                 <div>
                   <Label required>{t('listing.transmission')}</Label>
-                  <select name="transmission" value={form.transmission} onChange={handleChange} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none appearance-none cursor-pointer">
+                  <select name="transmission" value={form.transmission} onChange={handleChange} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none appearance-none">
                     {TRANSMISSIONS.map(t_ => <option key={t_} value={t_} className="bg-luxuryBlack">{t(`car.transmission_${t_}`)}</option>)}
                   </select>
                 </div>
                 <div>
                   <Label required>{t('listing.fuel')}</Label>
-                  <select name="fuel" value={form.fuel} onChange={handleChange} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none appearance-none cursor-pointer">
+                  <select name="fuel" value={form.fuel} onChange={handleChange} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none appearance-none">
                     {FUELS.map(f => <option key={f} value={f} className="bg-luxuryBlack">{t(`car.fuel_${f}`)}</option>)}
                   </select>
                 </div>
@@ -294,33 +293,115 @@ export default function PostListing() {
             </div>
           </div>
 
-          {/* Location & Pricing */}
+          {/* Tarification Avancée & Conditions */}
           <div className="card p-8 border border-white/5 bg-luxuryDark rounded-3xl">
             <h2 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-6 pb-4 border-b border-white/5">
-              {i18n.language.startsWith('fr') ? 'Localisation & Tarif' : 'Location & Pricing'}
+              {i18n.language.startsWith('fr') ? 'Tarification & Conditions' : 'Pricing & Conditions'}
             </h2>
 
+            <div className="space-y-8">
+              {/* Tarifs de base */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <Label required>{t('listing.price')} ({i18n.language.startsWith('fr') ? 'Semaine' : 'Weekday'})</Label>
+                  <div className="relative">
+                    <input type="number" name="price_per_day" value={form.price_per_day} onChange={handleChange} min="1" step="0.01" placeholder="Ex: 500000" required className="w-full bg-black/40 border border-white/10 rounded-xl pl-4 pr-16 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-xs uppercase tracking-widest">GNF/J</span>
+                  </div>
+                </div>
+                <div>
+                  <Label>{i18n.language.startsWith('fr') ? 'Prix Week-end' : 'Weekend Price'} <span className="text-gray-600 font-normal ml-1 lowercase italic">({t('common.optional')})</span></Label>
+                  <div className="relative">
+                    <input type="number" name="weekend_price" value={form.weekend_price} onChange={handleChange} min="1" step="0.01" placeholder="Ex: 600000" className="w-full bg-black/40 border border-white/10 rounded-xl pl-4 pr-16 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-xs uppercase tracking-widest">GNF/J</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Réductions de durée */}
+              <div className="pt-6 border-t border-white/5">
+                <h3 className="text-white font-bold text-sm mb-4">
+                  {i18n.language.startsWith('fr') ? 'Réductions par durée (%)' : 'Duration Discounts (%)'}
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <Label>{i18n.language.startsWith('fr') ? 'Dès 3 jours de location' : '3+ days discount'} <span className="text-gray-600 font-normal ml-1 lowercase italic">({t('common.optional')})</span></Label>
+                    <div className="relative">
+                      <input type="number" name="discount_3_days" value={form.discount_3_days} onChange={handleChange} min="0" max="100" placeholder="Ex: 10" className="w-full bg-black/40 border border-white/10 rounded-xl pl-4 pr-12 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gnYellow font-bold text-xs uppercase">%</span>
+                    </div>
+                  </div>
+                  <div>
+                    <Label>{i18n.language.startsWith('fr') ? 'Dès 7 jours de location' : '7+ days discount'} <span className="text-gray-600 font-normal ml-1 lowercase italic">({t('common.optional')})</span></Label>
+                    <div className="relative">
+                      <input type="number" name="discount_7_days" value={form.discount_7_days} onChange={handleChange} min="0" max="100" placeholder="Ex: 20" className="w-full bg-black/40 border border-white/10 rounded-xl pl-4 pr-12 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gnYellow font-bold text-xs uppercase">%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Durées de location */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 border-t border-white/5">
+                <div>
+                  <Label>{i18n.language.startsWith('fr') ? 'Durée Minimum' : 'Min Duration'} <span className="text-gray-600 font-normal ml-1 lowercase italic">({t('common.optional')})</span></Label>
+                  <div className="relative">
+                    <input type="number" name="min_rental_days" value={form.min_rental_days} onChange={handleChange} min="1" placeholder="Ex: 2" className="w-full bg-black/40 border border-white/10 rounded-xl pl-4 pr-16 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-[10px] uppercase tracking-widest">{i18n.language.startsWith('fr') ? 'Jours' : 'Days'}</span>
+                  </div>
+                </div>
+                <div>
+                  <Label>{i18n.language.startsWith('fr') ? 'Durée Maximum' : 'Max Duration'} <span className="text-gray-600 font-normal ml-1 lowercase italic">({t('common.optional')})</span></Label>
+                  <div className="relative">
+                    <input type="number" name="max_rental_days" value={form.max_rental_days} onChange={handleChange} min="1" placeholder="Ex: 30" className="w-full bg-black/40 border border-white/10 rounded-xl pl-4 pr-16 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-[10px] uppercase tracking-widest">{i18n.language.startsWith('fr') ? 'Jours' : 'Days'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Caution */}
+              <div className="p-5 bg-white/5 border border-white/5 rounded-2xl">
+                <label className="flex items-center gap-3 cursor-pointer w-max mb-4">
+                  <div className="relative flex items-center justify-center w-6 h-6 border-2 border-gray-400 rounded-md bg-transparent">
+                    <input type="checkbox" name="requires_deposit" checked={form.requires_deposit} onChange={handleChange} className="appearance-none absolute inset-0 cursor-pointer checked:bg-gnYellow checked:border-gnYellow transition-colors rounded-md" />
+                    {form.requires_deposit && <XMarkIcon className="w-4 h-4 text-black absolute pointer-events-none stroke-[4px]" style={{ clipPath: 'polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%)' }}/>}
+                  </div>
+                  <span className="text-sm font-bold text-white uppercase tracking-widest">
+                    {i18n.language.startsWith('fr') ? 'Exiger une caution' : 'Require Deposit'}
+                  </span>
+                </label>
+                
+                {form.requires_deposit && (
+                  <div className="pt-2 animate-fadeIn">
+                    <Label required>{i18n.language.startsWith('fr') ? 'Montant de la caution' : 'Deposit Amount'}</Label>
+                    <div className="relative max-w-sm">
+                      <input type="number" name="deposit_amount" value={form.deposit_amount} onChange={handleChange} min="1" step="0.01" placeholder="Ex: 1000000" className="w-full bg-black/40 border border-gnYellow/30 rounded-xl pl-4 pr-16 py-3 text-white text-sm focus:border-gnYellow focus:ring-1 focus:ring-gnYellow outline-none transition-colors" required={form.requires_deposit} />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gnYellow font-bold text-xs uppercase tracking-widest">GNF</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Location & Disponibilité */}
+          <div className="card p-8 border border-white/5 bg-luxuryDark rounded-3xl">
+            <h2 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-6 pb-4 border-b border-white/5">
+              {i18n.language.startsWith('fr') ? 'Localisation & Disponibilité' : 'Location & Availability'}
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
               <div>
                 <Label required>{t('listing.city')}</Label>
                 <input type="text" name="city" value={form.city} onChange={handleChange} placeholder={t('listing.city_placeholder')} required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
               </div>
               <div>
-                <Label required>{t('listing.price')}</Label>
-                <div className="relative">
-                  <input type="number" name="price_per_day" value={form.price_per_day} onChange={handleChange} min="1" step="0.01" placeholder="Ex: 500000" required className="w-full bg-black/40 border border-white/10 rounded-xl pl-4 pr-16 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-xs uppercase tracking-widest">GNF</span>
-                </div>
+                <Label>{t('listing.address')} <span className="text-gray-600 font-normal ml-1 lowercase italic">({t('common.optional')})</span></Label>
+                <input type="text" name="address" value={form.address} onChange={handleChange} placeholder={t('listing.address_placeholder')} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
               </div>
             </div>
 
-            <div className="mb-6">
-              <Label>{t('listing.address')} <span className="text-gray-600 font-normal ml-1 lowercase italic">({t('common.optional')})</span></Label>
-              <input type="text" name="address" value={form.address} onChange={handleChange} placeholder={t('listing.address_placeholder')} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors" />
-            </div>
-
             {isEdit && (
-              <label className="flex items-center gap-3 cursor-pointer mt-8 p-4 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors w-max">
+              <label className="flex items-center gap-3 cursor-pointer mt-4 p-4 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors w-max">
                 <div className="relative flex items-center justify-center w-6 h-6 border-2 border-gray-400 rounded-md bg-transparent">
                   <input type="checkbox" name="available" checked={form.available} onChange={handleChange} className="appearance-none absolute inset-0 cursor-pointer checked:bg-gnYellow checked:border-gnYellow transition-colors rounded-md" />
                   {form.available && <XMarkIcon className="w-4 h-4 text-black absolute pointer-events-none stroke-[4px]" style={{ clipPath: 'polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%)' }}/>}
@@ -338,7 +419,6 @@ export default function PostListing() {
             <p className="text-xs text-gray-500 font-medium mb-6 pb-4 border-b border-white/5">{t('listing.images_help')}</p>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {/* Existing */}
               {existingImages.map((img, idx) => (
                 <div key={`ext-${idx}`} className="group relative aspect-[4/3] rounded-xl overflow-hidden border border-white/10 bg-black">
                   <img src={imgUrl(img)} alt="" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
@@ -347,8 +427,6 @@ export default function PostListing() {
                   </button>
                 </div>
               ))}
-
-              {/* Previews */}
               {previews.map((src, idx) => (
                 <div key={`prev-${idx}`} className="group relative aspect-[4/3] rounded-xl overflow-hidden border-2 border-gnYellow/50 bg-black">
                   <img src={src} alt="" className="w-full h-full object-cover" />
@@ -357,8 +435,6 @@ export default function PostListing() {
                   </button>
                 </div>
               ))}
-
-              {/* Upload Button */}
               {(existingImages.length + newImages.length) < 8 && (
                 <label className="flex flex-col items-center justify-center gap-3 aspect-[4/3] border-2 border-dashed border-white/20 rounded-xl cursor-pointer hover:border-gnYellow hover:bg-gnYellow/5 transition-colors bg-white/5 group">
                   <PhotoIcon className="h-8 w-8 text-gray-500 group-hover:text-gnYellow transition-colors" />
@@ -377,18 +453,10 @@ export default function PostListing() {
 
           {/* Actions */}
           <div className="flex flex-col-reverse sm:flex-row gap-4 pt-4">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="w-full sm:w-1/3 py-4 rounded-xl border border-white/10 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/5 transition-colors"
-            >
+            <button type="button" onClick={() => navigate(-1)} className="w-full sm:w-1/3 py-4 rounded-xl border border-white/10 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/5 transition-colors">
               {t('common.cancel')}
             </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full sm:w-2/3 py-4 rounded-xl bg-gradient-to-r from-gnYellow to-[#D4AF37] text-black font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-transform shadow-[0_10px_20px_rgba(252,209,22,0.2)] disabled:opacity-50 disabled:hover:scale-100"
-            >
+            <button type="submit" disabled={loading} className="w-full sm:w-2/3 py-4 rounded-xl bg-gradient-to-r from-gnYellow to-[#D4AF37] text-black font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-transform shadow-[0_10px_20px_rgba(252,209,22,0.2)] disabled:opacity-50 disabled:hover:scale-100">
               {loading ? t('common.loading') : isEdit ? t('listing.update') : t('listing.submit')}
             </button>
           </div>

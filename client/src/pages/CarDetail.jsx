@@ -1,394 +1,313 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { useAuth } from '../App';
 import { imgUrl } from '../utils/imageUrl';
-import DateRangePicker from '../components/DateRangePicker';
-import AvailabilityCalendar from '../components/AvailabilityCalendar';
-import {
-  MapPinIcon,
-  UserGroupIcon,
-  CogIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  ArrowLeftIcon,
+import { 
+  CalendarIcon, 
+  UserGroupIcon, 
+  CogIcon, 
+  BeakerIcon, 
   CheckCircleIcon,
-  XCircleIcon,
-  HeartIcon,
-  NoSymbolIcon,
-  TrashIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
+  ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
-
-const CAR_TYPE_ICONS = {
-  sedan: '🚗', suv: '🚙', van: '🚐', sports: '🏎️', luxury: '🚘', economy: '🚕'
-};
-const FUEL_ICONS = { petrol: '⛽', diesel: '🛢️', electric: '⚡', hybrid: '🔋' };
-
-function StatusBadge({ available }) {
-  const { t } = useTranslation();
-  if (available) {
-    return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gnGreen/20 text-gnGreen rounded-full text-xs font-bold uppercase tracking-wider border border-gnGreen/30">
-        <CheckCircleIcon className="h-3.5 w-3.5" />
-        {t('car.available')}
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gnRed/20 text-gnRed rounded-full text-xs font-bold uppercase tracking-wider border border-gnRed/30">
-      <XCircleIcon className="h-3.5 w-3.5" />
-      {t('car.unavailable')}
-    </span>
-  );
-}
 
 export default function CarDetail() {
-  const { id } = useParams();
   const { t, i18n } = useTranslation();
-  const { user, favIds, toggleFavorite } = useAuth();
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [car, setCar] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeImage, setActiveImage] = useState(0);
-  const [reviews, setReviews] = useState([]);
-  const [bookedRanges, setBookedRanges] = useState([]);
-
-  const today = new Date().toISOString().split('T')[0];
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-
-  const [booking, setBooking] = useState({
-    start_date: today,
-    end_date: tomorrow,
-    message: ''
-  });
+  
+  // États pour la réservation
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [bookingLoading, setBookingLoading] = useState(false);
-  const [bookingError, setBookingError] = useState('');
-  const [bookingSuccess, setBookingSuccess] = useState('');
-
-  const [showBlocker, setShowBlocker] = useState(false);
-  const [blockedDates, setBlockedDates] = useState([]);
-  const [blockForm, setBlockForm] = useState({ start_date: today, end_date: tomorrow });
-  const [blockLoading, setBlockLoading] = useState(false);
-  const [blockError, setBlockError] = useState('');
 
   useEffect(() => {
     axios.get(`/api/cars/${id}`)
       .then(res => setCar(res.data.car))
-      .catch(err => {
-        if (err.response?.status === 404) setError('Car not found');
-        else setError(t('common.error'));
-      })
+      .catch(err => setError(err.response?.data?.error || 'Voiture introuvable'))
       .finally(() => setLoading(false));
+  }, [id]);
 
-    axios.get(`/api/reviews/car/${id}`)
-      .then(res => setReviews(res.data.reviews || []))
-      .catch(() => {});
+  // Algorithme de calcul du prix
+  const pricing = useMemo(() => {
+    if (!car || !startDate || !endDate) return null;
 
-    axios.get(`/api/bookings/car/${id}/booked-dates`)
-      .then(res => setBookedRanges(res.data.ranges || []))
-      .catch(() => {});
-  }, [id, t]);
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    // On met à minuit pour éviter les bugs de fuseau horaire
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
 
-  const isOwner = user && car && user.id === car.owner_id;
+    const diffTime = end - start;
+    const totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Différence en jours
 
-  useEffect(() => {
-    if (!isOwner) return;
-    axios.get(`/api/cars/${id}/blocked-dates`)
-      .then(res => setBlockedDates(res.data.blocked || []))
-      .catch(() => {});
-  }, [isOwner, id]);
+    if (totalDays <= 0) return { error: 'Les dates sont invalides.' };
+    
+    // Vérification des limites de durée
+    if (car.min_rental_days && totalDays < car.min_rental_days) {
+      return { error: `Cette voiture nécessite une location de ${car.min_rental_days} jours minimum.` };
+    }
+    if (car.max_rental_days && totalDays > car.max_rental_days) {
+      return { error: `Cette voiture ne peut pas être louée plus de ${car.max_rental_days} jours.` };
+    }
 
-  const handleDateChange = ({ start_date, end_date }) => {
-    setBooking(prev => ({ ...prev, start_date, end_date }));
-    setBookingError('');
-    setBookingSuccess('');
-  };
+    // Calcul des jours (Semaine vs Week-end)
+    let weekDays = 0;
+    let weekendDays = 0;
+    let currentDate = new Date(start);
 
-  const calculateDays = () => {
-    if (!booking.start_date || !booking.end_date) return 0;
-    const start = new Date(booking.start_date);
-    const end = new Date(booking.end_date);
-    return Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-  };
+    for (let i = 0; i < totalDays; i++) {
+      const dayOfWeek = currentDate.getDay(); // 0 = Dimanche, 6 = Samedi
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        weekendDays++;
+      } else {
+        weekDays++;
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
 
-  const calculateTotal = () => {
-    if (!car) return 0;
-    return (calculateDays() * car.price_per_day).toFixed(2);
-  };
+    const standardPrice = Number(car.price_per_day);
+    const wEPrice = car.weekend_price ? Number(car.weekend_price) : standardPrice;
 
-  const handleBookingSubmit = async (e) => {
-    e.preventDefault();
-    if (!user) { navigate('/login'); return; }
-    if (calculateDays() < 1) { setBookingError('Please select valid dates'); return; }
+    const totalWeek = weekDays * standardPrice;
+    const totalWeekend = weekendDays * wEPrice;
+    let subTotal = totalWeek + totalWeekend;
+    let discountPercent = 0;
 
+    // Application des réductions
+    if (totalDays >= 7 && car.discount_7_days) {
+      discountPercent = car.discount_7_days;
+    } else if (totalDays >= 3 && car.discount_3_days) {
+      discountPercent = car.discount_3_days;
+    }
+
+    const discountAmount = subTotal * (discountPercent / 100);
+    const finalTotal = subTotal - discountAmount;
+
+    return {
+      totalDays,
+      weekDays,
+      weekendDays,
+      standardPrice,
+      wEPrice,
+      totalWeek,
+      totalWeekend,
+      subTotal,
+      discountPercent,
+      discountAmount,
+      finalTotal,
+      deposit: car.requires_deposit ? car.deposit_amount : 0
+    };
+  }, [car, startDate, endDate]);
+
+  const handleBooking = async () => {
+    if (!pricing || pricing.error) return;
     setBookingLoading(true);
-    setBookingError('');
-    setBookingSuccess('');
-
     try {
+      // Ajuste cette route selon ton backend de réservation
       await axios.post('/api/bookings', {
-        car_id: car.id,
-        start_date: booking.start_date,
-        end_date: booking.end_date,
-        message: booking.message
+        carId: car.id,
+        startDate,
+        endDate,
+        totalPrice: pricing.finalTotal
       });
-      setBookingSuccess(i18n.language === 'fr'
-          ? 'Demande de réservation envoyée avec succès !'
-          : 'Booking request sent successfully!');
-      setBooking({ start_date: today, end_date: tomorrow, message: '' });
+      navigate('/my-bookings');
     } catch (err) {
-      setBookingError(err.response?.data?.error || t('common.error'));
+      alert(err.response?.data?.error || 'Erreur lors de la réservation');
     } finally {
       setBookingLoading(false);
     }
   };
 
-  const handleAddBlock = async (e) => {
-    e.preventDefault();
-    setBlockLoading(true);
-    setBlockError('');
-    try {
-      const res = await axios.post(`/api/cars/${id}/blocked-dates`, blockForm);
-      setBlockedDates(prev => [...prev, res.data.block]);
-      setBookedRanges(prev => [...prev, { ...res.data.block, type: 'blocked' }]);
-    } catch (err) {
-      setBlockError(err.response?.data?.error || 'Erreur');
-    } finally {
-      setBlockLoading(false);
-    }
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-luxuryBlack flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gnYellow"></div>
+      </div>
+    );
+  }
 
-  const handleRemoveBlock = async (blockId) => {
-    try {
-      await axios.delete(`/api/cars/${id}/blocked-dates/${blockId}`);
-      setBlockedDates(prev => prev.filter(b => b.id !== blockId));
-      setBookedRanges(prev => prev.filter(r => !(r.type === 'blocked' && r.id === blockId)));
-    } catch { }
-  };
+  if (error || !car) {
+    return (
+      <div className="min-h-screen bg-luxuryBlack flex items-center justify-center text-gnRed font-bold">
+        {error || 'Voiture introuvable.'}
+      </div>
+    );
+  }
 
-  if (loading) return <div className="min-h-screen max-w-7xl mx-auto px-4 py-12 animate-pulse bg-luxuryBlack"></div>;
-  if (error || !car) return <div className="min-h-screen text-center py-20 bg-luxuryBlack text-white"><h2 className="text-2xl font-bold">{error || 'Car not found'}</h2></div>;
-
-  const days = calculateDays();
-  const total = calculateTotal();
-  const typeIcon = CAR_TYPE_ICONS[car.type] || '🚗';
-  const fuelIcon = FUEL_ICONS[car.fuel] || '⛽';
-  const isFav = favIds.has(car.id);
+  // Format monétaire
+  const formatGNF = (amount) => new Intl.NumberFormat('fr-FR').format(amount) + ' GNF';
 
   return (
-    // AJOUT PRINCIPAL : Le wrapper min-h-screen avec bg-luxuryBlack
-    <div className="min-h-screen bg-luxuryBlack text-white pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* Back Button Stylisé Premium */}
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-400 hover:text-gnYellow transition-colors font-bold uppercase tracking-widest text-xs mb-8"
-        >
-          <ArrowLeftIcon className="h-4 w-4" />
-          {t('common.back')}
-        </button>
+    <div className="bg-luxuryBlack min-h-screen pb-20">
+      {/* Galerie d'images (Hero) */}
+      <div className="w-full h-[40vh] md:h-[60vh] bg-black relative">
+        <img 
+          src={car.images?.length > 0 ? imgUrl(car.images[0]) : '/placeholder.jpg'} 
+          alt={car.title} 
+          className="w-full h-full object-cover opacity-80"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-luxuryBlack to-transparent" />
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left: Car Details */}
-          <div className="lg:col-span-2 space-y-6">
-            
-            {/* Image Gallery */}
-            <div className="card overflow-hidden border border-white/5 bg-[#111] rounded-2xl">
-              {car.images && car.images.length > 0 ? (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-10">
+        <div className="flex flex-col lg:flex-row gap-8">
+          
+          {/* COLONNE GAUCHE : Détails */}
+          <div className="lg:w-2/3 space-y-8">
+            <div className="bg-luxuryDark border border-white/10 rounded-3xl p-8 backdrop-blur-md shadow-2xl">
+              <div className="flex justify-between items-start mb-4">
                 <div>
-                  <div className="relative h-72 sm:h-[450px] bg-luxuryDark overflow-hidden">
-                    <img
-                      src={imgUrl(car.images[activeImage])}
-                      alt={car.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-luxuryBlack/80 to-transparent pointer-events-none" />
-                  </div>
-                  {car.images.length > 1 && (
-                    <div className="p-4 flex gap-3 overflow-x-auto bg-black/40">
-                      {car.images.map((img, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => setActiveImage(idx)}
-                          className={`flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-all ${
-                            activeImage === idx ? 'border-gnYellow scale-105' : 'border-transparent opacity-40 hover:opacity-100'
-                          }`}
-                        >
-                          <img src={imgUrl(img)} alt="thumb" className="w-full h-full object-cover" />
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="h-72 sm:h-96 bg-luxuryDark flex items-center justify-center">
-                  <span className="text-9xl opacity-10">{typeIcon}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Car Info */}
-            <div className="card p-8 border border-white/5 bg-[#111] rounded-2xl">
-              <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-gnYellow font-bold text-xs uppercase tracking-widest">{t(`car.type_${car.type}`)}</span>
-                  </div>
-                  <h1 className="text-3xl md:text-4xl font-display font-black text-white mb-2 uppercase tracking-tight">{car.title}</h1>
-                  <div className="flex items-center gap-3 text-gray-400">
-                    <MapPinIcon className="h-4 w-4 text-gnYellow" />
-                    <span className="text-sm font-medium">{car.city}{car.address ? `, ${car.address}` : ''}</span>
-                  </div>
-                </div>
-                <div className="flex flex-col items-end gap-3">
-                  <StatusBadge available={car.available} />
-                  {user && (
-                    <button onClick={() => toggleFavorite(car.id)} className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/10">
-                      {isFav ? <HeartSolidIcon className="h-6 w-6 text-gnRed" /> : <HeartIcon className="h-6 w-6 text-white" />}
-                    </button>
-                  )}
+                  <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tight">
+                    {car.brand} {car.model}
+                  </h1>
+                  <p className="text-gnYellow font-bold tracking-widest uppercase text-sm mt-2">
+                    {car.year} • {car.city}
+                  </p>
                 </div>
               </div>
 
-              {/* Specs Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-                {[
-                  { label: t('car.year'), val: car.year, icon: '📅' },
-                  { label: t('car.seats'), val: car.seats, icon: '👥' },
-                  { label: t('car.transmission'), val: t(`car.transmission_${car.transmission}`), icon: '⚙️' },
-                  { label: t('car.fuel'), val: t(`car.fuel_${car.fuel}`), icon: fuelIcon }
-                ].map((spec, i) => (
-                  <div key={i} className="bg-white/5 border border-white/5 rounded-2xl p-4 text-center hover:bg-white/10 transition-colors">
-                    <div className="text-2xl mb-1">{spec.icon}</div>
-                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">{spec.label}</div>
-                    <div className="font-bold text-white text-sm mt-0.5">{spec.val}</div>
-                  </div>
-                ))}
+              {/* Badges Spécifications */}
+              <div className="flex flex-wrap gap-4 mt-8 py-6 border-y border-white/5">
+                <div className="flex items-center gap-2 text-gray-300">
+                  <UserGroupIcon className="w-5 h-5 text-gnYellow" />
+                  <span className="text-sm font-bold">{car.seats} Places</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-300">
+                  <CogIcon className="w-5 h-5 text-gnYellow" />
+                  <span className="text-sm font-bold uppercase">{car.transmission}</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-300">
+                  <BeakerIcon className="w-5 h-5 text-gnYellow" />
+                  <span className="text-sm font-bold uppercase">{car.fuel}</span>
+                </div>
               </div>
 
-              {/* Description */}
-              <div className="pt-6 border-t border-white/5">
-                <h3 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-3">{t('car.description')}</h3>
-                <p className="text-gray-300 leading-relaxed text-base italic font-light">
-                  {car.description || t('car.no_description')}
+              <div className="mt-8">
+                <h2 className="text-white font-bold text-lg mb-4 uppercase tracking-widest">Description</h2>
+                <p className="text-gray-400 leading-relaxed text-sm">
+                  {car.description || "Aucune description fournie pour ce véhicule."}
                 </p>
               </div>
             </div>
-
-            {/* Availability Calendar */}
-            <div className="card p-4 border border-white/5 bg-[#111] rounded-2xl overflow-hidden">
-               <h3 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-4">Disponibilités</h3>
-              <AvailabilityCalendar bookedRanges={bookedRanges} lang={i18n.language.startsWith('fr') ? 'fr' : 'en'} />
-            </div>
-
-            {/* Owner Info */}
-            <div className="card p-8 border border-white/5 bg-[#111] rounded-2xl">
-              <h3 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-6">{t('car.owner')}</h3>
-              <div className="flex items-center gap-6">
-                <div className="relative">
-                  {car.owner_avatar ? (
-                    <img src={imgUrl(car.owner_avatar)} className="w-20 h-20 rounded-2xl object-cover ring-2 ring-white/10" alt="avatar" />
-                  ) : (
-                    <div className="w-20 h-20 bg-gnYellow/10 rounded-2xl flex items-center justify-center text-gnYellow font-black text-3xl border border-gnYellow/20">
-                      {car.owner_name?.charAt(0)?.toUpperCase()}
-                    </div>
-                  )}
-                  <div className="absolute -bottom-2 -right-2 bg-gnGreen w-6 h-6 rounded-full border-4 border-luxuryBlack"></div>
-                </div>
-                <div className="flex-1">
-                  <Link to={`/profile/${car.owner_id}`} className="text-2xl font-bold text-white hover:text-gnYellow transition-colors">{car.owner_name}</Link>
-                  <div className="flex flex-col gap-2 mt-3">
-                    <a href={`mailto:${car.owner_email}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
-                      <EnvelopeIcon className="h-4 w-4 text-gnYellow/50" /> {car.owner_email}
-                    </a>
-                    {car.owner_phone && (
-                      <a href={`tel:${car.owner_phone}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
-                        <PhoneIcon className="h-4 w-4 text-gnYellow/50" /> {car.owner_phone}
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
-          {/* Right: Booking Widget avec effet Premium */}
-          <div className="lg:col-span-1">
-            <div className="relative overflow-hidden bg-gray-900/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 sticky top-28 shadow-2xl">
+          {/* COLONNE DROITE : Réservation & Prix */}
+          <div className="lg:w-1/3">
+            <div className="bg-luxuryDark border border-gnYellow/20 rounded-3xl p-6 sticky top-24 shadow-[0_0_40px_rgba(252,209,22,0.05)]">
+              <h2 className="text-2xl font-black text-white mb-1">
+                {formatGNF(car.price_per_day)} <span className="text-sm text-gray-500 font-normal">/ jour</span>
+              </h2>
               
-              {/* Effet de lumière dorée subtil */}
-              <div className="absolute -top-12 -right-12 w-48 h-48 bg-gnYellow/10 blur-[50px] rounded-full pointer-events-none"></div>
-
-              <div className="flex items-baseline gap-2 mb-8 border-b border-white/10 pb-6 relative z-10">
-                <span className="text-4xl font-display font-black text-white">{new Intl.NumberFormat().format(car.price_per_day)}</span>
-                <span className="text-gnYellow font-bold text-sm uppercase tracking-widest">GNF / {t('car.per_day')}</span>
-              </div>
-
-              <div className="relative z-10">
-                {isOwner ? (
-                  <div className="space-y-4">
-                    <div className="bg-gnYellow/5 border border-gnYellow/20 rounded-2xl p-5 text-center">
-                      <p className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-4">Votre Annonce</p>
-                      <Link to={`/edit-listing/${car.id}`} className="btn-primary w-full block mb-3">{t('common.edit')}</Link>
-                      <button onClick={() => setShowBlocker(v => !v)} className="w-full text-xs font-bold text-gray-400 hover:text-white transition-colors">
-                        {showBlocker ? 'Fermer le gestionnaire' : 'Gérer les disponibilités'}
-                      </button>
-                    </div>
-                    {showBlocker && (
-                        <div className="p-4 bg-black/40 rounded-2xl border border-white/10 animate-fadeIn">
-                          <form onSubmit={handleAddBlock} className="space-y-3">
-                            <input type="date" value={blockForm.start_date} min={today} onChange={e => setBlockForm(p => ({ ...p, start_date: e.target.value }))} className="input-field text-sm bg-luxuryBlack" required />
-                            <input type="date" value={blockForm.end_date} min={blockForm.start_date} onChange={e => setBlockForm(p => ({ ...p, end_date: e.target.value }))} className="input-field text-sm bg-luxuryBlack" required />
-                            <button type="submit" disabled={blockLoading} className="btn-primary w-full py-2 text-xs">Bloquer ces dates</button>
-                          </form>
-                          <div className="mt-4 space-y-2">
-                            {blockedDates.map(b => (
-                              <div key={b.id} className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/5 text-[11px] font-bold text-gray-300">
-                                <span>{b.start_date} → {b.end_date}</span>
-                                <button onClick={() => handleRemoveBlock(b.id)} className="p-1.5 hover:bg-gnRed/20 rounded-lg transition-colors"><TrashIcon className="h-4 w-4 text-gnRed" /></button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                    )}
+              {/* Infos Tarifaires Rapides */}
+              <div className="flex flex-col gap-2 mt-4 mb-6 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/5 pb-6">
+                {car.weekend_price && (
+                  <div className="flex justify-between">
+                    <span>Prix Week-end :</span>
+                    <span className="text-white">{formatGNF(car.weekend_price)} /j</span>
                   </div>
-                ) : (
-                  <form onSubmit={handleBookingSubmit} className="space-y-6">
-                    <DateRangePicker startDate={booking.start_date} endDate={booking.end_date} onChange={handleDateChange} bookedRanges={bookedRanges} lang={i18n.language.startsWith('fr') ? 'fr' : 'en'} />
-                    
-                    {days > 0 && (
-                      <div className="bg-black/40 rounded-2xl p-5 space-y-3 border border-white/5 shadow-inner">
-                        <div className="flex justify-between text-xs text-gray-400">
-                          <span>{new Intl.NumberFormat().format(car.price_per_day)} GNF × {days} j</span>
-                          <span className="text-white font-bold">{new Intl.NumberFormat().format(total)} GNF</span>
-                        </div>
-                        <div className="border-t border-white/5 pt-3 flex items-end justify-between">
-                          <span className="text-sm font-bold text-white uppercase tracking-widest">Total</span>
-                          <span className="text-2xl font-display font-black text-gnYellow">{new Intl.NumberFormat().format(total)} GNF</span>
-                        </div>
-                      </div>
-                    )}
-
-                    <textarea value={booking.message} onChange={e => setBooking(prev => ({ ...prev, message: e.target.value }))} placeholder={t('booking.message_placeholder')} rows={3} className="input-field text-sm bg-black/40 border-white/10" />
-
-                    {bookingError && <div className="p-3 bg-gnRed/10 border border-gnRed/20 text-gnRed text-xs font-bold rounded-xl text-center">{bookingError}</div>}
-                    {bookingSuccess && <div className="p-3 bg-gnGreen/10 border border-gnGreen/20 text-gnGreen text-xs font-bold rounded-xl text-center">{bookingSuccess}</div>}
-
-                    <button type="submit" disabled={bookingLoading || !car.available || days < 1} className="btn-primary w-full py-4 text-sm font-black uppercase tracking-widest shadow-[0_0_20px_rgba(252,209,22,0.2)]">
-                      {bookingLoading ? t('common.loading') : t('booking.submit')}
-                    </button>
-                  </form>
+                )}
+                {car.discount_3_days > 0 && (
+                  <div className="flex justify-between text-gnGreen">
+                    <span>Réduction 3+ jours :</span>
+                    <span>-{car.discount_3_days}%</span>
+                  </div>
+                )}
+                {car.discount_7_days > 0 && (
+                  <div className="flex justify-between text-gnGreen">
+                    <span>Réduction 7+ jours :</span>
+                    <span>-{car.discount_7_days}%</span>
+                  </div>
                 )}
               </div>
+
+              {/* Sélection des dates */}
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Début</label>
+                  <input 
+                    type="date" 
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-gnYellow/50 outline-none color-scheme-dark"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Fin</label>
+                  <input 
+                    type="date" 
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    min={startDate || new Date().toISOString().split('T')[0]}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-gnYellow/50 outline-none color-scheme-dark"
+                  />
+                </div>
+              </div>
+
+              {/* Reçu détaillé (affiché uniquement si les dates sont valides) */}
+              {pricing && !pricing.error && (
+                <div className="bg-black/50 rounded-2xl p-4 mb-6 border border-white/5 text-sm">
+                  <div className="space-y-3 mb-4 border-b border-white/5 pb-4">
+                    {pricing.weekDays > 0 && (
+                      <div className="flex justify-between text-gray-300">
+                        <span>{formatGNF(pricing.standardPrice)} x {pricing.weekDays} j (Semaine)</span>
+                        <span>{formatGNF(pricing.totalWeek)}</span>
+                      </div>
+                    )}
+                    {pricing.weekendDays > 0 && (
+                      <div className="flex justify-between text-gray-300">
+                        <span>{formatGNF(pricing.wEPrice)} x {pricing.weekendDays} j (Week-end)</span>
+                        <span>{formatGNF(pricing.totalWeekend)}</span>
+                      </div>
+                    )}
+                    {pricing.discountPercent > 0 && (
+                      <div className="flex justify-between text-gnGreen font-bold">
+                        <span>Réduction ({pricing.discountPercent}%)</span>
+                        <span>-{formatGNF(pricing.discountAmount)}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex justify-between text-white font-black text-lg">
+                    <span>Total</span>
+                    <span className="text-gnYellow">{formatGNF(pricing.finalTotal)}</span>
+                  </div>
+
+                  {pricing.deposit > 0 && (
+                    <div className="mt-4 flex gap-2 text-xs text-gray-400 bg-white/5 p-3 rounded-lg border border-white/5">
+                      <ExclamationTriangleIcon className="w-5 h-5 text-gnYellow shrink-0" />
+                      <p>
+                        Une caution de <strong className="text-white">{formatGNF(pricing.deposit)}</strong> sera exigée par le propriétaire avant la remise des clés.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Affichage d'erreur de date (ex: durée min/max) */}
+              {pricing?.error && (
+                <div className="bg-gnRed/10 border border-gnRed/20 text-gnRed text-xs font-bold p-4 rounded-xl mb-6">
+                  {pricing.error}
+                </div>
+              )}
+
+              <button 
+                onClick={handleBooking}
+                disabled={!pricing || !!pricing.error || bookingLoading}
+                className="w-full py-4 rounded-xl bg-gradient-to-r from-gnYellow to-[#D4AF37] text-black font-black text-sm uppercase tracking-widest hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:hover:scale-100 shadow-[0_10px_20px_rgba(252,209,22,0.2)]"
+              >
+                {bookingLoading ? 'Traitement...' : 'Réserver ce véhicule'}
+              </button>
             </div>
           </div>
+
         </div>
       </div>
     </div>
