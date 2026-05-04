@@ -1,7 +1,64 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+
+const GUINEA_CITIES = [
+  'Conakry', 'Nzérékoré', 'Kindia', 'Kankan', 'Labé',
+  'Guéckédou', 'Mamou', 'Macenta', 'Kissidougou', 'Dalaba',
+  'Siguiri', 'Kérouané', 'Faranah', 'Boké', 'Télimélé',
+  'Pita', 'Forécariah', 'Coyah', 'Fria', 'Dubréka',
+];
+
+function CityInput({ value, onChange, placeholder, className }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  const filtered = value.trim()
+    ? GUINEA_CITIES.filter(c => c.toLowerCase().startsWith(value.toLowerCase()))
+    : GUINEA_CITIES;
+
+  const visible = filtered.slice(0, 5);
+
+  const handleSelect = (city) => {
+    onChange({ target: { name: 'city', value: city } });
+    setOpen(false);
+  };
+
+  const handleBlur = () => {
+    // délai pour permettre le clic sur l'item
+    setTimeout(() => setOpen(false), 150);
+  };
+
+  return (
+    <div className="relative" ref={ref}>
+      <input
+        type="text"
+        name="city"
+        value={value}
+        onChange={onChange}
+        onFocus={() => setOpen(true)}
+        onBlur={handleBlur}
+        placeholder={placeholder}
+        className={className}
+        autoComplete="off"
+      />
+      {open && visible.length > 0 && (
+        <ul className="absolute z-50 top-full left-0 right-0 mt-1 bg-[#1a1a1a] border border-white/10 rounded-xl overflow-hidden shadow-xl">
+          {visible.map(city => (
+            <li
+              key={city}
+              onMouseDown={() => handleSelect(city)}
+              className="px-4 py-2.5 text-sm text-gray-300 hover:bg-gnYellow/10 hover:text-gnYellow cursor-pointer transition-colors"
+            >
+              {city}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 const CAR_TYPES = [
   { value: 'all', icon: '🚗', labelKey: 'car.type_all' },
@@ -78,9 +135,7 @@ export default function SearchBar({ compact = false, initialValues = {} }) {
         </div>
         <div className="flex-1 min-w-[140px]">
           <label className="form-label text-gray-400">{t('home.search_city')}</label>
-          <input
-            type="text"
-            name="city"
+          <CityInput
             value={form.city}
             onChange={handleChange}
             placeholder={t('home.search_city_placeholder')}
@@ -147,9 +202,7 @@ export default function SearchBar({ compact = false, initialValues = {} }) {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div>
           <label className="form-label text-gray-400">{t('home.search_city')}</label>
-          <input
-            type="text"
-            name="city"
+          <CityInput
             value={form.city}
             onChange={handleChange}
             placeholder={t('home.search_city_placeholder')}

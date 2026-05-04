@@ -81,4 +81,21 @@ router.get('/:userId', authenticateToken, async (req, res) => {
   }
 });
 
+// POST /api/messages/:userId
+router.post('/:userId', authenticateToken, async (req, res) => {
+  try {
+    const { content } = req.body;
+    if (!content?.trim()) return res.status(400).json({ error: 'Message requis' });
+    const { rows } = await pool.query(
+      `INSERT INTO messages (sender_id, receiver_id, content) VALUES ($1, $2, $3)
+       RETURNING id, sender_id, receiver_id, content, created_at`,
+      [req.user.id, parseInt(req.params.userId), content.trim()]
+    );
+    res.json({ message: rows[0] });
+  } catch (err) {
+    console.error('Post message error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
