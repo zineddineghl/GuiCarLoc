@@ -157,6 +157,70 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'RentCar API is running', timestamp: new Date().toISOString() });
 });
 
+// Sitemap dynamique
+app.get('/sitemap.xml', async (req, res) => {
+  const BASE_URL = 'https://www.guicarloc.com';
+  const staticPages = [
+    { url: '/', priority: '1.0', changefreq: 'daily' },
+    { url: '/listings', priority: '0.9', changefreq: 'daily' },
+    { url: '/about', priority: '0.5', changefreq: 'monthly' },
+    { url: '/contact', priority: '0.5', changefreq: 'monthly' },
+    { url: '/login', priority: '0.3', changefreq: 'monthly' },
+    { url: '/register', priority: '0.3', changefreq: 'monthly' },
+  ];
+
+  try {
+    const { rows: cars } = await pool.query(
+      'SELECT id, updated_at, created_at FROM cars WHERE available = 1 ORDER BY created_at DESC'
+    );
+
+    const staticUrls = staticPages.map(p => `
+  <url>
+    <loc>${BASE_URL}${p.url}</loc>
+    <changefreq>${p.changefreq}</changefreq>
+    <priority>${p.priority}</priority>
+  </url>`).join('');
+
+    const carUrls = cars.map(car => `
+  <url>
+    <loc>${BASE_URL}/cars/${car.id}</loc>
+    <lastmod>${new Date(car.updated_at || car.created_at).toISOString().split('T')[0]}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`).join('');
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${staticUrls}
+${carUrls}
+</urlset>`;
+
+    res.header('Content-Type', 'application/xml');
+    res.send(xml);
+  } catch (err) {
+    console.error('Sitemap error:', err);
+    res.status(500).send('Error generating sitemap');
+  }
+});
+
+// Robots.txt
+app.get('/robots.txt', (req, res) => {
+  res.header('Content-Type', 'text/plain');
+  res.send(`User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /messages
+Disallow: /my-bookings
+Disallow: /my-listings
+Disallow: /post-listing
+Disallow: /edit-listing
+Disallow: /verify-identity
+Disallow: /favorites
+
+Sitemap: https://www.guicarloc.com/sitemap.xml`);
+});
+
 // Serve React frontend in production
 if (process.env.NODE_ENV === 'production') {
   const clientBuild = path.join(__dirname, '../client/dist');
