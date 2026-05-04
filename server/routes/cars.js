@@ -341,4 +341,13 @@ router.post('/:id/blocked-dates', authenticateToken, async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Internal server error' }); }
 });
 
+router.delete('/:id/blocked-dates/:blockId', authenticateToken, async (req, res) => {
+  try {
+    const { rows: carRows } = await pool.query('SELECT owner_id FROM cars WHERE id = $1', [req.params.id]);
+    if (!carRows.length || carRows[0].owner_id !== req.user.id) return res.status(403).json({ error: 'Non autorisé' });
+    await pool.query('DELETE FROM blocked_dates WHERE id = $1 AND car_id = $2', [req.params.blockId, req.params.id]);
+    res.json({ message: 'Bloc supprimé' });
+  } catch (err) { res.status(500).json({ error: 'Internal server error' }); }
+});
+
 module.exports = router;
