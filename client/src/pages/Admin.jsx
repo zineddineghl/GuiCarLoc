@@ -655,11 +655,11 @@ function VerificationsTab() {
       ) : (
         <div className="space-y-6">
           {users.map(u => (
-            <div key={u.id} className="card p-8 border border-white/5 bg-[#111] rounded-3xl flex flex-col gap-6">
-              <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-6">
-                <div>
-                  <p className="text-xl font-black text-white uppercase tracking-wider">{u.name}</p>
-                  <p className="text-sm font-bold text-gray-500 mt-1">{u.email} {u.phone && <span className="text-gnYellow ml-2">· {u.phone}</span>}</p>
+            <div key={u.id} className="card p-4 sm:p-8 border border-white/5 bg-[#111] rounded-3xl flex flex-col gap-6">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 border-b border-white/5 pb-6">
+                <div className="min-w-0">
+                  <p className="text-lg sm:text-xl font-black text-white uppercase tracking-wider break-words">{u.name}</p>
+                  <p className="text-sm font-bold text-gray-500 mt-1 break-all">{u.email} {u.phone && <span className="text-gnYellow ml-2">· {u.phone}</span>}</p>
                   {u.id_submitted_at && (
                     <p className="text-[10px] text-gray-600 uppercase font-black tracking-widest mt-3">Soumis le {new Date(u.id_submitted_at).toLocaleDateString('fr-FR')}</p>
                   )}
@@ -671,16 +671,16 @@ function VerificationsTab() {
                   <div className="flex gap-3 flex-shrink-0">
                     <button
                       onClick={() => handleApprove(u.id)}
-                      className="flex items-center gap-2 px-5 py-3 bg-green-500 hover:bg-green-400 text-black font-black uppercase text-xs tracking-widest rounded-xl transition-colors shadow-lg shadow-green-500/20"
+                      className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-green-500 hover:bg-green-400 text-black font-black uppercase text-xs tracking-widest rounded-xl transition-colors shadow-lg shadow-green-500/20"
                     >
-                      <CheckCircleIcon className="h-5 w-5" />
+                      <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                       Approuver
                     </button>
                     <button
                       onClick={() => { setRejectModal({ userId: u.id, name: u.name }); setRejectReason(''); }}
-                      className="flex items-center gap-2 px-5 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-black uppercase text-xs tracking-widest rounded-xl border border-red-500/20 transition-colors"
+                      className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-black uppercase text-xs tracking-widest rounded-xl border border-red-500/20 transition-colors"
                     >
-                      <XCircleIcon className="h-5 w-5" />
+                      <XCircleIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                       Refuser
                     </button>
                   </div>
@@ -688,14 +688,14 @@ function VerificationsTab() {
               </div>
 
               {/* Documents */}
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-3 gap-3 sm:gap-6">
                 {[
                   { label: 'CNI Recto', url: u.id_doc_front },
                   { label: 'CNI Verso', url: u.id_doc_back },
                   { label: 'Selfie', url: u.id_selfie },
                 ].map(({ label, url }) => (
                   <a key={label} href={url} target="_blank" rel="noopener noreferrer" className="group block">
-                    <div className="relative overflow-hidden rounded-2xl border border-white/10 hover:border-gnYellow/50 transition-colors bg-black/40 aspect-video flex items-center justify-center">
+                    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/10 hover:border-gnYellow/50 transition-colors bg-black/40 aspect-video flex items-center justify-center">
                       <img
                         src={url}
                         alt={label}
@@ -703,7 +703,7 @@ function VerificationsTab() {
                         onError={e => { e.target.style.display = 'none'; }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
-                      <div className="absolute bottom-3 left-0 right-0 text-white text-xs font-black uppercase tracking-widest text-center">
+                      <div className="absolute bottom-2 left-0 right-0 text-white text-[9px] sm:text-xs font-black uppercase tracking-widest text-center">
                         {label}
                       </div>
                     </div>
