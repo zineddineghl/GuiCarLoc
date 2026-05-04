@@ -54,7 +54,7 @@ router.get('/', optionalAuth, async (req, res) => {
 
     let query = `
       SELECT c.*, u.name as owner_name, u.phone as owner_phone, u.email as owner_email, u.avatar as owner_avatar,
-             ROUND(AVG(r.rating)::numeric, 1) as avg_car_rating,
+             ROUND(AVG(r.car_rating)::numeric, 1) as avg_car_rating,
              COUNT(r.id)::int as review_count
       FROM cars c
       JOIN users u ON c.owner_id = u.id
@@ -149,7 +149,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(`
       SELECT c.*, u.name as owner_name, u.phone as owner_phone, u.email as owner_email, u.avatar as owner_avatar,
-             ROUND(AVG(r.rating)::numeric, 1) as avg_car_rating,
+             ROUND(AVG(r.car_rating)::numeric, 1) as avg_car_rating,
              COUNT(r.id)::int as review_count
       FROM cars c
       JOIN users u ON c.owner_id = u.id
