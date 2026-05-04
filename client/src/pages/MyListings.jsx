@@ -13,7 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 const CAR_TYPE_ICONS = {
-  sedan: '🚗', suv: '🚙', van: '🚐', sports: '🏎️', luxury: '🚘', economy: '🚕', scooter: '🛵', moto: '🏍️', boat: '⛵'
+  sedan: '🚗', suv: '🚙', van: '🚐', sports: '🏎️', luxury: '🚘', compact: '🚕', scooter: '🛵', moto: '🏍️', boat: '⛵'
 };
 
 export default function MyListings() {

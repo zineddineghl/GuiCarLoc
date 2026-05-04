@@ -11,7 +11,7 @@ const CAR_TYPE_ICONS = {
   van: '🚐',
   sports: '🏎️',
   luxury: '🚘',
-  economy: '🚕',
+  compact: '🚕',
   scooter: '🛵',
   moto: '🏍️',
   boat: '⛵'

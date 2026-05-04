@@ -26,7 +26,7 @@ import {
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 
 const CAR_TYPE_ICONS = {
-  sedan: '🚗', suv: '🚙', van: '🚐', sports: '🏎️', luxury: '🚘', economy: '🚕'
+  sedan: '🚗', suv: '🚙', van: '🚐', sports: '🏎️', luxury: '🚘', compact: '🚕'
 };
 const FUEL_ICONS = { petrol: '⛽', diesel: '🛢️', electric: '⚡', hybrid: '🔋' };
 

@@ -15,7 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 const CAR_TYPE_ICONS = {
-  sedan: '🚗', suv: '🚙', van: '🚐', sports: '🏎️', luxury: '🚘', economy: '🚕'
+  sedan: '🚗', suv: '🚙', van: '🚐', sports: '🏎️', luxury: '🚘', compact: '🚕'
 };
 
 // Badges adaptés au mode sombre

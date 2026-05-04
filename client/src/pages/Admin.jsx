@@ -370,7 +370,7 @@ function CarsTab() {
         </div>
         <select value={typeFilter} onChange={e => { setTypeFilter(e.target.value); setPage(1); }} className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none appearance-none min-w-[150px]">
           <option value="">Tous types</option>
-          {['sedan','suv','van','sports','luxury','economy'].map(t => (
+          {['sedan','suv','van','sports','luxury','compact'].map(t => (
             <option key={t} value={t}>{t}</option>
           ))}
         </select>

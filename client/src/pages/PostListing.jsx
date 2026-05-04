@@ -6,7 +6,7 @@ import { PhotoIcon, XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/o
 import { imgUrl } from '../utils/imageUrl';
 import imageCompression from 'browser-image-compression';
 
-const CAR_TYPES = ['sedan', 'suv', 'van', 'sports', 'luxury', 'economy', 'scooter', 'moto', 'boat'];
+const CAR_TYPES = ['sedan', 'suv', 'van', 'sports', 'luxury', 'compact', 'scooter', 'moto', 'boat'];
 const TRANSMISSIONS = ['auto', 'manual'];
 const FUELS = ['petrol', 'diesel', 'electric', 'hybrid'];
 const CURRENT_YEAR = new Date().getFullYear();
@@ -52,7 +52,7 @@ export default function PostListing() {
     van: '🚐',
     sports: '🏎️',
     luxury: '🚘',
-    economy: '🚕',
+    compact: '🚕',
     scooter: '🛵',
     moto: '🏍️',
     boat: '🚤'
@@ -227,7 +227,9 @@ export default function PostListing() {
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-8">
               {CAR_TYPES.map(type => (
                 <button key={type} type="button" onClick={() => setForm(p => ({ ...p, type }))} className={`flex flex-col items-center p-3 rounded-xl border transition-all ${form.type === type ? 'bg-gnYellow/10 text-gnYellow border-gnYellow/50' : 'bg-white/5 text-gray-500 border-white/5'}`}>
-                  <span className="text-xl mb-1">{type === 'sedan' ? '🚗' : type === 'suv' ? '🚙' : '🏎️'}</span>
+                  <span className="text-2xl mb-1">
+                    {type === 'sedan' ? '🚗' : type === 'suv' ? '🚙' : type === 'van' ? '🚐' : type === 'sports' ? '🏎️' : type === 'luxury' ? '🚘' : type === 'compact' ? '🚕' : type === 'scooter' ? '🛵' : type === 'moto' ? '🏍️' : '⛵'}
+                  </span>
                   <span className="text-[8px] font-bold uppercase">{t(`car.type_${type}`)}</span>
                 </button>
               ))}

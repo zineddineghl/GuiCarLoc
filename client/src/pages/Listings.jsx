@@ -12,7 +12,7 @@ const CAR_TYPES = [
   { val: 'van', icon: '🚐' },
   { val: 'sports', icon: '🏎️' },
   { val: 'luxury', icon: '🚘' },
-  { val: 'economy', icon: '🚕' },
+  { val: 'compact', icon: '🚕' },
   { val: 'scooter', icon: '🛵' },
   { val: 'moto', icon: '🏍️' },
   { val: 'boat', icon: '⛵' }
