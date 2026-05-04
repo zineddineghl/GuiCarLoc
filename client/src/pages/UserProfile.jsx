@@ -278,6 +278,15 @@ export default function UserProfile() {
                         <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-md border ${ROLE_COLORS[profile.role]}`}>
                           {roleLabel[profile.role]}
                         </span>
+                        {profile.id_status === 'verified' ? (
+                          <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-md border border-gnGreen/40 bg-gnGreen/10 text-gnGreen">
+                            ✓ Identité vérifiée
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-md border border-white/10 bg-white/5 text-gray-500">
+                            Identité non vérifiée
+                          </span>
+                        )}
                         {profile.avg_owner_rating && (
                           <span className="flex items-center gap-1.5 text-sm bg-white/5 px-3 py-1.5 rounded-md border border-white/5">
                             <span className="text-gnYellow mb-0.5">★</span>

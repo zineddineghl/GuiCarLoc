@@ -116,7 +116,7 @@ router.put('/me', authenticateToken, async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { rows: userRows } = await pool.query(
-      'SELECT id, name, role, bio, avatar, two_fa_enabled, created_at FROM users WHERE id = $1',
+      'SELECT id, name, role, bio, avatar, two_fa_enabled, id_status, created_at FROM users WHERE id = $1',
       [req.params.id]
     );
     if (!userRows[0]) return res.status(404).json({ error: 'User not found' });
