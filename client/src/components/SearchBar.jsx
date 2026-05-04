@@ -18,8 +18,6 @@ function CityInput({ value, onChange, placeholder, className }) {
     ? GUINEA_CITIES.filter(c => c.toLowerCase().startsWith(value.toLowerCase()))
     : GUINEA_CITIES;
 
-  const visible = filtered.slice(0, 5);
-
   const handleSelect = (city) => {
     onChange({ target: { name: 'city', value: city } });
     setOpen(false);
@@ -43,9 +41,9 @@ function CityInput({ value, onChange, placeholder, className }) {
         className={className}
         autoComplete="off"
       />
-      {open && visible.length > 0 && (
-        <ul className="absolute z-50 top-full left-0 right-0 mt-1 bg-[#1a1a1a] border border-white/10 rounded-xl overflow-hidden shadow-xl">
-          {visible.map(city => (
+      {open && filtered.length > 0 && (
+        <ul className="absolute z-50 top-full left-0 right-0 mt-1 bg-[#1a1a1a] border border-white/10 rounded-xl overflow-y-auto max-h-[200px] shadow-xl">
+          {filtered.map(city => (
             <li
               key={city}
               onMouseDown={() => handleSelect(city)}
