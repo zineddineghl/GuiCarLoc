@@ -27,22 +27,22 @@ const TABS = [
 ];
 
 const STATUS_COLORS = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  confirmed: 'bg-green-100 text-green-800',
-  rejected: 'bg-red-100 text-red-800',
-  cancelled: 'bg-gray-100 text-gray-600',
+  pending: 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20',
+  confirmed: 'bg-green-500/10 text-green-500 border border-green-500/20',
+  rejected: 'bg-red-500/10 text-red-500 border border-red-500/20',
+  cancelled: 'bg-gray-500/10 text-gray-400 border border-gray-500/20',
 };
 
-function StatCard({ icon: Icon, label, value, sub, color = 'text-primary-700' }) {
+function StatCard({ icon: Icon, label, value, sub, color = 'text-gnYellow', bgIcon = 'bg-gnYellow/10' }) {
   return (
-    <div className="card p-5 flex items-center gap-4">
-      <div className="p-3 bg-gray-50 rounded-xl">
-        <Icon className={`h-6 w-6 ${color}`} />
+    <div className="card p-6 flex items-center gap-5 border border-white/5 bg-[#111] rounded-2xl shadow-xl">
+      <div className={`p-4 rounded-xl ${bgIcon}`}>
+        <Icon className={`h-7 w-7 ${color}`} />
       </div>
       <div>
-        <p className="text-xs text-gray-500 font-medium">{label}</p>
-        <p className={`text-2xl font-bold ${color}`}>{value}</p>
-        {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+        <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">{label}</p>
+        <p className={`text-3xl font-black mt-1 ${color}`}>{value}</p>
+        {sub && <p className="text-[10px] text-gray-400 mt-1 uppercase font-semibold">{sub}</p>}
       </div>
     </div>
   );
@@ -52,23 +52,23 @@ function Pagination({ page, total, limit, onPage }) {
   const totalPages = Math.ceil(total / limit);
   if (totalPages <= 1) return null;
   return (
-    <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
+    <div className="flex items-center justify-between mt-6 text-sm text-gray-400 font-bold">
       <span>{total} résultat{total > 1 ? 's' : ''}</span>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <button
           onClick={() => onPage(page - 1)}
           disabled={page <= 1}
-          className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors border border-white/5"
         >
-          <ChevronLeftIcon className="h-4 w-4" />
+          <ChevronLeftIcon className="h-4 w-4 text-white" />
         </button>
-        <span>Page {page} / {totalPages}</span>
+        <span className="text-white">Page {page} / {totalPages}</span>
         <button
           onClick={() => onPage(page + 1)}
           disabled={page >= totalPages}
-          className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors border border-white/5"
         >
-          <ChevronRightIcon className="h-4 w-4" />
+          <ChevronRightIcon className="h-4 w-4 text-white" />
         </button>
       </div>
     </div>
@@ -88,8 +88,8 @@ function StatsTab() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="flex justify-center py-16"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600" /></div>;
-  if (!data) return <p className="text-center text-gray-500 py-8">Erreur de chargement</p>;
+  if (loading) return <div className="flex justify-center py-16"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gnYellow" /></div>;
+  if (!data) return <p className="text-center text-gray-500 py-8 font-bold">Erreur de chargement</p>;
 
   const { summary, recent_bookings, recent_users } = data;
 
@@ -98,33 +98,34 @@ function StatsTab() {
       {/* KPI Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={UsersIcon} label="Utilisateurs" value={summary.total_users} sub={`+${summary.new_users_month} ce mois`} />
-        <StatCard icon={TruckIcon} label="Annonces" value={summary.total_cars} sub={`${summary.active_cars} actives`} color="text-green-600" />
-        <StatCard icon={CalendarDaysIcon} label="Réservations" value={summary.total_bookings} sub={`${summary.pending_bookings} en attente`} color="text-yellow-600" />
-        <StatCard icon={CurrencyDollarIcon} label="Revenus confirmés" value={`${summary.total_revenue.toLocaleString()} GNF`} sub={`${summary.month_revenue.toLocaleString()} GNF ce mois`} color="text-emerald-600" />
+        <StatCard icon={TruckIcon} label="Annonces" value={summary.total_cars} sub={`${summary.active_cars} actives`} color="text-white" bgIcon="bg-white/10" />
+        <StatCard icon={CalendarDaysIcon} label="Réservations" value={summary.total_bookings} sub={`${summary.pending_bookings} en attente`} color="text-blue-400" bgIcon="bg-blue-400/10" />
+        <StatCard icon={CurrencyDollarIcon} label="Revenus confirmés" value={`${summary.total_revenue.toLocaleString()}`} sub={`${summary.month_revenue.toLocaleString()} GNF ce mois`} color="text-green-400" bgIcon="bg-green-400/10" />
       </div>
 
       {summary.banned_users > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 font-medium">
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-5 py-4 text-sm text-red-500 font-bold flex items-center gap-3">
+          <ShieldExclamationIcon className="w-5 h-5" />
           {summary.banned_users} compte{summary.banned_users > 1 ? 's' : ''} suspendu{summary.banned_users > 1 ? 's' : ''}
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent bookings */}
-        <div className="card p-5">
-          <h3 className="font-bold text-gray-900 mb-4">Dernières réservations</h3>
-          <div className="space-y-3">
+        <div className="card p-6 border border-white/5 bg-[#111] rounded-2xl">
+          <h3 className="font-bold text-gnYellow text-xs uppercase tracking-widest mb-6 border-b border-white/5 pb-4">Dernières réservations</h3>
+          <div className="space-y-4">
             {recent_bookings.map(b => (
-              <div key={b.id} className="flex items-center justify-between text-sm">
+              <div key={b.id} className="flex items-center justify-between text-sm bg-black/40 p-3 rounded-xl border border-white/5">
                 <div className="min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{b.car_title}</p>
-                  <p className="text-xs text-gray-400">{b.renter_name} → {b.owner_name}</p>
+                  <p className="font-bold text-white truncate">{b.car_title}</p>
+                  <p className="text-[10px] text-gray-500 uppercase font-semibold mt-1 truncate">{b.renter_name} → {b.owner_name}</p>
                 </div>
-                <div className="flex items-center gap-2 ml-3 flex-shrink-0">
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_COLORS[b.status]}`}>
+                <div className="flex items-center gap-3 ml-3 flex-shrink-0">
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${STATUS_COLORS[b.status]}`}>
                     {b.status}
                   </span>
-                  <span className="text-gray-600 font-medium">{b.total_price?.toLocaleString()} GNF</span>
+                  <span className="text-white font-black">{b.total_price?.toLocaleString()} GNF</span>
                 </div>
               </div>
             ))}
@@ -132,16 +133,16 @@ function StatsTab() {
         </div>
 
         {/* Recent users */}
-        <div className="card p-5">
-          <h3 className="font-bold text-gray-900 mb-4">Dernières inscriptions</h3>
-          <div className="space-y-3">
+        <div className="card p-6 border border-white/5 bg-[#111] rounded-2xl">
+          <h3 className="font-bold text-gnYellow text-xs uppercase tracking-widest mb-6 border-b border-white/5 pb-4">Dernières inscriptions</h3>
+          <div className="space-y-4">
             {recent_users.map(u => (
-              <div key={u.id} className="flex items-center justify-between text-sm">
+              <div key={u.id} className="flex items-center justify-between text-sm bg-black/40 p-3 rounded-xl border border-white/5">
                 <div className="min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{u.name}</p>
-                  <p className="text-xs text-gray-400 truncate">{u.email}</p>
+                  <p className="font-bold text-white truncate">{u.name}</p>
+                  <p className="text-[10px] text-gray-500 uppercase font-semibold mt-1 truncate">{u.email}</p>
                 </div>
-                <span className="ml-3 flex-shrink-0 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                <span className="ml-3 flex-shrink-0 px-3 py-1 bg-white/10 text-white border border-white/10 rounded-full text-[10px] font-black uppercase tracking-wider">
                   {u.role}
                 </span>
               </div>
@@ -164,7 +165,7 @@ function UsersTab() {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [bannedFilter, setBannedFilter] = useState('');
-  const [confirm, setConfirm] = useState(null); // { action, userId, userName }
+  const [confirm, setConfirm] = useState(null);
 
   const fetchUsers = useCallback(() => {
     setLoading(true);
@@ -192,26 +193,26 @@ function UsersTab() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Filters */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-4 p-4 bg-[#111] border border-white/5 rounded-2xl">
         <div className="relative flex-1 min-w-[200px]">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
           <input
             type="text"
             placeholder="Rechercher nom ou email..."
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
-            className="input-field pl-9 py-2 text-sm w-full"
+            className="w-full bg-black/40 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors"
           />
         </div>
-        <select value={roleFilter} onChange={e => { setRoleFilter(e.target.value); setPage(1); }} className="input-field py-2 text-sm">
+        <select value={roleFilter} onChange={e => { setRoleFilter(e.target.value); setPage(1); }} className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none appearance-none min-w-[150px]">
           <option value="">Tous les rôles</option>
           <option value="owner">Propriétaire</option>
           <option value="renter">Locataire</option>
           <option value="both">Les deux</option>
         </select>
-        <select value={bannedFilter} onChange={e => { setBannedFilter(e.target.value); setPage(1); }} className="input-field py-2 text-sm">
+        <select value={bannedFilter} onChange={e => { setBannedFilter(e.target.value); setPage(1); }} className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none appearance-none min-w-[150px]">
           <option value="">Tous statuts</option>
           <option value="0">Actifs</option>
           <option value="1">Suspendus</option>
@@ -219,69 +220,69 @@ function UsersTab() {
       </div>
 
       {/* Table */}
-      <div className="card overflow-hidden">
+      <div className="card overflow-hidden border border-white/5 bg-[#111] rounded-2xl">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-black/40 border-b border-white/5 text-[10px] uppercase font-black text-gray-500 tracking-widest">
               <tr>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Utilisateur</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Rôle</th>
-                <th className="text-center px-4 py-3 font-semibold text-gray-600">Annonces</th>
-                <th className="text-center px-4 py-3 font-semibold text-gray-600">Réservations</th>
-                <th className="text-center px-4 py-3 font-semibold text-gray-600">Statut</th>
-                <th className="text-center px-4 py-3 font-semibold text-gray-600">Admin</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Inscrit le</th>
-                <th className="px-4 py-3" />
+                <th className="px-6 py-4">Utilisateur</th>
+                <th className="px-6 py-4 text-center">Rôle</th>
+                <th className="px-6 py-4 text-center">Annonces</th>
+                <th className="px-6 py-4 text-center">Réservations</th>
+                <th className="px-6 py-4 text-center">Statut</th>
+                <th className="px-6 py-4 text-center">Admin</th>
+                <th className="px-6 py-4">Inscrit le</th>
+                <th className="px-6 py-4" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-white/5">
               {loading ? (
-                <tr><td colSpan={8} className="text-center py-10 text-gray-400">Chargement...</td></tr>
+                <tr><td colSpan={8} className="text-center py-10 text-gray-500 font-bold">Chargement...</td></tr>
               ) : users.length === 0 ? (
-                <tr><td colSpan={8} className="text-center py-10 text-gray-400">Aucun utilisateur</td></tr>
+                <tr><td colSpan={8} className="text-center py-10 text-gray-500 font-bold">Aucun utilisateur</td></tr>
               ) : users.map(u => (
-                <tr key={u.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3">
-                    <p className="font-medium text-gray-900">{u.name}</p>
-                    <p className="text-xs text-gray-400">{u.email}</p>
+                <tr key={u.id} className="hover:bg-white/5 transition-colors">
+                  <td className="px-6 py-4">
+                    <p className="font-bold text-white">{u.name}</p>
+                    <p className="text-xs text-gray-500 mt-1">{u.email}</p>
                   </td>
-                  <td className="px-4 py-3">
-                    <span className="px-2 py-0.5 bg-primary-50 text-primary-700 rounded-full text-xs font-medium">{u.role}</span>
+                  <td className="px-6 py-4 text-center">
+                    <span className="px-3 py-1 bg-white/10 text-white border border-white/10 rounded-full text-[10px] font-black uppercase tracking-wider">{u.role}</span>
                   </td>
-                  <td className="px-4 py-3 text-center text-gray-600">{u.car_count}</td>
-                  <td className="px-4 py-3 text-center text-gray-600">{u.booking_count}</td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-6 py-4 text-center text-gray-400 font-bold">{u.car_count}</td>
+                  <td className="px-6 py-4 text-center text-gray-400 font-bold">{u.booking_count}</td>
+                  <td className="px-6 py-4 text-center">
                     {u.banned ? (
-                      <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-semibold">Suspendu</span>
+                      <span className="px-3 py-1 bg-red-500/10 border border-red-500/20 text-red-500 rounded-full text-[10px] font-black uppercase tracking-wider">Suspendu</span>
                     ) : (
-                      <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">Actif</span>
+                      <span className="px-3 py-1 bg-green-500/10 border border-green-500/20 text-green-500 rounded-full text-[10px] font-black uppercase tracking-wider">Actif</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-center">
-                    {u.is_admin ? <ShieldCheckIcon className="h-5 w-5 text-primary-600 mx-auto" /> : <span className="text-gray-300">—</span>}
+                  <td className="px-6 py-4 text-center">
+                    {u.is_admin ? <ShieldCheckIcon className="h-5 w-5 text-gnYellow mx-auto" /> : <span className="text-gray-600">—</span>}
                   </td>
-                  <td className="px-4 py-3 text-gray-400 text-xs">{new Date(u.created_at).toLocaleDateString('fr-FR')}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-6 py-4 text-gray-500 text-xs font-semibold">{new Date(u.created_at).toLocaleDateString('fr-FR')}</td>
+                  <td className="px-6 py-4">
                     {u.id !== me?.id && (
-                      <div className="flex items-center gap-1 justify-end">
+                      <div className="flex items-center gap-2 justify-end">
                         <button
                           onClick={() => update(u.id, { banned: u.banned ? 0 : 1 })}
                           title={u.banned ? 'Réactiver' : 'Suspendre'}
-                          className={`p-1.5 rounded-lg transition-colors ${u.banned ? 'text-green-600 hover:bg-green-50' : 'text-yellow-600 hover:bg-yellow-50'}`}
+                          className={`p-2 rounded-xl transition-colors border ${u.banned ? 'text-green-500 bg-green-500/10 border-green-500/20 hover:bg-green-500/20' : 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20'}`}
                         >
                           {u.banned ? <CheckCircleIcon className="h-4 w-4" /> : <ShieldExclamationIcon className="h-4 w-4" />}
                         </button>
                         <button
                           onClick={() => update(u.id, { is_admin: u.is_admin ? 0 : 1 })}
                           title={u.is_admin ? 'Retirer admin' : 'Rendre admin'}
-                          className="p-1.5 rounded-lg text-primary-600 hover:bg-primary-50 transition-colors"
+                          className="p-2 rounded-xl text-gnYellow bg-gnYellow/10 border border-gnYellow/20 hover:bg-gnYellow/20 transition-colors"
                         >
                           <ShieldCheckIcon className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => setConfirm({ action: 'delete', userId: u.id, userName: u.name })}
                           title="Supprimer"
-                          className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                          className="p-2 rounded-xl text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors"
                         >
                           <TrashIcon className="h-4 w-4" />
                         </button>
@@ -298,15 +299,15 @@ function UsersTab() {
 
       {/* Confirm modal */}
       {confirm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
-            <h3 className="font-bold text-gray-900 text-lg mb-2">Confirmer la suppression</h3>
-            <p className="text-gray-600 text-sm mb-6">
-              Supprimer <strong>{confirm.userName}</strong> ? Cette action est irréversible et supprimera toutes ses annonces et réservations.
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-luxuryDark border border-white/10 rounded-3xl shadow-2xl p-8 max-w-sm w-full">
+            <h3 className="font-black text-white text-xl mb-4">Confirmer la suppression</h3>
+            <p className="text-gray-400 text-sm mb-8 leading-relaxed">
+              Supprimer <strong className="text-white">{confirm.userName}</strong> ? Cette action est irréversible et supprimera toutes ses annonces et réservations.
             </p>
-            <div className="flex gap-3">
-              <button onClick={() => setConfirm(null)} className="btn-secondary flex-1">Annuler</button>
-              <button onClick={() => deleteUser(confirm.userId)} className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold text-sm transition-colors">
+            <div className="flex gap-4">
+              <button onClick={() => setConfirm(null)} className="flex-1 py-3 rounded-xl border border-white/10 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/5 transition-colors">Annuler</button>
+              <button onClick={() => deleteUser(confirm.userId)} className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-colors shadow-lg shadow-red-600/20">
                 Supprimer
               </button>
             </div>
@@ -355,95 +356,95 @@ function CarsTab() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-3">
+    <div className="space-y-6">
+      <div className="flex flex-wrap gap-4 p-4 bg-[#111] border border-white/5 rounded-2xl">
         <div className="relative flex-1 min-w-[200px]">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
           <input
             type="text"
             placeholder="Titre, marque, ville..."
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
-            className="input-field pl-9 py-2 text-sm w-full"
+            className="w-full bg-black/40 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none transition-colors"
           />
         </div>
-        <select value={typeFilter} onChange={e => { setTypeFilter(e.target.value); setPage(1); }} className="input-field py-2 text-sm">
+        <select value={typeFilter} onChange={e => { setTypeFilter(e.target.value); setPage(1); }} className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none appearance-none min-w-[150px]">
           <option value="">Tous types</option>
           {['sedan','suv','van','sports','luxury','economy'].map(t => (
             <option key={t} value={t}>{t}</option>
           ))}
         </select>
-        <select value={availableFilter} onChange={e => { setAvailableFilter(e.target.value); setPage(1); }} className="input-field py-2 text-sm">
+        <select value={availableFilter} onChange={e => { setAvailableFilter(e.target.value); setPage(1); }} className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none appearance-none min-w-[150px]">
           <option value="">Toutes</option>
           <option value="1">Disponibles</option>
           <option value="0">Désactivées</option>
         </select>
       </div>
 
-      <div className="card overflow-hidden">
+      <div className="card overflow-hidden border border-white/5 bg-[#111] rounded-2xl">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-black/40 border-b border-white/5 text-[10px] uppercase font-black text-gray-500 tracking-widest">
               <tr>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Annonce</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Propriétaire</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Type</th>
-                <th className="text-right px-4 py-3 font-semibold text-gray-600">Prix/j</th>
-                <th className="text-center px-4 py-3 font-semibold text-gray-600">Résa</th>
-                <th className="text-center px-4 py-3 font-semibold text-gray-600">Statut</th>
-                <th className="px-4 py-3" />
+                <th className="px-6 py-4">Annonce</th>
+                <th className="px-6 py-4">Propriétaire</th>
+                <th className="px-6 py-4 text-center">Type</th>
+                <th className="px-6 py-4 text-right">Prix/j</th>
+                <th className="px-6 py-4 text-center">Résa</th>
+                <th className="px-6 py-4 text-center">Statut</th>
+                <th className="px-6 py-4" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-white/5">
               {loading ? (
-                <tr><td colSpan={7} className="text-center py-10 text-gray-400">Chargement...</td></tr>
+                <tr><td colSpan={7} className="text-center py-10 text-gray-500 font-bold">Chargement...</td></tr>
               ) : cars.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-10 text-gray-400">Aucune annonce</td></tr>
+                <tr><td colSpan={7} className="text-center py-10 text-gray-500 font-bold">Aucune annonce</td></tr>
               ) : cars.map(car => (
-                <tr key={car.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
+                <tr key={car.id} className="hover:bg-white/5 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-4">
                       {car.images?.[0] ? (
-                        <img src={imgUrl(car.images[0])} alt={car.title} className="h-10 w-14 object-cover rounded-lg flex-shrink-0" onError={e => { e.target.style.display = 'none'; }} />
+                        <img src={imgUrl(car.images[0])} alt={car.title} className="h-12 w-16 object-cover rounded-xl flex-shrink-0 border border-white/10" onError={e => { e.target.style.display = 'none'; }} />
                       ) : (
-                        <div className="h-10 w-14 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center text-gray-300 text-lg">🚗</div>
+                        <div className="h-12 w-16 bg-white/5 rounded-xl flex-shrink-0 flex items-center justify-center text-gray-500 text-xl border border-white/10">🚗</div>
                       )}
                       <div className="min-w-0">
-                        <Link to={`/cars/${car.id}`} className="font-medium text-gray-900 hover:text-primary-700 truncate block">
+                        <Link to={`/cars/${car.id}`} className="font-bold text-white hover:text-gnYellow transition-colors truncate block">
                           {car.title}
                         </Link>
-                        <p className="text-xs text-gray-400">{car.brand} {car.model} · {car.city}</p>
+                        <p className="text-[10px] uppercase font-semibold text-gray-500 mt-1">{car.brand} {car.model} · {car.city}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3">
-                    <p className="text-gray-700">{car.owner_name}</p>
-                    <p className="text-xs text-gray-400">{car.owner_email}</p>
+                  <td className="px-6 py-4">
+                    <p className="font-bold text-white">{car.owner_name}</p>
+                    <p className="text-xs text-gray-500 mt-1">{car.owner_email}</p>
                   </td>
-                  <td className="px-4 py-3">
-                    <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">{car.type}</span>
+                  <td className="px-6 py-4 text-center">
+                    <span className="px-3 py-1 bg-white/10 text-white border border-white/10 rounded-full text-[10px] font-black uppercase tracking-wider">{car.type}</span>
                   </td>
-                  <td className="px-4 py-3 text-right font-semibold text-gray-800">{car.price_per_day?.toLocaleString()} GNF</td>
-                  <td className="px-4 py-3 text-center text-gray-600">{car.booking_count}</td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-6 py-4 text-right font-black text-gnYellow">{car.price_per_day?.toLocaleString()} GNF</td>
+                  <td className="px-6 py-4 text-center text-gray-400 font-bold">{car.booking_count}</td>
+                  <td className="px-6 py-4 text-center">
                     {car.available ? (
-                      <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">Disponible</span>
+                      <span className="px-3 py-1 bg-green-500/10 border border-green-500/20 text-green-500 rounded-full text-[10px] font-black uppercase tracking-wider">Disponible</span>
                     ) : (
-                      <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold">Désactivée</span>
+                      <span className="px-3 py-1 bg-gray-500/10 border border-gray-500/20 text-gray-400 rounded-full text-[10px] font-black uppercase tracking-wider">Désactivée</span>
                     )}
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-1 justify-end">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2 justify-end">
                       <button
                         onClick={() => toggleAvailable(car)}
                         title={car.available ? 'Désactiver' : 'Activer'}
-                        className={`p-1.5 rounded-lg transition-colors ${car.available ? 'text-yellow-600 hover:bg-yellow-50' : 'text-green-600 hover:bg-green-50'}`}
+                        className={`p-2 rounded-xl transition-colors border ${car.available ? 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20' : 'text-green-500 bg-green-500/10 border-green-500/20 hover:bg-green-500/20'}`}
                       >
                         {car.available ? <XCircleIcon className="h-4 w-4" /> : <CheckCircleIcon className="h-4 w-4" />}
                       </button>
                       <button
                         onClick={() => setConfirm({ carId: car.id, carTitle: car.title })}
-                        className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                        className="p-2 rounded-xl text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors"
                       >
                         <TrashIcon className="h-4 w-4" />
                       </button>
@@ -458,15 +459,15 @@ function CarsTab() {
       <Pagination page={page} total={total} limit={20} onPage={setPage} />
 
       {confirm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
-            <h3 className="font-bold text-gray-900 text-lg mb-2">Supprimer l'annonce</h3>
-            <p className="text-gray-600 text-sm mb-6">
-              Supprimer <strong>{confirm.carTitle}</strong> ? Les réservations associées seront également supprimées.
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-luxuryDark border border-white/10 rounded-3xl shadow-2xl p-8 max-w-sm w-full">
+            <h3 className="font-black text-white text-xl mb-4">Supprimer l'annonce</h3>
+            <p className="text-gray-400 text-sm mb-8 leading-relaxed">
+              Supprimer <strong className="text-white">{confirm.carTitle}</strong> ? Les réservations associées seront également supprimées.
             </p>
-            <div className="flex gap-3">
-              <button onClick={() => setConfirm(null)} className="btn-secondary flex-1">Annuler</button>
-              <button onClick={() => deleteCar(confirm.carId)} className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold text-sm transition-colors">
+            <div className="flex gap-4">
+              <button onClick={() => setConfirm(null)} className="flex-1 py-3 rounded-xl border border-white/10 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/5 transition-colors">Annuler</button>
+              <button onClick={() => deleteCar(confirm.carId)} className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-colors shadow-lg shadow-red-600/20">
                 Supprimer
               </button>
             </div>
@@ -485,7 +486,7 @@ function BookingsTab() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
-  const [actionModal, setActionModal] = useState(null); // { bookingId, currentStatus }
+  const [actionModal, setActionModal] = useState(null);
 
   const fetchBookings = useCallback(() => {
     setLoading(true);
@@ -506,9 +507,9 @@ function BookingsTab() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-3">
-        <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }} className="input-field py-2 text-sm">
+    <div className="space-y-6">
+      <div className="flex gap-4 p-4 bg-[#111] border border-white/5 rounded-2xl">
+        <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }} className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none appearance-none min-w-[200px]">
           <option value="">Tous statuts</option>
           <option value="pending">En attente</option>
           <option value="confirmed">Confirmées</option>
@@ -517,52 +518,52 @@ function BookingsTab() {
         </select>
       </div>
 
-      <div className="card overflow-hidden">
+      <div className="card overflow-hidden border border-white/5 bg-[#111] rounded-2xl">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-black/40 border-b border-white/5 text-[10px] uppercase font-black text-gray-500 tracking-widest">
               <tr>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Voiture</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Locataire</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Propriétaire</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Dates</th>
-                <th className="text-right px-4 py-3 font-semibold text-gray-600">Montant</th>
-                <th className="text-center px-4 py-3 font-semibold text-gray-600">Statut</th>
-                <th className="px-4 py-3" />
+                <th className="px-6 py-4">Voiture</th>
+                <th className="px-6 py-4">Locataire</th>
+                <th className="px-6 py-4">Propriétaire</th>
+                <th className="px-6 py-4">Dates</th>
+                <th className="px-6 py-4 text-right">Montant</th>
+                <th className="px-6 py-4 text-center">Statut</th>
+                <th className="px-6 py-4" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-white/5">
               {loading ? (
-                <tr><td colSpan={7} className="text-center py-10 text-gray-400">Chargement...</td></tr>
+                <tr><td colSpan={7} className="text-center py-10 text-gray-500 font-bold">Chargement...</td></tr>
               ) : bookings.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-10 text-gray-400">Aucune réservation</td></tr>
+                <tr><td colSpan={7} className="text-center py-10 text-gray-500 font-bold">Aucune réservation</td></tr>
               ) : bookings.map(b => (
-                <tr key={b.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3">
-                    <p className="font-medium text-gray-900">{b.car_title}</p>
-                    <p className="text-xs text-gray-400">{b.brand} {b.model}</p>
+                <tr key={b.id} className="hover:bg-white/5 transition-colors">
+                  <td className="px-6 py-4">
+                    <p className="font-bold text-white">{b.car_title}</p>
+                    <p className="text-[10px] uppercase font-semibold text-gray-500 mt-1">{b.brand} {b.model}</p>
                   </td>
-                  <td className="px-4 py-3">
-                    <p className="text-gray-700">{b.renter_name}</p>
-                    <p className="text-xs text-gray-400">{b.renter_email}</p>
+                  <td className="px-6 py-4">
+                    <p className="font-bold text-white">{b.renter_name}</p>
+                    <p className="text-xs text-gray-500 mt-1">{b.renter_email}</p>
                   </td>
-                  <td className="px-4 py-3">
-                    <p className="text-gray-700">{b.owner_name}</p>
-                    <p className="text-xs text-gray-400">{b.owner_email}</p>
+                  <td className="px-6 py-4">
+                    <p className="font-bold text-white">{b.owner_name}</p>
+                    <p className="text-xs text-gray-500 mt-1">{b.owner_email}</p>
                   </td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">
-                    {b.start_date} → {b.end_date}
+                  <td className="px-6 py-4 text-gray-400 text-xs font-semibold">
+                    {b.start_date} <br/><span className="text-gray-600">→</span> {b.end_date}
                   </td>
-                  <td className="px-4 py-3 text-right font-semibold text-gray-800">{b.total_price?.toLocaleString()} GNF</td>
-                  <td className="px-4 py-3 text-center">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_COLORS[b.status]}`}>
+                  <td className="px-6 py-4 text-right font-black text-gnYellow">{b.total_price?.toLocaleString()} GNF</td>
+                  <td className="px-6 py-4 text-center">
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${STATUS_COLORS[b.status]}`}>
                       {b.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-6 py-4">
                     <button
                       onClick={() => setActionModal({ bookingId: b.id, currentStatus: b.status })}
-                      className="text-xs text-primary-600 hover:text-primary-800 font-medium px-2 py-1 hover:bg-primary-50 rounded-lg transition-colors"
+                      className="text-[10px] text-gnYellow hover:text-black font-black px-3 py-2 border border-gnYellow/20 hover:bg-gnYellow rounded-xl uppercase tracking-widest transition-colors"
                     >
                       Modifier
                     </button>
@@ -577,22 +578,22 @@ function BookingsTab() {
 
       {/* Force status modal */}
       {actionModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
-            <h3 className="font-bold text-gray-900 text-lg mb-1">Modifier le statut</h3>
-            <p className="text-gray-500 text-sm mb-4">Statut actuel : <strong>{actionModal.currentStatus}</strong></p>
-            <div className="space-y-2">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-luxuryDark border border-white/10 rounded-3xl shadow-2xl p-8 max-w-sm w-full">
+            <h3 className="font-black text-white text-xl mb-2">Modifier le statut</h3>
+            <p className="text-gray-400 text-sm mb-6">Statut actuel : <strong className="text-white uppercase tracking-wider text-xs">{actionModal.currentStatus}</strong></p>
+            <div className="space-y-3">
               {['pending', 'confirmed', 'rejected', 'cancelled'].filter(s => s !== actionModal.currentStatus).map(s => (
                 <button
                   key={s}
                   onClick={() => forceStatus(actionModal.bookingId, s)}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${STATUS_COLORS[s]} hover:opacity-80`}
+                  className={`w-full text-left px-5 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all hover:scale-[1.02] ${STATUS_COLORS[s]}`}
                 >
                   {s === 'confirmed' ? 'Confirmer' : s === 'rejected' ? 'Refuser' : s === 'cancelled' ? 'Annuler' : 'Remettre en attente'}
                 </button>
               ))}
             </div>
-            <button onClick={() => setActionModal(null)} className="btn-secondary w-full mt-4">Fermer</button>
+            <button onClick={() => setActionModal(null)} className="w-full mt-6 py-4 rounded-2xl border border-white/10 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/5 transition-colors">Fermer</button>
           </div>
         </div>
       )}
@@ -607,7 +608,7 @@ function VerificationsTab() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState('pending');
-  const [rejectModal, setRejectModal] = useState(null); // { userId, name }
+  const [rejectModal, setRejectModal] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
 
   const fetchVerifications = useCallback(() => {
@@ -633,51 +634,51 @@ function VerificationsTab() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-3 items-center">
+    <div className="space-y-6">
+      <div className="flex gap-4 p-4 bg-[#111] border border-white/5 rounded-2xl items-center">
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
-          className="input-field py-2 text-sm"
+          className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none appearance-none min-w-[200px]"
         >
           <option value="pending">En attente</option>
           <option value="verified">Vérifiés</option>
           <option value="rejected">Refusés</option>
         </select>
-        <span className="text-sm text-gray-500">{total} résultat{total > 1 ? 's' : ''}</span>
+        <span className="text-sm font-bold text-gray-500">{total} résultat{total > 1 ? 's' : ''}</span>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-16"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600" /></div>
+        <div className="flex justify-center py-16"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gnYellow" /></div>
       ) : users.length === 0 ? (
-        <div className="card p-10 text-center text-gray-500">Aucune demande {statusFilter === 'pending' ? 'en attente' : ''}</div>
+        <div className="card p-10 text-center text-gray-500 font-bold border border-white/5 bg-[#111] rounded-2xl">Aucune demande {statusFilter === 'pending' ? 'en attente' : ''}</div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {users.map(u => (
-            <div key={u.id} className="card p-5 flex flex-col gap-4">
-              <div className="flex items-start justify-between gap-4">
+            <div key={u.id} className="card p-8 border border-white/5 bg-[#111] rounded-3xl flex flex-col gap-6">
+              <div className="flex items-start justify-between gap-4 border-b border-white/5 pb-6">
                 <div>
-                  <p className="font-semibold text-gray-900">{u.name}</p>
-                  <p className="text-sm text-gray-500">{u.email} {u.phone && `· ${u.phone}`}</p>
-                  <p className="text-xs text-gray-400 mt-1">Soumis le {new Date(u.created_at).toLocaleDateString('fr-FR')}</p>
+                  <p className="text-xl font-black text-white uppercase tracking-wider">{u.name}</p>
+                  <p className="text-sm font-bold text-gray-500 mt-1">{u.email} {u.phone && <span className="text-gnYellow ml-2">· {u.phone}</span>}</p>
+                  <p className="text-[10px] text-gray-600 uppercase font-black tracking-widest mt-3">Soumis le {new Date(u.created_at).toLocaleDateString('fr-FR')}</p>
                   {u.id_rejection_reason && (
-                    <p className="text-xs text-red-500 mt-1">Motif refus : {u.id_rejection_reason}</p>
+                    <p className="text-xs font-bold text-red-500 mt-2 bg-red-500/10 inline-block px-3 py-1 rounded-full border border-red-500/20">Motif refus : {u.id_rejection_reason}</p>
                   )}
                 </div>
                 {statusFilter === 'pending' && (
-                  <div className="flex gap-2 flex-shrink-0">
+                  <div className="flex gap-3 flex-shrink-0">
                     <button
                       onClick={() => handleApprove(u.id)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition-colors"
+                      className="flex items-center gap-2 px-5 py-3 bg-green-500 hover:bg-green-400 text-black font-black uppercase text-xs tracking-widest rounded-xl transition-colors shadow-lg shadow-green-500/20"
                     >
-                      <CheckCircleIcon className="h-4 w-4" />
+                      <CheckCircleIcon className="h-5 w-5" />
                       Approuver
                     </button>
                     <button
                       onClick={() => { setRejectModal({ userId: u.id, name: u.name }); setRejectReason(''); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-lg transition-colors"
+                      className="flex items-center gap-2 px-5 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-black uppercase text-xs tracking-widest rounded-xl border border-red-500/20 transition-colors"
                     >
-                      <XCircleIcon className="h-4 w-4" />
+                      <XCircleIcon className="h-5 w-5" />
                       Refuser
                     </button>
                   </div>
@@ -685,22 +686,23 @@ function VerificationsTab() {
               </div>
 
               {/* Documents */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-6">
                 {[
                   { label: 'CNI Recto', url: u.id_doc_front },
                   { label: 'CNI Verso', url: u.id_doc_back },
                   { label: 'Selfie', url: u.id_selfie },
                 ].map(({ label, url }) => (
                   <a key={label} href={url} target="_blank" rel="noopener noreferrer" className="group block">
-                    <div className="relative overflow-hidden rounded-xl border border-gray-100 hover:border-primary-300 transition-colors">
+                    <div className="relative overflow-hidden rounded-2xl border border-white/10 hover:border-gnYellow/50 transition-colors bg-black/40 aspect-video flex items-center justify-center">
                       <img
                         src={url}
                         alt={label}
-                        className="w-full h-28 object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         onError={e => { e.target.style.display = 'none'; }}
                       />
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] font-semibold text-center py-1">
-                        {label} — cliquer pour agrandir
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                      <div className="absolute bottom-3 left-0 right-0 text-white text-xs font-black uppercase tracking-widest text-center">
+                        {label}
                       </div>
                     </div>
                   </a>
@@ -713,25 +715,25 @@ function VerificationsTab() {
 
       {/* Reject modal */}
       {rejectModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
-            <h3 className="font-bold text-gray-900 text-lg mb-1">Refuser la vérification</h3>
-            <p className="text-gray-500 text-sm mb-4">Utilisateur : <strong>{rejectModal.name}</strong></p>
-            <label className="form-label">Motif du refus (optionnel)</label>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-luxuryDark border border-white/10 rounded-3xl shadow-2xl p-8 max-w-sm w-full">
+            <h3 className="font-black text-white text-xl mb-2">Refuser la vérification</h3>
+            <p className="text-gray-400 text-sm mb-6">Utilisateur : <strong className="text-white">{rejectModal.name}</strong></p>
+            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Motif du refus (optionnel)</label>
             <textarea
               value={rejectReason}
               onChange={e => setRejectReason(e.target.value)}
-              rows={3}
+              rows={4}
               placeholder="Document illisible, selfie non conforme..."
-              className="input-field mt-1 mb-4 resize-none"
+              className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-sm focus:border-red-500/50 outline-none resize-none mb-6"
             />
-            <div className="flex gap-3">
-              <button onClick={() => setRejectModal(null)} className="btn-secondary flex-1">Annuler</button>
+            <div className="flex gap-4">
+              <button onClick={() => setRejectModal(null)} className="flex-1 py-3 rounded-xl border border-white/10 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/5 transition-colors">Annuler</button>
               <button
                 onClick={handleReject}
-                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold text-sm transition-colors"
+                className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-colors shadow-lg shadow-red-600/20"
               >
-                Confirmer le refus
+                Confirmer
               </button>
             </div>
           </div>
@@ -749,49 +751,55 @@ export default function Admin() {
 
   if (!user?.is_admin) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <ShieldExclamationIcon className="h-16 w-16 text-red-400" />
-        <h1 className="text-2xl font-bold text-gray-900">Accès refusé</h1>
-        <p className="text-gray-500">Cette page est réservée aux administrateurs.</p>
-        <Link to="/" className="btn-primary mt-2">Retour à l'accueil</Link>
+      <div className="min-h-screen bg-luxuryBlack flex flex-col items-center justify-center gap-6 pb-20">
+        <ShieldExclamationIcon className="h-24 w-24 text-red-500/50" />
+        <h1 className="text-4xl font-black text-white uppercase tracking-widest">Accès refusé</h1>
+        <p className="text-gray-400 font-semibold">Cette page est réservée aux administrateurs de l'élite.</p>
+        <Link to="/" className="mt-4 px-8 py-4 bg-gnYellow text-black font-black uppercase tracking-widest rounded-2xl hover:scale-105 transition-transform shadow-lg shadow-gnYellow/20">Retour à l'accueil</Link>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="mb-8 flex items-center gap-3">
-        <ShieldCheckIcon className="h-8 w-8 text-primary-600" />
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Panel Admin</h1>
-          <p className="text-sm text-gray-500">Gestion de la plateforme GuiCarLoc</p>
+    <div className="min-h-screen bg-luxuryBlack pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Header */}
+        <div className="mb-10 flex items-center gap-5">
+          <div className="p-4 bg-gnYellow/10 border border-gnYellow/20 rounded-2xl">
+            <ShieldCheckIcon className="h-10 w-10 text-gnYellow" />
+          </div>
+          <div>
+            <h1 className="text-4xl font-black text-white uppercase tracking-tighter">Panel Admin</h1>
+            <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mt-1">Centre de contrôle GuiCarLoc</p>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-2 bg-[#111] border border-white/5 p-2 rounded-2xl mb-10 w-full overflow-x-auto hide-scrollbar">
+          {TABS.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${
+                activeTab === tab.id
+                  ? 'bg-gnYellow text-black shadow-lg shadow-gnYellow/20 scale-[1.02]'
+                  : 'text-gray-500 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab content */}
+        <div className="animate-fadeIn">
+          {activeTab === 'stats' && <StatsTab />}
+          {activeTab === 'users' && <UsersTab />}
+          {activeTab === 'cars' && <CarsTab />}
+          {activeTab === 'bookings' && <BookingsTab />}
+          {activeTab === 'verifications' && <VerificationsTab />}
         </div>
       </div>
-
-      {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl mb-6 w-fit">
-        {TABS.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-              activeTab === tab.id
-                ? 'bg-white text-primary-700 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab content */}
-      {activeTab === 'stats' && <StatsTab />}
-      {activeTab === 'users' && <UsersTab />}
-      {activeTab === 'cars' && <CarsTab />}
-      {activeTab === 'bookings' && <BookingsTab />}
-      {activeTab === 'verifications' && <VerificationsTab />}
     </div>
   );
 }
