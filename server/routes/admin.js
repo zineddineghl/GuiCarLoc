@@ -1,8 +1,15 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 const pool = require('../db');
 const { authenticateAdmin } = require('../middleware/auth');
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const router = express.Router();
 
@@ -340,8 +347,29 @@ router.put('/verifications/:id', async (req, res) => {
       return res.status(400).json({ error: 'action must be approve or reject' });
     }
     const id_status = action === 'approve' ? 'verified' : 'rejected';
+
+    // Récupérer les URLs des photos avant de les effacer
+    const { rows } = await pool.query(
+      'SELECT id_doc_front, id_doc_back, id_selfie FROM users WHERE id = $1',
+      [req.params.id]
+    );
+    const user = rows[0];
+
+    // Supprimer les photos Cloudinary
+    if (user) {
+      const urls = [user.id_doc_front, user.id_doc_back, user.id_selfie].filter(Boolean);
+      await Promise.allSettled(urls.map(url => {
+        const parts = url.split('/');
+        const idx = parts.indexOf('guicarloc');
+        if (idx === -1) return Promise.resolve();
+        const publicId = parts.slice(idx).join('/').replace(/\.[^/.]+$/, '');
+        return cloudinary.uploader.destroy(publicId);
+      }));
+    }
+
+    // Mettre à jour le statut et effacer les colonnes photos
     await pool.query(
-      'UPDATE users SET id_status = $1, id_rejection_reason = $2 WHERE id = $3',
+      'UPDATE users SET id_status = $1, id_rejection_reason = $2, id_doc_front = NULL, id_doc_back = NULL, id_selfie = NULL WHERE id = $3',
       [id_status, reason || null, req.params.id]
     );
     res.json({ ok: true, id_status });
