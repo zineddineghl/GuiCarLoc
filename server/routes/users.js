@@ -82,6 +82,18 @@ router.post('/me/avatar', authenticateToken, (req, res) => {
   });
 });
 
+// PUT /api/users/me/push-token
+router.put('/me/push-token', authenticateToken, async (req, res) => {
+  const { token: pushToken } = req.body;
+  if (!pushToken) return res.status(400).json({ error: 'Token requis' });
+  try {
+    await pool.query('UPDATE users SET expo_push_token = $1 WHERE id = $2', [pushToken, req.user.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // PUT /api/users/me/2fa
 router.put('/me/2fa', authenticateToken, async (req, res) => {
   try {

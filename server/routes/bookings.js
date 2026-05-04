@@ -2,6 +2,7 @@ const express = require('express');
 const pool = require('../db');
 const { authenticateToken } = require('../middleware/auth');
 const { sendNewBookingEmail, sendBookingConfirmedEmail, sendBookingRejectedEmail } = require('../mailer');
+const { sendPushNotification } = require('../pushNotifications');
 
 const router = express.Router();
 
@@ -123,6 +124,17 @@ router.post('/', authenticateToken, async (req, res) => {
       endDate: booking.end_date,
       totalPrice: booking.total_price,
     }).catch(() => {});
+
+    // Push au propriétaire
+    const { rows: ownerRows } = await pool.query(
+      'SELECT expo_push_token FROM users WHERE id = $1', [car.owner_id]
+    );
+    sendPushNotification(
+      ownerRows[0]?.expo_push_token,
+      'Nouvelle réservation',
+      `${req.user.name} veut louer votre ${car.brand} ${car.model}`,
+      { screen: 'bookings', bookingId: insertResult.rows[0].id }
+    );
 
     res.status(201).json({ booking: parseBookingImages(booking) });
   } catch (err) {
@@ -252,6 +264,16 @@ router.put('/:id/status', authenticateToken, async (req, res) => {
         endDate: updated.end_date,
         totalPrice: updated.total_price,
       }).catch(() => {});
+
+      const { rows: renterPushRows } = await pool.query(
+        'SELECT expo_push_token FROM users WHERE id = $1', [updated.renter_id]
+      );
+      sendPushNotification(
+        renterPushRows[0]?.expo_push_token,
+        'Réservation confirmée !',
+        `Votre réservation pour ${updated.car_title} a été acceptée`,
+        { screen: 'bookings', bookingId: updated.id }
+      );
     } else if (status === 'rejected') {
       sendBookingRejectedEmail({
         to: updated.renter_email,
@@ -260,6 +282,16 @@ router.put('/:id/status', authenticateToken, async (req, res) => {
         startDate: updated.start_date,
         endDate: updated.end_date,
       }).catch(() => {});
+
+      const { rows: renterPushRows } = await pool.query(
+        'SELECT expo_push_token FROM users WHERE id = $1', [updated.renter_id]
+      );
+      sendPushNotification(
+        renterPushRows[0]?.expo_push_token,
+        'Réservation refusée',
+        `Votre demande pour ${updated.car_title} n'a pas été acceptée`,
+        { screen: 'bookings', bookingId: updated.id }
+      );
     }
 
     res.json({ booking: parseBookingImages(updated) });

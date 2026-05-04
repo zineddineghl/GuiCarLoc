@@ -1,6 +1,7 @@
 const express = require('express');
 const pool = require('../db');
 const { authenticateToken } = require('../middleware/auth');
+const { sendPushNotification } = require('../pushNotifications');
 
 const router = express.Router();
 
@@ -86,11 +87,24 @@ router.post('/:userId', authenticateToken, async (req, res) => {
   try {
     const { content } = req.body;
     if (!content?.trim()) return res.status(400).json({ error: 'Message requis' });
+    const receiverId = parseInt(req.params.userId);
     const { rows } = await pool.query(
       `INSERT INTO messages (sender_id, receiver_id, content) VALUES ($1, $2, $3)
        RETURNING id, sender_id, receiver_id, content, created_at`,
-      [req.user.id, parseInt(req.params.userId), content.trim()]
+      [req.user.id, receiverId, content.trim()]
     );
+
+    // Push au destinataire
+    const { rows: receiverRows } = await pool.query(
+      'SELECT expo_push_token FROM users WHERE id = $1', [receiverId]
+    );
+    sendPushNotification(
+      receiverRows[0]?.expo_push_token,
+      `Message de ${req.user.name}`,
+      content.trim().length > 60 ? content.trim().slice(0, 60) + '…' : content.trim(),
+      { screen: 'messages', userId: req.user.id }
+    );
+
     res.json({ message: rows[0] });
   } catch (err) {
     console.error('Post message error:', err);
