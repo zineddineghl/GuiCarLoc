@@ -47,6 +47,17 @@ export default function PostListing() {
   const [fetchLoading, setFetchLoading] = useState(isEdit);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const CAR_TYPE_ICONS = {
+    sedan: '🚗',
+    suv: '🚙',
+    van: '🚐',
+    sports: '🏎️',
+    luxury: '🚘',
+    economy: '🚕',
+    scooter: '🛵',
+    moto: '🏍️',
+    boat: '🚤'
+  };
 
   useEffect(() => {
     if (isEdit) {
