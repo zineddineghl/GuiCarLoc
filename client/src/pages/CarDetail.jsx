@@ -314,7 +314,14 @@ export default function CarDetail() {
                   <div className="absolute -bottom-2 -right-2 bg-gnGreen w-6 h-6 rounded-full border-4 border-luxuryBlack"></div>
                 </div>
                 <div className="flex-1">
-                  <Link to={`/profile/${car.owner_id}`} className="text-2xl font-bold text-white hover:text-gnYellow transition-colors">{car.owner_name}</Link>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Link to={`/profile/${car.owner_id}`} className="text-2xl font-bold text-white hover:text-gnYellow transition-colors">{car.owner_name}</Link>
+                    {car.owner_id_status === 'verified' ? (
+                      <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-gnGreen/40 bg-gnGreen/10 text-gnGreen">✓ Vérifié</span>
+                    ) : (
+                      <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-white/10 bg-white/5 text-gray-500">Non vérifié</span>
+                    )}
+                  </div>
                   <div className="flex flex-col gap-2 mt-3">
                     <a href={`mailto:${car.owner_email}`} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
                       <EnvelopeIcon className="h-4 w-4 text-gnYellow/50" /> {car.owner_email}
