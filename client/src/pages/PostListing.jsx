@@ -36,7 +36,6 @@ export default function PostListing() {
     max_rental_days: '',
     requires_deposit: false,
     deposit_amount: '',
-    // Remplacement des colonnes fixes par un tableau dynamique
     discounts: [] 
   });
   

@@ -13,6 +13,23 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+const kycStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'guicarloc/kyc',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+  },
+});
+
+const kycUpload = multer({
+  storage: kycStorage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Image files only'));
+  }
+});
+
 const avatarStorage = new CloudinaryStorage({
   cloudinary,
   params: {
@@ -29,6 +46,30 @@ const avatarUpload = multer({
     if (file.mimetype.startsWith('image/')) cb(null, true);
     else cb(new Error('Image files only'));
   }
+});
+
+// POST /api/users/me/verify-identity
+router.post('/me/verify-identity', authenticateToken, (req, res) => {
+  kycUpload.fields([
+    { name: 'id_doc_front', maxCount: 1 },
+    { name: 'id_doc_back', maxCount: 1 },
+    { name: 'id_selfie', maxCount: 1 },
+  ])(req, res, async (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    const { id_doc_front, id_doc_back, id_selfie } = req.files || {};
+    if (!id_doc_front || !id_doc_back || !id_selfie) {
+      return res.status(400).json({ error: 'Les 3 documents sont requis (CNI recto, verso, selfie)' });
+    }
+    try {
+      await pool.query(
+        'UPDATE users SET id_doc_front = $1, id_doc_back = $2, id_selfie = $3, id_status = $4, id_rejection_reason = NULL WHERE id = $5',
+        [id_doc_front[0].path, id_doc_back[0].path, id_selfie[0].path, 'pending', req.user.id]
+      );
+      res.json({ ok: true, id_status: 'pending' });
+    } catch (dbErr) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 });
 
 // POST /api/users/me/avatar

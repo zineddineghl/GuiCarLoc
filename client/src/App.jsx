@@ -23,6 +23,7 @@ import ResetPassword from './pages/ResetPassword';
 // Nouvelles pages ajoutées
 import About from './pages/About';
 import Contact from './pages/Contact';
+import VerifyIdentity from './pages/VerifyIdentity';
 
 // Auth Context
 const AuthContext = createContext(null);
@@ -150,6 +151,7 @@ function App() {
             <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
             <Route path="/messages/:userId" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
             <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
+            <Route path="/verify-identity" element={<ProtectedRoute><VerifyIdentity /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
             

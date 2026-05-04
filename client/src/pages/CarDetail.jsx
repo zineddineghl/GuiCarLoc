@@ -153,7 +153,12 @@ export default function CarDetail() {
           : 'Booking request sent successfully!');
       setBooking({ start_date: today, end_date: tomorrow, message: '' });
     } catch (err) {
-      setBookingError(err.response?.data?.error || t('common.error'));
+      const errCode = err.response?.data?.error;
+      if (errCode === 'identity_not_verified') {
+        setBookingError('identity_not_verified');
+      } else {
+        setBookingError(errCode || t('common.error'));
+      }
     } finally {
       setBookingLoading(false);
     }
@@ -425,7 +430,19 @@ export default function CarDetail() {
 
                     <textarea value={booking.message} onChange={e => setBooking(prev => ({ ...prev, message: e.target.value }))} placeholder={t('booking.message_placeholder')} rows={3} className="input-field text-sm bg-black/40 border-white/10" />
 
-                    {bookingError && <div className="p-3 bg-gnRed/10 border border-gnRed/20 text-gnRed text-xs font-bold rounded-xl text-center">{bookingError}</div>}
+                    {bookingError && (
+                      bookingError === 'identity_not_verified' ? (
+                        <div className="p-4 bg-gnYellow/10 border border-gnYellow/30 rounded-xl flex flex-col gap-2">
+                          <p className="text-gnYellow text-xs font-black uppercase tracking-widest">Identité non vérifiée</p>
+                          <p className="text-gray-300 text-xs leading-relaxed">Vous devez vérifier votre identité avant d'effectuer une réservation.</p>
+                          <Link to="/verify-identity" className="btn-primary text-xs py-2 text-center mt-1 block">
+                            Vérifier mon identité →
+                          </Link>
+                        </div>
+                      ) : (
+                        <div className="p-3 bg-gnRed/10 border border-gnRed/20 text-gnRed text-xs font-bold rounded-xl text-center">{bookingError}</div>
+                      )
+                    )}
                     {bookingSuccess && <div className="p-3 bg-gnGreen/10 border border-gnGreen/20 text-gnGreen text-xs font-bold rounded-xl text-center">{bookingSuccess}</div>}
 
                     {/* Le bouton se désactive si pricing est en erreur */}

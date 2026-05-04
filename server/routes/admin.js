@@ -310,4 +310,45 @@ router.put('/bookings/:id', async (req, res) => {
   }
 });
 
+// GET /api/admin/verifications?status=pending|verified|rejected
+router.get('/verifications', async (req, res) => {
+  try {
+    const { status = 'pending', page = 1, limit = 20 } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const { rows } = await pool.query(`
+      SELECT id, name, email, phone, id_doc_front, id_doc_back, id_selfie, id_status, id_rejection_reason, created_at
+      FROM users
+      WHERE id_status = $1
+      ORDER BY created_at DESC
+      LIMIT $2 OFFSET $3
+    `, [status, parseInt(limit), offset]);
+    const { rows: countRows } = await pool.query(
+      'SELECT COUNT(*)::int as total FROM users WHERE id_status = $1', [status]
+    );
+    res.json({ users: rows, total: countRows[0].total });
+  } catch (err) {
+    console.error('Admin verifications error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// PUT /api/admin/verifications/:id
+router.put('/verifications/:id', async (req, res) => {
+  try {
+    const { action, reason } = req.body;
+    if (!['approve', 'reject'].includes(action)) {
+      return res.status(400).json({ error: 'action must be approve or reject' });
+    }
+    const id_status = action === 'approve' ? 'verified' : 'rejected';
+    await pool.query(
+      'UPDATE users SET id_status = $1, id_rejection_reason = $2 WHERE id = $3',
+      [id_status, reason || null, req.params.id]
+    );
+    res.json({ ok: true, id_status });
+  } catch (err) {
+    console.error('Admin verify user error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

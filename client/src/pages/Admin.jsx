@@ -23,6 +23,7 @@ const TABS = [
   { id: 'users', label: 'Utilisateurs' },
   { id: 'cars', label: 'Annonces' },
   { id: 'bookings', label: 'Réservations' },
+  { id: 'verifications', label: 'Vérifications' },
 ];
 
 const STATUS_COLORS = {
@@ -599,6 +600,147 @@ function BookingsTab() {
   );
 }
 
+// ─── VERIFICATIONS TAB ────────────────────────────────────────────────────────
+
+function VerificationsTab() {
+  const [users, setUsers] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('pending');
+  const [rejectModal, setRejectModal] = useState(null); // { userId, name }
+  const [rejectReason, setRejectReason] = useState('');
+
+  const fetchVerifications = useCallback(() => {
+    setLoading(true);
+    axios.get('/api/admin/verifications', { params: { status: statusFilter } })
+      .then(r => { setUsers(r.data.users); setTotal(r.data.total); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [statusFilter]);
+
+  useEffect(() => { fetchVerifications(); }, [fetchVerifications]);
+
+  const handleApprove = async (userId) => {
+    await axios.put(`/api/admin/verifications/${userId}`, { action: 'approve' });
+    fetchVerifications();
+  };
+
+  const handleReject = async () => {
+    await axios.put(`/api/admin/verifications/${rejectModal.userId}`, { action: 'reject', reason: rejectReason });
+    setRejectModal(null);
+    setRejectReason('');
+    fetchVerifications();
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-3 items-center">
+        <select
+          value={statusFilter}
+          onChange={e => setStatusFilter(e.target.value)}
+          className="input-field py-2 text-sm"
+        >
+          <option value="pending">En attente</option>
+          <option value="verified">Vérifiés</option>
+          <option value="rejected">Refusés</option>
+        </select>
+        <span className="text-sm text-gray-500">{total} résultat{total > 1 ? 's' : ''}</span>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center py-16"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600" /></div>
+      ) : users.length === 0 ? (
+        <div className="card p-10 text-center text-gray-500">Aucune demande {statusFilter === 'pending' ? 'en attente' : ''}</div>
+      ) : (
+        <div className="space-y-4">
+          {users.map(u => (
+            <div key={u.id} className="card p-5 flex flex-col gap-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="font-semibold text-gray-900">{u.name}</p>
+                  <p className="text-sm text-gray-500">{u.email} {u.phone && `· ${u.phone}`}</p>
+                  <p className="text-xs text-gray-400 mt-1">Soumis le {new Date(u.created_at).toLocaleDateString('fr-FR')}</p>
+                  {u.id_rejection_reason && (
+                    <p className="text-xs text-red-500 mt-1">Motif refus : {u.id_rejection_reason}</p>
+                  )}
+                </div>
+                {statusFilter === 'pending' && (
+                  <div className="flex gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => handleApprove(u.id)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition-colors"
+                    >
+                      <CheckCircleIcon className="h-4 w-4" />
+                      Approuver
+                    </button>
+                    <button
+                      onClick={() => { setRejectModal({ userId: u.id, name: u.name }); setRejectReason(''); }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-lg transition-colors"
+                    >
+                      <XCircleIcon className="h-4 w-4" />
+                      Refuser
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Documents */}
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: 'CNI Recto', url: u.id_doc_front },
+                  { label: 'CNI Verso', url: u.id_doc_back },
+                  { label: 'Selfie', url: u.id_selfie },
+                ].map(({ label, url }) => (
+                  <a key={label} href={url} target="_blank" rel="noopener noreferrer" className="group block">
+                    <div className="relative overflow-hidden rounded-xl border border-gray-100 hover:border-primary-300 transition-colors">
+                      <img
+                        src={url}
+                        alt={label}
+                        className="w-full h-28 object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={e => { e.target.style.display = 'none'; }}
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] font-semibold text-center py-1">
+                        {label} — cliquer pour agrandir
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Reject modal */}
+      {rejectModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
+            <h3 className="font-bold text-gray-900 text-lg mb-1">Refuser la vérification</h3>
+            <p className="text-gray-500 text-sm mb-4">Utilisateur : <strong>{rejectModal.name}</strong></p>
+            <label className="form-label">Motif du refus (optionnel)</label>
+            <textarea
+              value={rejectReason}
+              onChange={e => setRejectReason(e.target.value)}
+              rows={3}
+              placeholder="Document illisible, selfie non conforme..."
+              className="input-field mt-1 mb-4 resize-none"
+            />
+            <div className="flex gap-3">
+              <button onClick={() => setRejectModal(null)} className="btn-secondary flex-1">Annuler</button>
+              <button
+                onClick={handleReject}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold text-sm transition-colors"
+              >
+                Confirmer le refus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── MAIN ADMIN PAGE ──────────────────────────────────────────────────────────
 
 export default function Admin() {
@@ -649,6 +791,7 @@ export default function Admin() {
       {activeTab === 'users' && <UsersTab />}
       {activeTab === 'cars' && <CarsTab />}
       {activeTab === 'bookings' && <BookingsTab />}
+      {activeTab === 'verifications' && <VerificationsTab />}
     </div>
   );
 }

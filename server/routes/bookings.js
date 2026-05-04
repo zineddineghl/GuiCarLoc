@@ -63,6 +63,12 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'End date must be after start date' });
     }
 
+    // Vérification d'identité obligatoire
+    const { rows: renterRows } = await pool.query('SELECT id_status FROM users WHERE id = $1', [req.user.id]);
+    if (renterRows[0]?.id_status !== 'verified') {
+      return res.status(403).json({ error: 'identity_not_verified' });
+    }
+
     const { rows: carRows } = await pool.query('SELECT * FROM cars WHERE id = $1', [car_id]);
     const car = carRows[0];
     if (!car) return res.status(404).json({ error: 'Car not found' });

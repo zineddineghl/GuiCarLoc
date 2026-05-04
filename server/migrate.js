@@ -67,6 +67,13 @@ async function migrate() {
       )
     `);
 
+    // Colonnes KYC vérification d'identité
+    await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS id_doc_front TEXT`);
+    await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS id_doc_back TEXT`);
+    await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS id_selfie TEXT`);
+    await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS id_status TEXT DEFAULT 'none'`);
+    await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS id_rejection_reason TEXT`);
+
     console.log('[DB] Migrations terminées avec succès sur Railway !');
   } catch (err) {
     console.error('[DB] Erreur pendant la migration :', err.message);

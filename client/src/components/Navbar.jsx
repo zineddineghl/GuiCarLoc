@@ -11,6 +11,7 @@ import {
   HeartIcon,
   ChartBarIcon,
   ShieldCheckIcon,
+  IdentificationIcon,
 } from '@heroicons/react/24/outline';
 
 export default function Navbar() {
@@ -91,6 +92,12 @@ export default function Navbar() {
                   </NavLink>
                   <NavLink to="/favorites" className={navLinkClass}>
                     <HeartIcon className="h-4 w-4" />
+                  </NavLink>
+                  <NavLink to="/verify-identity" className={navLinkClass} title="Vérification d'identité">
+                    <IdentificationIcon className="h-4 w-4" />
+                    {user.id_status !== 'verified' && (
+                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-gnYellow rounded-full" />
+                    )}
                   </NavLink>
                   {(user.role === 'owner' || user.role === 'both') && (
                     <NavLink to="/dashboard" className={navLinkClass}>
@@ -187,6 +194,12 @@ export default function Navbar() {
                   </NavLink>
                   <NavLink to="/favorites" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>
                     <HeartIcon className="h-5 w-5" /> {t('nav.favorites')}
+                  </NavLink>
+                  <NavLink to="/verify-identity" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>
+                    <IdentificationIcon className="h-5 w-5" /> Vérification d'identité
+                    {user.id_status !== 'verified' && (
+                      <span className="ml-auto w-2 h-2 bg-gnYellow rounded-full" />
+                    )}
                   </NavLink>
                   {(user.role === 'owner' || user.role === 'both') && (
                     <NavLink to="/dashboard" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>
