@@ -96,6 +96,7 @@ export default function Login() {
                 <div className="text-4xl mb-4 opacity-80">📧</div>
                 <p className="text-white font-bold text-sm uppercase tracking-widest">{t('auth.two_fa_title') || 'Code de sécurité'}</p>
                 <p className="text-gray-400 text-xs mt-2">{t('auth.two_fa_hint') || 'Consultez votre boîte mail'}</p>
+                <p className="text-gray-600 text-[10px] mt-1">⚠️ Vérifiez également vos spams.</p>
               </div>
 
               <input

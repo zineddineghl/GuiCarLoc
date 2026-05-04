@@ -123,6 +123,7 @@ export default function Register() {
               <div className="text-center mb-4">
                 <div className="text-4xl mb-4 opacity-80">📧</div>
                 <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">{form.email}</p>
+                <p className="text-gray-600 text-[10px] mt-1">⚠️ Vérifiez également vos spams.</p>
               </div>
 
               <input
