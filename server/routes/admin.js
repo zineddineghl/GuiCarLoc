@@ -316,10 +316,10 @@ router.get('/verifications', async (req, res) => {
     const { status = 'pending', page = 1, limit = 20 } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
     const { rows } = await pool.query(`
-      SELECT id, name, email, phone, id_doc_front, id_doc_back, id_selfie, id_status, id_rejection_reason, created_at
+      SELECT id, name, email, phone, id_doc_front, id_doc_back, id_selfie, id_status, id_rejection_reason, id_submitted_at
       FROM users
       WHERE id_status = $1
-      ORDER BY created_at DESC
+      ORDER BY id_submitted_at DESC
       LIMIT $2 OFFSET $3
     `, [status, parseInt(limit), offset]);
     const { rows: countRows } = await pool.query(

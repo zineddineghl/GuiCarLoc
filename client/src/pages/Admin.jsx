@@ -660,7 +660,9 @@ function VerificationsTab() {
                 <div>
                   <p className="text-xl font-black text-white uppercase tracking-wider">{u.name}</p>
                   <p className="text-sm font-bold text-gray-500 mt-1">{u.email} {u.phone && <span className="text-gnYellow ml-2">· {u.phone}</span>}</p>
-                  <p className="text-[10px] text-gray-600 uppercase font-black tracking-widest mt-3">Soumis le {new Date(u.created_at).toLocaleDateString('fr-FR')}</p>
+                  {u.id_submitted_at && (
+                    <p className="text-[10px] text-gray-600 uppercase font-black tracking-widest mt-3">Soumis le {new Date(u.id_submitted_at).toLocaleDateString('fr-FR')}</p>
+                  )}
                   {u.id_rejection_reason && (
                     <p className="text-xs font-bold text-red-500 mt-2 bg-red-500/10 inline-block px-3 py-1 rounded-full border border-red-500/20">Motif refus : {u.id_rejection_reason}</p>
                   )}

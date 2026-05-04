@@ -62,7 +62,7 @@ router.post('/me/verify-identity', authenticateToken, (req, res) => {
     }
     try {
       await pool.query(
-        'UPDATE users SET id_doc_front = $1, id_doc_back = $2, id_selfie = $3, id_status = $4, id_rejection_reason = NULL WHERE id = $5',
+        'UPDATE users SET id_doc_front = $1, id_doc_back = $2, id_selfie = $3, id_status = $4, id_rejection_reason = NULL, id_submitted_at = NOW() WHERE id = $5',
         [id_doc_front[0].path, id_doc_back[0].path, id_selfie[0].path, 'pending', req.user.id]
       );
       res.json({ ok: true, id_status: 'pending' });

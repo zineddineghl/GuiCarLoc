@@ -73,6 +73,7 @@ async function migrate() {
     await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS id_selfie TEXT`);
     await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS id_status TEXT DEFAULT 'none'`);
     await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS id_rejection_reason TEXT`);
+    await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS id_submitted_at TIMESTAMP`);
 
     console.log('[DB] Migrations terminées avec succès sur Railway !');
   } catch (err) {
