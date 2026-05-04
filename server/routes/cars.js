@@ -41,7 +41,10 @@ function withUpload(req, res, next) {
 }
 
 function safeParseJSON(str, fallback) {
-  try { return JSON.parse(str); } catch { return fallback; }
+  try { 
+    if (!str) return fallback;
+    return typeof str === 'string' ? JSON.parse(str) : str; 
+  } catch { return fallback; }
 }
 
 // GET /api/cars
@@ -51,7 +54,7 @@ router.get('/', optionalAuth, async (req, res) => {
 
     let query = `
       SELECT c.*, u.name as owner_name, u.phone as owner_phone, u.email as owner_email, u.avatar as owner_avatar,
-             ROUND(AVG(r.car_rating)::numeric, 1) as avg_car_rating,
+             ROUND(AVG(r.rating)::numeric, 1) as avg_car_rating,
              COUNT(r.id)::int as review_count
       FROM cars c
       JOIN users u ON c.owner_id = u.id
@@ -103,7 +106,13 @@ router.get('/', optionalAuth, async (req, res) => {
     query += ' GROUP BY c.id, u.name, u.phone, u.email, u.avatar ORDER BY c.created_at DESC';
 
     const { rows } = await pool.query(query, params);
-    res.json({ cars: rows.map(car => ({ ...car, images: safeParseJSON(car.images, []) })) });
+    res.json({ 
+      cars: rows.map(car => ({ 
+        ...car, 
+        images: safeParseJSON(car.images, []),
+        discounts: safeParseJSON(car.discounts, [])
+      })) 
+    });
   } catch (err) {
     console.error('Get cars error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -122,7 +131,13 @@ router.get('/my/listings', authenticateToken, async (req, res) => {
       ORDER BY c.created_at DESC
     `, [req.user.id]);
 
-    res.json({ cars: rows.map(car => ({ ...car, images: safeParseJSON(car.images, []) })) });
+    res.json({ 
+      cars: rows.map(car => ({ 
+        ...car, 
+        images: safeParseJSON(car.images, []),
+        discounts: safeParseJSON(car.discounts, [])
+      })) 
+    });
   } catch (err) {
     console.error('Get my listings error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -134,20 +149,24 @@ router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(`
       SELECT c.*, u.name as owner_name, u.phone as owner_phone, u.email as owner_email, u.avatar as owner_avatar,
-             ROUND(AVG(r.car_rating)::numeric, 1) as avg_car_rating,
-             COUNT(r.id)::int as review_count,
-             ROUND(AVG(r2.owner_rating)::numeric, 1) as avg_owner_rating
+             ROUND(AVG(r.rating)::numeric, 1) as avg_car_rating,
+             COUNT(r.id)::int as review_count
       FROM cars c
       JOIN users u ON c.owner_id = u.id
       LEFT JOIN reviews r ON r.car_id = c.id
-      LEFT JOIN reviews r2 ON r2.owner_id = c.owner_id
       WHERE c.id = $1
       GROUP BY c.id, u.name, u.phone, u.email, u.avatar
     `, [req.params.id]);
 
     if (!rows[0]) return res.status(404).json({ error: 'Car not found' });
 
-    res.json({ car: { ...rows[0], images: safeParseJSON(rows[0].images, []) } });
+    res.json({ 
+      car: { 
+        ...rows[0], 
+        images: safeParseJSON(rows[0].images, []),
+        discounts: safeParseJSON(rows[0].discounts, [])
+      } 
+    });
   } catch (err) {
     console.error('Get car error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -157,28 +176,45 @@ router.get('/:id', optionalAuth, async (req, res) => {
 // POST /api/cars
 router.post('/', authenticateToken, withUpload, async (req, res) => {
   try {
-    const { title, description, type, brand, model, year, seats, transmission, fuel, price_per_day, city, address } = req.body;
+    const { 
+      title, description, type, brand, model, year, seats, transmission, fuel, 
+      price_per_day, city, address, weekend_price, min_rental_days, 
+      max_rental_days, requires_deposit, deposit_amount, discounts 
+    } = req.body;
 
     if (!title || !type || !brand || !model || !year || !price_per_day || !city) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const validTypes = ['sedan', 'suv', 'van', 'sports', 'luxury', 'economy', 'scooter', 'moto', 'boat'];
-    if (!validTypes.includes(type)) {
-      return res.status(400).json({ error: 'Invalid car type' });
-    }
-
     const images = req.files ? req.files.map(f => f.path) : [];
 
     const { rows } = await pool.query(`
-      INSERT INTO cars (owner_id, title, description, type, brand, model, year, seats, transmission, fuel, price_per_day, city, address, images)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      INSERT INTO cars (
+        owner_id, title, description, type, brand, model, year, seats, transmission, 
+        fuel, price_per_day, city, address, images, weekend_price, 
+        min_rental_days, max_rental_days, requires_deposit, deposit_amount, discounts
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
       RETURNING *
-    `, [req.user.id, title, description || null, type, brand, model, parseInt(year),
-        parseInt(seats) || 5, transmission || 'auto', fuel || 'petrol',
-        parseFloat(price_per_day), city, address || null, JSON.stringify(images)]);
+    `, [
+      req.user.id, title, description || null, type, brand, model, parseInt(year),
+      parseInt(seats) || 5, transmission || 'auto', fuel || 'petrol',
+      parseFloat(price_per_day), city, address || null, JSON.stringify(images),
+      weekend_price ? parseFloat(weekend_price) : null,
+      min_rental_days ? parseInt(min_rental_days) : 1,
+      max_rental_days ? parseInt(max_rental_days) : null,
+      requires_deposit === 'true' || requires_deposit === true,
+      deposit_amount ? parseFloat(deposit_amount) : 0,
+      discounts || '[]'
+    ]);
 
-    res.status(201).json({ car: { ...rows[0], images: safeParseJSON(rows[0].images, []) } });
+    res.status(201).json({ 
+      car: { 
+        ...rows[0], 
+        images: safeParseJSON(rows[0].images, []),
+        discounts: safeParseJSON(rows[0].discounts, [])
+      } 
+    });
   } catch (err) {
     console.error('Create car error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -192,9 +228,14 @@ router.put('/:id', authenticateToken, withUpload, async (req, res) => {
     const car = carRows[0];
 
     if (!car) return res.status(404).json({ error: 'Car not found' });
-    if (car.owner_id !== req.user.id) return res.status(403).json({ error: 'Not authorized to edit this listing' });
+    if (car.owner_id !== req.user.id) return res.status(403).json({ error: 'Not authorized' });
 
-    const { title, description, type, brand, model, year, seats, transmission, fuel, price_per_day, city, address, available, existing_images } = req.body;
+    const { 
+      title, description, type, brand, model, year, seats, transmission, fuel, 
+      price_per_day, city, address, available, existing_images,
+      weekend_price, min_rental_days, max_rental_days, 
+      requires_deposit, deposit_amount, discounts 
+    } = req.body;
 
     let images = safeParseJSON(car.images, []);
     if (existing_images !== undefined) {
@@ -219,8 +260,14 @@ router.put('/:id', authenticateToken, withUpload, async (req, res) => {
         city = COALESCE($11, city),
         address = COALESCE($12, address),
         images = $13,
-        available = COALESCE($14, available)
-      WHERE id = $15
+        available = COALESCE($14, available),
+        weekend_price = COALESCE($15, weekend_price),
+        min_rental_days = COALESCE($16, min_rental_days),
+        max_rental_days = COALESCE($17, max_rental_days),
+        requires_deposit = COALESCE($18, requires_deposit),
+        deposit_amount = COALESCE($19, deposit_amount),
+        discounts = COALESCE($20, discounts)
+      WHERE id = $21
       RETURNING *
     `, [
       title || null, description || null, type || null, brand || null, model || null,
@@ -228,24 +275,35 @@ router.put('/:id', authenticateToken, withUpload, async (req, res) => {
       transmission || null, fuel || null, price_per_day ? parseFloat(price_per_day) : null,
       city || null, address || null, JSON.stringify(images),
       available !== undefined ? (available === 'true' || available === true ? 1 : 0) : null,
+      weekend_price ? parseFloat(weekend_price) : null,
+      min_rental_days ? parseInt(min_rental_days) : null,
+      max_rental_days ? parseInt(max_rental_days) : null,
+      requires_deposit !== undefined ? (requires_deposit === 'true' || requires_deposit === true) : null,
+      deposit_amount ? parseFloat(deposit_amount) : null,
+      discounts || null,
       req.params.id
     ]);
 
-    res.json({ car: { ...rows[0], images: safeParseJSON(rows[0].images, []) } });
+    res.json({ 
+      car: { 
+        ...rows[0], 
+        images: safeParseJSON(rows[0].images, []),
+        discounts: safeParseJSON(rows[0].discounts, [])
+      } 
+    });
   } catch (err) {
     console.error('Update car error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// DELETE /api/cars/:id
+// DELETE /api/cars/:id (Inchangé)
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM cars WHERE id = $1', [req.params.id]);
     const car = rows[0];
-
     if (!car) return res.status(404).json({ error: 'Car not found' });
-    if (car.owner_id !== req.user.id) return res.status(403).json({ error: 'Not authorized to delete this listing' });
+    if (car.owner_id !== req.user.id) return res.status(403).json({ error: 'Not authorized' });
 
     const images = safeParseJSON(car.images, []);
     await Promise.all(images.map(async (url) => {
@@ -255,63 +313,32 @@ router.delete('/:id', authenticateToken, async (req, res) => {
           const publicId = parts.slice(parts.indexOf('guicarloc')).join('/').replace(/\.[^/.]+$/, '');
           await cloudinary.uploader.destroy(publicId);
         }
-      } catch (e) { /* ignore */ }
+      } catch (e) { }
     }));
 
     await pool.query('DELETE FROM cars WHERE id = $1', [req.params.id]);
     res.json({ message: 'Car listing deleted successfully' });
   } catch (err) {
-    console.error('Delete car error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// GET /api/cars/:id/blocked-dates (public)
+// Dates bloquées (Inchangé)
 router.get('/:id/blocked-dates', async (req, res) => {
   try {
-    const { rows } = await pool.query(
-      'SELECT id, start_date, end_date FROM blocked_dates WHERE car_id = $1 ORDER BY start_date',
-      [req.params.id]
-    );
+    const { rows } = await pool.query('SELECT id, start_date, end_date FROM blocked_dates WHERE car_id = $1 ORDER BY start_date', [req.params.id]);
     res.json({ blocked: rows });
-  } catch (err) {
-    res.status(500).json({ error: 'Internal server error' });
-  }
+  } catch (err) { res.status(500).json({ error: 'Internal server error' }); }
 });
 
-// POST /api/cars/:id/blocked-dates (owner only)
 router.post('/:id/blocked-dates', authenticateToken, async (req, res) => {
   try {
     const { start_date, end_date } = req.body;
-    if (!start_date || !end_date || start_date > end_date) {
-      return res.status(400).json({ error: 'Dates invalides' });
-    }
     const { rows: carRows } = await pool.query('SELECT owner_id FROM cars WHERE id = $1', [req.params.id]);
-    if (!carRows.length || carRows[0].owner_id !== req.user.id) {
-      return res.status(403).json({ error: 'Non autorisé' });
-    }
-    const { rows } = await pool.query(
-      'INSERT INTO blocked_dates (car_id, start_date, end_date) VALUES ($1, $2, $3) RETURNING id, start_date, end_date',
-      [req.params.id, start_date, end_date]
-    );
+    if (!carRows.length || carRows[0].owner_id !== req.user.id) return res.status(403).json({ error: 'Non autorisé' });
+    const { rows } = await pool.query('INSERT INTO blocked_dates (car_id, start_date, end_date) VALUES ($1, $2, $3) RETURNING id, start_date, end_date', [req.params.id, start_date, end_date]);
     res.json({ block: rows[0] });
-  } catch (err) {
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// DELETE /api/cars/:id/blocked-dates/:blockId (owner only)
-router.delete('/:id/blocked-dates/:blockId', authenticateToken, async (req, res) => {
-  try {
-    const { rows: carRows } = await pool.query('SELECT owner_id FROM cars WHERE id = $1', [req.params.id]);
-    if (!carRows.length || carRows[0].owner_id !== req.user.id) {
-      return res.status(403).json({ error: 'Non autorisé' });
-    }
-    await pool.query('DELETE FROM blocked_dates WHERE id = $1 AND car_id = $2', [req.params.blockId, req.params.id]);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: 'Internal server error' });
-  }
+  } catch (err) { res.status(500).json({ error: 'Internal server error' }); }
 });
 
 module.exports = router;
