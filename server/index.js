@@ -171,7 +171,7 @@ app.get('/sitemap.xml', async (req, res) => {
 
   try {
     const { rows: cars } = await pool.query(
-      'SELECT id, updated_at, created_at FROM cars WHERE available = 1 ORDER BY created_at DESC'
+      'SELECT id, created_at FROM cars WHERE available = 1 ORDER BY created_at DESC'
     );
 
     const staticUrls = staticPages.map(p => `
@@ -184,7 +184,7 @@ app.get('/sitemap.xml', async (req, res) => {
     const carUrls = cars.map(car => `
   <url>
     <loc>${BASE_URL}/cars/${car.id}</loc>
-    <lastmod>${new Date(car.updated_at || car.created_at).toISOString().split('T')[0]}</lastmod>
+    <lastmod>${new Date(car.created_at).toISOString().split('T')[0]}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`).join('');
