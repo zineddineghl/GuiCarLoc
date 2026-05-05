@@ -349,23 +349,6 @@ export default function CarDetail() {
             </div>
           </div>
 
-          {/* Signaler */}
-          {user && !isOwner && (
-            <div className="text-center pb-2">
-              {reportSuccess ? (
-                <p className="text-gnGreen text-xs font-bold">Signalement envoyé, merci.</p>
-              ) : (
-                <button
-                  onClick={() => setReportModal(true)}
-                  className="text-gray-600 hover:text-gray-400 text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-1.5 mx-auto"
-                >
-                  <ExclamationTriangleIcon className="h-3.5 w-3.5" />
-                  Signaler cette annonce
-                </button>
-              )}
-            </div>
-          )}
-
           {/* Right: Booking Widget avec effet Premium */}
           <div className="lg:col-span-1">
             <div className="relative overflow-hidden bg-gray-900/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 sticky top-28 shadow-2xl">
@@ -489,6 +472,22 @@ export default function CarDetail() {
                 )}
               </div>
             </div>
+
+          {user && !isOwner && (
+            <div className="text-center pt-4">
+              {reportSuccess ? (
+                <p className="text-gnGreen text-xs font-bold">Signalement envoyé, merci.</p>
+              ) : (
+                <button
+                  onClick={() => setReportModal(true)}
+                  className="text-gray-600 hover:text-gray-400 text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-1.5 mx-auto"
+                >
+                  <ExclamationTriangleIcon className="h-3.5 w-3.5" />
+                  Signaler cette annonce
+                </button>
+              )}
+            </div>
+          )}
           </div>
         </div>
       </div>
