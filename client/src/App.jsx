@@ -24,6 +24,8 @@ import ResetPassword from './pages/ResetPassword';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import VerifyIdentity from './pages/VerifyIdentity';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
 
 // Auth Context
 const AuthContext = createContext(null);
@@ -142,6 +144,8 @@ function App() {
             {/* Routes Pages d'information */}
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
 
             {/* Routes Protégées */}
             <Route path="/post-listing" element={<ProtectedRoute><PostListing /></ProtectedRoute>} />

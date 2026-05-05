@@ -83,8 +83,8 @@ export default function Footer() {
             &copy; {currentYear} GuiCarLoc. All rights reserved.
           </p>
           <div className="flex gap-8">
-            <span className="text-gray-600 text-[10px] font-bold uppercase tracking-widest hover:text-white cursor-pointer transition-colors">Privacy</span>
-            <span className="text-gray-600 text-[10px] font-bold uppercase tracking-widest hover:text-white cursor-pointer transition-colors">Terms</span>
+            <Link to="/privacy" className="text-gray-600 text-[10px] font-bold uppercase tracking-widest hover:text-white transition-colors">Privacy</Link>
+            <Link to="/terms" className="text-gray-600 text-[10px] font-bold uppercase tracking-widest hover:text-white transition-colors">Terms</Link>
           </div>
         </div>
       </div>
