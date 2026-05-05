@@ -95,7 +95,7 @@ export default function Privacy() {
                 </li>
               ))}
             </ul>
-            <p className="mt-4">Pour exercer ces droits, contactez-nous à <span className="text-white">contact@guicarloc.com</span>.</p>
+            <p className="mt-4">Pour exercer ces droits, contactez-nous à <span className="text-white">noreply.guicarloc@gmail.com</span>.</p>
           </section>
 
           <section>
@@ -106,7 +106,7 @@ export default function Privacy() {
           <section>
             <h2 className="text-white font-bold text-xs uppercase tracking-widest mb-4 text-gnYellow">8. Contact</h2>
             <p>Pour toute question relative à cette politique de confidentialité :<br />
-            Email : <span className="text-white">contact@guicarloc.com</span><br />
+            Email : <span className="text-white">noreply.guicarloc@gmail.com</span><br />
             Site : <span className="text-white">www.guicarloc.com</span></p>
           </section>
 
