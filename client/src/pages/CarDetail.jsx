@@ -470,24 +470,24 @@ export default function CarDetail() {
                     </button>
                   </form>
                 )}
+
+              {user && !isOwner && (
+                <div className="text-center pt-6 border-t border-white/5 mt-6">
+                  {reportSuccess ? (
+                    <p className="text-gnGreen text-xs font-bold">Signalement envoyé, merci.</p>
+                  ) : (
+                    <button
+                      onClick={() => setReportModal(true)}
+                      className="text-gray-600 hover:text-gray-400 text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-1.5 mx-auto"
+                    >
+                      <ExclamationTriangleIcon className="h-3.5 w-3.5" />
+                      Signaler cette annonce
+                    </button>
+                  )}
+                </div>
+              )}
               </div>
             </div>
-
-          {user && !isOwner && (
-            <div className="text-center pt-4">
-              {reportSuccess ? (
-                <p className="text-gnGreen text-xs font-bold">Signalement envoyé, merci.</p>
-              ) : (
-                <button
-                  onClick={() => setReportModal(true)}
-                  className="text-gray-600 hover:text-gray-400 text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-1.5 mx-auto"
-                >
-                  <ExclamationTriangleIcon className="h-3.5 w-3.5" />
-                  Signaler cette annonce
-                </button>
-              )}
-            </div>
-          )}
           </div>
         </div>
       </div>
