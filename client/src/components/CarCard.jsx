@@ -117,7 +117,7 @@ export default function CarCard({ car }) {
         {/* City - Correction du contraste ici */}
         <p className="text-sm text-gray-400 mb-4 flex items-center gap-1.5 font-medium">
           <MapPinIcon className="h-4 w-4 text-gnYellow/70 flex-shrink-0" />
-          <span className="truncate">{car.city}</span>
+          <span className="truncate">{car.city}{car.neighborhood ? ` · ${car.neighborhood}` : ''}</span>
         </p>
 
         {/* Car Details - Icônes et textes plus clairs */}

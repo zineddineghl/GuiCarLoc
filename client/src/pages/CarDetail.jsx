@@ -255,7 +255,7 @@ export default function CarDetail() {
                   <h1 className="text-3xl md:text-4xl font-display font-black text-white mb-2 uppercase tracking-tight">{car.title}</h1>
                   <div className="flex items-center gap-3 text-gray-400">
                     <MapPinIcon className="h-4 w-4 text-gnYellow" />
-                    <span className="text-sm font-medium">{car.city}{car.address ? `, ${car.address}` : ''}</span>
+                    <span className="text-sm font-medium">{car.city}{car.neighborhood ? ` · ${car.neighborhood}` : ''}{car.address ? `, ${car.address}` : ''}</span>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-3">

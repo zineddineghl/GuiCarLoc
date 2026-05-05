@@ -29,6 +29,7 @@ export default function PostListing() {
     fuel: 'petrol',
     price_per_day: '',
     city: '',
+    neighborhood: '',
     address: '',
     available: true,
     weekend_price: '',
@@ -75,6 +76,7 @@ export default function PostListing() {
             fuel: car.fuel || 'petrol',
             price_per_day: car.price_per_day || '',
             city: car.city || '',
+            neighborhood: car.neighborhood || '',
             address: car.address || '',
             available: Boolean(car.available),
             weekend_price: car.weekend_price || '',
@@ -307,10 +309,11 @@ export default function PostListing() {
           {/* Localisation */}
           <div className="card p-8 border border-white/5 bg-luxuryDark rounded-3xl">
             <h2 className="text-gnYellow font-bold text-xs uppercase tracking-widest mb-6 pb-4 border-b border-white/5">{t('listing.city')}</h2>
-            <div className="grid grid-cols-2 gap-6">
-              <input type="text" name="city" value={form.city} onChange={handleChange} placeholder="Ville" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none" required />
-              <input type="text" name="address" value={form.address} onChange={handleChange} placeholder="Adresse (Optionnel)" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none" />
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              <input type="text" name="city" value={form.city} onChange={handleChange} placeholder="Ville *" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none" required />
+              <input type="text" name="neighborhood" value={form.neighborhood} onChange={handleChange} placeholder="Quartier (Optionnel)" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none" />
             </div>
+            <input type="text" name="address" value={form.address} onChange={handleChange} placeholder="Adresse précise (Optionnel)" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 outline-none" />
           </div>
 
           {/* Photos */}

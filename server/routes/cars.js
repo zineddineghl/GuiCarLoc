@@ -177,9 +177,9 @@ router.get('/:id', optionalAuth, async (req, res) => {
 router.post('/', authenticateToken, withUpload, async (req, res) => {
   try {
     const { 
-      title, description, type, brand, model, year, seats, transmission, fuel, 
-      price_per_day, city, address, weekend_price, min_rental_days, 
-      max_rental_days, requires_deposit, deposit_amount, discounts 
+      title, description, type, brand, model, year, seats, transmission, fuel,
+      price_per_day, city, neighborhood, address, weekend_price, min_rental_days,
+      max_rental_days, requires_deposit, deposit_amount, discounts
     } = req.body;
 
     if (!title || !type || !brand || !model || !year || !price_per_day || !city) {
@@ -190,16 +190,16 @@ router.post('/', authenticateToken, withUpload, async (req, res) => {
 
     const { rows } = await pool.query(`
       INSERT INTO cars (
-        owner_id, title, description, type, brand, model, year, seats, transmission, 
-        fuel, price_per_day, city, address, images, weekend_price, 
+        owner_id, title, description, type, brand, model, year, seats, transmission,
+        fuel, price_per_day, city, neighborhood, address, images, weekend_price,
         min_rental_days, max_rental_days, requires_deposit, deposit_amount, discounts
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
       RETURNING *
     `, [
       req.user.id, title, description || null, type, brand, model, parseInt(year),
       parseInt(seats) || 5, transmission || 'auto', fuel || 'petrol',
-      parseFloat(price_per_day), city, address || null, JSON.stringify(images),
+      parseFloat(price_per_day), city, neighborhood || null, address || null, JSON.stringify(images),
       weekend_price ? parseFloat(weekend_price) : null,
       min_rental_days ? parseInt(min_rental_days) : 1,
       max_rental_days ? parseInt(max_rental_days) : null,
@@ -231,10 +231,10 @@ router.put('/:id', authenticateToken, withUpload, async (req, res) => {
     if (car.owner_id !== req.user.id) return res.status(403).json({ error: 'Not authorized' });
 
     const { 
-      title, description, type, brand, model, year, seats, transmission, fuel, 
-      price_per_day, city, address, available, existing_images,
-      weekend_price, min_rental_days, max_rental_days, 
-      requires_deposit, deposit_amount, discounts 
+      title, description, type, brand, model, year, seats, transmission, fuel,
+      price_per_day, city, neighborhood, address, available, existing_images,
+      weekend_price, min_rental_days, max_rental_days,
+      requires_deposit, deposit_amount, discounts
     } = req.body;
 
     let images = safeParseJSON(car.images, []);
@@ -258,22 +258,23 @@ router.put('/:id', authenticateToken, withUpload, async (req, res) => {
         fuel = COALESCE($9, fuel),
         price_per_day = COALESCE($10, price_per_day),
         city = COALESCE($11, city),
-        address = COALESCE($12, address),
-        images = $13,
-        available = COALESCE($14, available),
-        weekend_price = COALESCE($15, weekend_price),
-        min_rental_days = COALESCE($16, min_rental_days),
-        max_rental_days = COALESCE($17, max_rental_days),
-        requires_deposit = COALESCE($18, requires_deposit),
-        deposit_amount = COALESCE($19, deposit_amount),
-        discounts = COALESCE($20, discounts)
-      WHERE id = $21
+        neighborhood = $12,
+        address = COALESCE($13, address),
+        images = $14,
+        available = COALESCE($15, available),
+        weekend_price = COALESCE($16, weekend_price),
+        min_rental_days = COALESCE($17, min_rental_days),
+        max_rental_days = COALESCE($18, max_rental_days),
+        requires_deposit = COALESCE($19, requires_deposit),
+        deposit_amount = COALESCE($20, deposit_amount),
+        discounts = COALESCE($21, discounts)
+      WHERE id = $22
       RETURNING *
     `, [
       title || null, description || null, type || null, brand || null, model || null,
       year ? parseInt(year) : null, seats ? parseInt(seats) : null,
       transmission || null, fuel || null, price_per_day ? parseFloat(price_per_day) : null,
-      city || null, address || null, JSON.stringify(images),
+      city || null, neighborhood || null, address || null, JSON.stringify(images),
       available !== undefined ? (available === 'true' || available === true ? 1 : 0) : null,
       weekend_price ? parseFloat(weekend_price) : null,
       min_rental_days ? parseInt(min_rental_days) : null,
