@@ -20,6 +20,7 @@ const messagesRoutes = require('./routes/messages');
 const favoritesRoutes = require('./routes/favorites');
 const dashboardRoutes = require('./routes/dashboard');
 const adminRoutes = require('./routes/admin');
+const reportsRoutes = require('./routes/reports');
 
 const app = express();
 const server = http.createServer(app);
@@ -133,6 +134,7 @@ app.use('/api/messages', messagesRoutes);
 app.use('/api/favorites', favoritesRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/reports', reportsRoutes);
 
 // LA NOUVELLE ROUTE POUR LE FORMULAIRE DE CONTACT 👇
 app.post('/api/contact', async (req, res) => {

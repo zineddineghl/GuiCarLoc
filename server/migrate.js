@@ -118,6 +118,17 @@ async function migrate() {
       )
     `);
 
+    // Table Reports
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS reports (
+        id SERIAL PRIMARY KEY,
+        car_id INTEGER NOT NULL REFERENCES cars(id) ON DELETE CASCADE,
+        reporter_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        reason TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // Colonnes manquantes sur users
     await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS two_fa_enabled INTEGER NOT NULL DEFAULT 0`);
     await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS two_fa_code TEXT`);
