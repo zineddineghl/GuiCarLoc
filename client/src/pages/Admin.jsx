@@ -15,6 +15,7 @@ import {
   XCircleIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  FlagIcon,
 } from '@heroicons/react/24/outline';
 import { ShieldCheckIcon } from '@heroicons/react/24/solid';
 
@@ -24,6 +25,7 @@ const TABS = [
   { id: 'cars', label: 'Annonces' },
   { id: 'bookings', label: 'Réservations' },
   { id: 'verifications', label: 'Vérifications' },
+  { id: 'reports', label: 'Signalements' },
 ];
 
 const STATUS_COLORS = {
@@ -745,6 +747,86 @@ function VerificationsTab() {
   );
 }
 
+// ─── REPORTS TAB ──────────────────────────────────────────────────────────────
+
+function ReportsTab() {
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(() => {
+    setLoading(true);
+    axios.get('/api/admin/reports')
+      .then(r => setReports(r.data.reports))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const dismiss = async (id) => {
+    await axios.delete(`/api/admin/reports/${id}`);
+    setReports(prev => prev.filter(r => r.id !== id));
+  };
+
+  const deleteCar = async (carId) => {
+    if (!window.confirm('Supprimer cette annonce et tous ses signalements ?')) return;
+    await axios.delete(`/api/admin/cars/${carId}`);
+    setReports(prev => prev.filter(r => r.car_id !== carId));
+  };
+
+  if (loading) return <div className="flex justify-center py-16"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gnYellow" /></div>;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <FlagIcon className="h-6 w-6 text-red-400" />
+          <h2 className="text-white font-black text-xl uppercase tracking-widest">Signalements</h2>
+        </div>
+        <span className="px-3 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full text-xs font-black uppercase">
+          {reports.length} signalement{reports.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+      {reports.length === 0 ? (
+        <p className="text-center text-gray-500 font-bold py-16">Aucun signalement</p>
+      ) : (
+        reports.map(r => (
+          <div key={r.id} className="card p-5 border border-white/5 bg-[#111] rounded-2xl flex items-center justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <Link to={`/cars/${r.car_id}`} className="font-bold text-white hover:text-gnYellow transition-colors truncate block">
+                {r.car_title}
+              </Link>
+              <p className="text-xs text-gray-400 mt-1">
+                Signalé par <span className="text-white font-bold">{r.reporter_name}</span> · {r.reporter_email}
+              </p>
+              <span className="text-xs mt-2 inline-block px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full font-bold">
+                {r.reason}
+              </span>
+              <p className="text-[10px] text-gray-600 mt-1">
+                {new Date(r.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 flex-shrink-0">
+              <button
+                onClick={() => dismiss(r.id)}
+                className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition-colors"
+              >
+                Ignorer
+              </button>
+              <button
+                onClick={() => deleteCar(r.car_id)}
+                className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl text-xs font-bold text-red-400 transition-colors"
+              >
+                Supprimer annonce
+              </button>
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
 // ─── MAIN ADMIN PAGE ──────────────────────────────────────────────────────────
 
 export default function Admin() {
@@ -800,6 +882,7 @@ export default function Admin() {
           {activeTab === 'cars' && <CarsTab />}
           {activeTab === 'bookings' && <BookingsTab />}
           {activeTab === 'verifications' && <VerificationsTab />}
+          {activeTab === 'reports' && <ReportsTab />}
         </div>
       </div>
     </div>

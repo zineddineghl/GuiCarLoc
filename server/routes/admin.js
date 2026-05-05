@@ -379,4 +379,34 @@ router.put('/verifications/:id', async (req, res) => {
   }
 });
 
+// GET /api/admin/reports
+router.get('/reports', async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT r.id, r.reason, r.created_at,
+             c.id as car_id, c.title as car_title,
+             u.name as reporter_name, u.email as reporter_email
+      FROM reports r
+      JOIN cars c ON r.car_id = c.id
+      JOIN users u ON r.reporter_id = u.id
+      ORDER BY r.created_at DESC
+    `);
+    res.json({ reports: rows });
+  } catch (err) {
+    console.error('Admin reports error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// DELETE /api/admin/reports/:id
+router.delete('/reports/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM reports WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Admin delete report error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
