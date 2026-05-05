@@ -73,6 +73,9 @@ export default function CarDetail() {
   const [bookingError, setBookingError] = useState('');
   const [bookingSuccess, setBookingSuccess] = useState('');
 
+  const [reportModal, setReportModal] = useState(false);
+  const [reportSuccess, setReportSuccess] = useState(false);
+
   const [showBlocker, setShowBlocker] = useState(false);
   const [blockedDates, setBlockedDates] = useState([]);
   const [blockForm, setBlockForm] = useState({ start_date: today, end_date: tomorrow });
@@ -162,6 +165,15 @@ export default function CarDetail() {
     } finally {
       setBookingLoading(false);
     }
+  };
+
+  const handleReport = async (reason) => {
+    try {
+      await axios.post('/api/reports', { car_id: car.id, reason });
+      setReportModal(false);
+      setReportSuccess(true);
+      setTimeout(() => setReportSuccess(false), 4000);
+    } catch {}
   };
 
   const handleAddBlock = async (e) => {
@@ -337,6 +349,23 @@ export default function CarDetail() {
             </div>
           </div>
 
+          {/* Signaler */}
+          {user && !isOwner && (
+            <div className="text-center pb-2">
+              {reportSuccess ? (
+                <p className="text-gnGreen text-xs font-bold">Signalement envoyé, merci.</p>
+              ) : (
+                <button
+                  onClick={() => setReportModal(true)}
+                  className="text-gray-600 hover:text-gray-400 text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-1.5 mx-auto"
+                >
+                  <ExclamationTriangleIcon className="h-3.5 w-3.5" />
+                  Signaler cette annonce
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Right: Booking Widget avec effet Premium */}
           <div className="lg:col-span-1">
             <div className="relative overflow-hidden bg-gray-900/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 sticky top-28 shadow-2xl">
@@ -463,6 +492,30 @@ export default function CarDetail() {
           </div>
         </div>
       </div>
+
+      {/* Modal signalement */}
+      {reportModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4" onClick={() => setReportModal(false)}>
+          <div className="bg-[#161616] border border-white/10 rounded-2xl p-8 max-w-sm w-full" onClick={e => e.stopPropagation()}>
+            <h3 className="text-white font-black uppercase tracking-widest text-sm mb-2">Signaler cette annonce</h3>
+            <p className="text-gray-500 text-xs mb-6">Choisissez une raison</p>
+            <div className="space-y-2">
+              {['Contenu inapproprié', 'Fraude / Arnaque', 'Informations incorrectes', 'Autre'].map(reason => (
+                <button
+                  key={reason}
+                  onClick={() => handleReport(reason)}
+                  className="w-full text-left px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-sm text-gray-300 hover:text-white transition-colors font-medium"
+                >
+                  {reason}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setReportModal(false)} className="mt-4 w-full text-gray-600 hover:text-gray-400 text-xs font-bold uppercase tracking-widest transition-colors">
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
