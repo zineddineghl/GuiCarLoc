@@ -83,6 +83,8 @@ export default function UserProfile() {
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [toggling2FA, setToggling2FA] = useState(false);
   const [twoFaMessage, setTwoFaMessage] = useState('');
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const isOwn = authUser && String(authUser.id) === String(id);
 
@@ -153,6 +155,19 @@ export default function UserProfile() {
       // silently fail
     } finally {
       setToggling2FA(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    try {
+      await axios.delete('/api/users/me');
+      localStorage.removeItem('token');
+      navigate('/');
+      window.location.reload();
+    } catch {
+      setDeletingAccount(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -389,6 +404,38 @@ export default function UserProfile() {
                 <p className="text-xs font-bold text-gnGreen uppercase tracking-widest">{twoFaMessage}</p>
               </div>
             )}
+
+            <div className="mt-8 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <p className="font-bold text-white text-sm">Supprimer mon compte</p>
+                <p className="text-xs text-gray-500 mt-1">Cette action est irréversible. Toutes vos données seront supprimées.</p>
+              </div>
+              {!showDeleteConfirm ? (
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-red-400 border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 rounded-xl transition-colors"
+                >
+                  Supprimer le compte
+                </button>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-red-400 font-bold">Confirmer ?</span>
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={deletingAccount}
+                    className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors disabled:opacity-50"
+                  >
+                    {deletingAccount ? 'Suppression...' : 'Oui, supprimer'}
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-gray-400 border border-white/20 rounded-xl hover:bg-white/10 transition-colors"
+                  >
+                    Annuler
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
 

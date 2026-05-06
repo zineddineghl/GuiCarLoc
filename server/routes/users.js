@@ -124,6 +124,16 @@ router.put('/me', authenticateToken, async (req, res) => {
   }
 });
 
+// DELETE /api/users/me
+router.delete('/me', authenticateToken, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM users WHERE id = $1', [req.user.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // GET /api/users/:id
 router.get('/:id', async (req, res) => {
   try {
