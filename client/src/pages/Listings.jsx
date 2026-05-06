@@ -14,8 +14,7 @@ const CAR_TYPES = [
   { val: 'luxury', icon: '🚘' },
   { val: 'compact', icon: '🚕' },
   { val: 'scooter', icon: '🛵' },
-  { val: 'moto', icon: '🏍️' },
-  { val: 'boat', icon: '⛵' }
+  { val: 'moto', icon: '🏍️' }
 ];
 
 export default function Listings() {

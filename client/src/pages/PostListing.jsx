@@ -6,7 +6,7 @@ import { PhotoIcon, XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/o
 import { imgUrl } from '../utils/imageUrl';
 import imageCompression from 'browser-image-compression';
 
-const CAR_TYPES = ['sedan', 'suv', 'van', 'sports', 'luxury', 'compact', 'scooter', 'moto', 'boat'];
+const CAR_TYPES = ['sedan', 'suv', 'van', 'sports', 'luxury', 'compact', 'scooter', 'moto'];
 const TRANSMISSIONS = ['auto', 'manual'];
 const FUELS = ['petrol', 'diesel', 'electric', 'hybrid'];
 const CURRENT_YEAR = new Date().getFullYear();
@@ -55,8 +55,7 @@ export default function PostListing() {
     luxury: '🚘',
     compact: '🚕',
     scooter: '🛵',
-    moto: '🏍️',
-    boat: '🚤'
+    moto: '🏍️'
   };
 
   useEffect(() => {
