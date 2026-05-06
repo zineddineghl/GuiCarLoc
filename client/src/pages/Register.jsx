@@ -15,7 +15,10 @@ export default function Register() {
     email: '',
     password: '',
     phone: '',
-    role: 'renter'
+    role: 'renter',
+    account_type: 'personal',
+    company_name: '',
+    rccm: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -175,7 +178,79 @@ export default function Register() {
           ) : (
             /* --- Registration form --- */
             <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
-              
+
+              {/* Account Type Selection */}
+              <div className="mb-2">
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">
+                  {i18n.language.startsWith('fr') ? 'Type de compte' : 'Account type'} *
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { value: 'personal', label: i18n.language.startsWith('fr') ? 'Particulier' : 'Personal', icon: '👤' },
+                    { value: 'professional', label: i18n.language.startsWith('fr') ? 'Professionnel' : 'Professional', icon: '🏢' }
+                  ].map(t => (
+                    <label
+                      key={t.value}
+                      className={`relative flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all duration-300 ${
+                        form.account_type === t.value
+                          ? 'border-gnYellow bg-gnYellow/10 text-white shadow-[0_0_15px_rgba(252,209,22,0.1)]'
+                          : 'border-white/10 hover:border-white/20 text-gray-400 bg-black/20 hover:bg-black/40'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="account_type"
+                        value={t.value}
+                        checked={form.account_type === t.value}
+                        onChange={handleChange}
+                        className="hidden"
+                      />
+                      <div className={`w-4 h-4 rounded-full border flex-shrink-0 flex items-center justify-center transition-colors ${form.account_type === t.value ? 'border-gnYellow' : 'border-gray-500'}`}>
+                        {form.account_type === t.value && <div className="w-2 h-2 bg-gnYellow rounded-full" />}
+                      </div>
+                      <span className="text-xl">{t.icon}</span>
+                      <span className="text-[11px] font-bold uppercase tracking-widest">{t.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Professional fields */}
+              {form.account_type === 'professional' && (
+                <div className="space-y-4 p-4 rounded-xl border border-gnYellow/20 bg-gnYellow/5">
+                  <p className="text-[9px] font-bold text-gnYellow uppercase tracking-widest">
+                    {i18n.language.startsWith('fr') ? 'Informations entreprise' : 'Company information'}
+                  </p>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
+                      {i18n.language.startsWith('fr') ? 'Nom de l\'entreprise' : 'Company name'} *
+                    </label>
+                    <input
+                      type="text"
+                      name="company_name"
+                      value={form.company_name}
+                      onChange={handleChange}
+                      placeholder={i18n.language.startsWith('fr') ? 'Ex: Transport SARL' : 'Ex: Transport LLC'}
+                      className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 focus:ring-1 focus:ring-gnYellow/50 transition-all outline-none"
+                      required={form.account_type === 'professional'}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
+                      RCCM <span className="text-gray-600 font-normal lowercase italic">({i18n.language.startsWith('fr') ? 'optionnel' : 'optional'})</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="rccm"
+                      value={form.rccm}
+                      onChange={handleChange}
+                      placeholder="Ex: GN-CON-2024-B-12345"
+                      className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-gnYellow/50 focus:ring-1 focus:ring-gnYellow/50 transition-all outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Role Selection (Propriétaire/Locataire) - Refondu Luxe */}
               <div className="mb-6">
                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">{t('auth.role') || 'Vous souhaitez ?'} *</label>

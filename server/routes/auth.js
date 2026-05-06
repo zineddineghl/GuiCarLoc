@@ -13,7 +13,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'rentcar_super_secret_key_2024';
 // ==========================================
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, phone, role } = req.body;
+    const { name, email, password, phone, role, account_type, company_name, rccm } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Name, email and password are required' });
@@ -21,6 +21,11 @@ router.post('/register', async (req, res) => {
 
     if (!['owner', 'renter', 'both'].includes(role)) {
       return res.status(400).json({ error: 'Invalid role. Must be owner, renter, or both' });
+    }
+
+    const accType = account_type === 'professional' ? 'professional' : 'personal';
+    if (accType === 'professional' && !company_name) {
+      return res.status(400).json({ error: 'Company name is required for professional accounts' });
     }
 
     const existing = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
@@ -32,8 +37,8 @@ router.post('/register', async (req, res) => {
 
     // email_verified est mis à 0 pour bloquer le compte par défaut
     const result = await pool.query(
-      'INSERT INTO users (name, email, password_hash, phone, role, email_verified) VALUES ($1, $2, $3, $4, $5, 0) RETURNING id, name, email, phone, role, created_at, email_verified',
-      [name, email, password_hash, phone || null, role || 'renter']
+      'INSERT INTO users (name, email, password_hash, phone, role, email_verified, account_type, company_name, rccm) VALUES ($1, $2, $3, $4, $5, 0, $6, $7, $8) RETURNING id, name, email, phone, role, created_at, email_verified, account_type, company_name, rccm',
+      [name, email, password_hash, phone || null, role || 'renter', accType, company_name || null, rccm || null]
     );
     const user = result.rows[0];
 
@@ -236,7 +241,7 @@ router.get('/me', async (req, res) => {
     if (!token) return res.status(401).json({ error: 'No token' });
     
     const decoded = jwt.verify(token, JWT_SECRET);
-    const { rows } = await pool.query('SELECT id, name, email, role, is_admin, email_verified, banned, id_status FROM users WHERE id = $1', [decoded.id]);
+    const { rows } = await pool.query('SELECT id, name, email, role, is_admin, email_verified, banned, id_status, account_type, company_name, rccm FROM users WHERE id = $1', [decoded.id]);
     
     if (!rows[0]) return res.status(404).json({ error: 'User not found' });
     return res.json({ user: rows[0] });

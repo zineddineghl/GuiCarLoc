@@ -328,6 +328,9 @@ export default function CarDetail() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Link to={`/profile/${car.owner_id}`} className="text-2xl font-bold text-white hover:text-gnYellow transition-colors">{car.owner_name}</Link>
+                    {car.owner_account_type === 'professional' && (
+                      <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border border-gnYellow/60 bg-gnYellow/15 text-gnYellow shadow-[0_0_8px_rgba(252,209,22,0.2)]">PRO</span>
+                    )}
                     {car.owner_id_status === 'verified' ? (
                       <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-gnGreen/40 bg-gnGreen/10 text-gnGreen">✓ Vérifié</span>
                     ) : (

@@ -148,14 +148,14 @@ router.get('/my/listings', authenticateToken, async (req, res) => {
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(`
-      SELECT c.*, u.name as owner_name, u.phone as owner_phone, u.email as owner_email, u.avatar as owner_avatar, u.id_status as owner_id_status,
+      SELECT c.*, u.name as owner_name, u.phone as owner_phone, u.email as owner_email, u.avatar as owner_avatar, u.id_status as owner_id_status, u.account_type as owner_account_type, u.company_name as owner_company_name,
              ROUND(AVG(r.car_rating)::numeric, 1) as avg_car_rating,
              COUNT(r.id)::int as review_count
       FROM cars c
       JOIN users u ON c.owner_id = u.id
       LEFT JOIN reviews r ON r.car_id = c.id
       WHERE c.id = $1
-      GROUP BY c.id, u.name, u.phone, u.email, u.avatar, u.id_status
+      GROUP BY c.id, u.name, u.phone, u.email, u.avatar, u.id_status, u.account_type, u.company_name
     `, [req.params.id]);
 
     if (!rows[0]) return res.status(404).json({ error: 'Car not found' });
